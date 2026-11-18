@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="fr" data-ui-lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Model Play — Load & Play</title>
+  <meta name="description" content="Model Play : synthé analogique virtuel gratuit inspiré du Minimoog. AU, VST3, CLAP, LV2 et application autonome pour Mac, Windows et Linux.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Permanent+Marker&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/site.js"></script>
+  <script type="module" src="assets/js/try.js"></script>
+  <script src="assets/js/closer.js" defer></script>
+</head>
+<body class="inner">
+  <header class="site-header">
+    <div class="left">
+      <a class="box-link" data-mail href="#">Contact</a>
+      <a class="box-link" data-github href="#" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <a class="logo" href="index.html">Load &amp; Play</a>
+    <div class="right">
+      <div class="lang-switch" role="group" aria-label="Langue / Language">
+        <button type="button" data-lang="fr" aria-pressed="true">FR</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <a class="back" href="index.html">← <span lang="fr">Accueil</span><span lang="en">Home</span></a>
+    <h1>Model Play</h1>
+    <p class="lead" lang="fr">Synthé analogique virtuel gratuit et open source, inspiré du légendaire Minimoog : trois oscillateurs, un mixer qui sature, le filtre en échelle 24 dB et ses deux contours. Jouez-le tel quel, ou ouvrez les options : polyphonie, LFO, arpégiateur, chorus, delay, MIDI learn.</p>
+    <p class="lead" lang="en">A free, open-source virtual analog synth inspired by the legendary Minimoog: three oscillators, a mixer that saturates, the 24 dB ladder filter and its two contour generators. Play it as is, or open up the extras: polyphony, LFO, arpeggiator, chorus, delay, MIDI learn.</p>
+
+    <ul class="toc">
+      <li><a class="btn dark" href="#de-plus-pres"><span lang="fr">De plus près</span><span lang="en">A closer look</span></a></li>
+      <li><a class="btn dark" href="#description">Description</a></li>
+      <li><a class="btn dark" href="#essayer"><span lang="fr">Essayer maintenant</span><span lang="en">Try it now</span></a></li>
+      <li><a class="btn dark" href="#caracteristiques"><span lang="fr">Caractéristiques</span><span lang="en">Specifications</span></a></li>
+      <li><a class="btn dark" href="#telechargements"><span lang="fr">Téléchargements</span><span lang="en">Downloads</span></a></li>
+      <li><a class="btn dark" href="#code"><span lang="fr">Code source</span><span lang="en">Source code</span></a></li>
+    </ul>
+
+    <section class="closer" id="de-plus-pres" data-closer="modelplay">
+      <h2><span lang="fr">De plus près</span><span lang="en">A closer look</span></h2>
+    </section>
+
+    <h2 id="description">Description</h2>
+    <div lang="fr">
+      <p>Model Play reprend fidèlement l'architecture et le comportement du synthé monophonique le plus célèbre : priorité à la note la plus grave, legato sans redéclenchement, saturation du mixer, filtre en échelle, perte de graves à forte résonance. Toutes les options sont neutres par défaut : sans les toucher, vous jouez le son pur du moteur, vérifié à l'échantillon près par les tests.</p>
+      <h3>Le son</h3>
+      <ul>
+        <li><b>Oscillateurs</b> : 3 oscillateurs libres (LO à 2'), 6 formes d'onde, anti-repliement et suréchantillonnage x2 ; l'osc 3 sert aussi de LFO ; dérive analogique réglable.</li>
+        <li><b>Mixer</b> : 3 oscillateurs + bruit blanc ou rose, saturation douce quand on pousse les niveaux.</li>
+        <li><b>Filtre</b> : échelle 24 dB/octave, saturation à chaque étage, résonance jusqu'à l'auto-oscillation, compensation des graves en option.</li>
+        <li><b>Contours</b> : deux générateurs attaque / decay / sustain, interrupteur DECAY comme l'original ou release réglable.</li>
+      </ul>
+      <h3>Les extras</h3>
+      <ul>
+        <li><b>Jeu</b> : mono ou 8 voix, glide, retrigger, vélocité et aftertouch vers le filtre.</li>
+        <li><b>LFO</b> : 5 formes, vitesse libre ou synchronisée au tempo, vers les oscillateurs, le filtre ou le volume.</li>
+        <li><b>Arpégiateur</b> : 5 modes, 1 à 4 octaves, motif de 16 pas.</li>
+        <li><b>Effets</b> : overdrive, chorus BBD, autopan, delay stéréo synchronisable.</li>
+        <li><b>MIDI learn</b> : associez n'importe quel réglage à un potard de votre contrôleur. Lecteur de fichier MIDI : glissez un .mid sur la fenêtre.</li>
+      </ul>
+    </div>
+    <div lang="en">
+      <p>Model Play faithfully follows the architecture and behaviour of the most famous monosynth: low-note priority, legato without retriggering, mixer saturation, ladder filter, bass loss at high resonance. Every extra is neutral by default: leave them alone and you hear the pure engine, verified sample for sample by the tests.</p>
+      <h3>The sound</h3>
+      <ul>
+        <li><b>Oscillators</b>: 3 free-running oscillators (LO to 2'), 6 waveforms, anti-aliasing and 2x oversampling; osc 3 doubles as an LFO; adjustable analog drift.</li>
+        <li><b>Mixer</b>: 3 oscillators + white or pink noise, soft saturation when levels are pushed.</li>
+        <li><b>Filter</b>: 24 dB/octave ladder, saturation in each stage, resonance up to self-oscillation, optional bass compensation.</li>
+        <li><b>Contours</b>: two attack / decay / sustain generators, original DECAY switch or adjustable release.</li>
+      </ul>
+      <h3>The extras</h3>
+      <ul>
+        <li><b>Playing</b>: mono or 8 voices, glide, retrigger, velocity and aftertouch to the filter.</li>
+        <li><b>LFO</b>: 5 shapes, free or tempo-synced rate, to the oscillators, filter or volume.</li>
+        <li><b>Arpeggiator</b>: 5 modes, 1 to 4 octaves, 16-step pattern.</li>
+        <li><b>Effects</b>: overdrive, BBD chorus, autopan, syncable stereo delay.</li>
+        <li><b>MIDI learn</b>: map any control to a knob on your controller. MIDI file player: drop a .mid onto the window.</li>
+      </ul>
+    </div>
+
+    <h2 id="essayer"><span lang="fr">Essayer maintenant</span><span lang="en">Try it now</span></h2>
+    <p lang="fr">Jouez avec le clavier de l'écran, celui de l'ordinateur ou un clavier MIDI (Chrome, Edge, Firefox), ou lancez le séquenceur.</p>
+    <p lang="en">Play with the on-screen keyboard, your computer keyboard or a MIDI keyboard (Chrome, Edge, Firefox), or start the sequencer.</p>
+    <div class="try-panel inline" id="try-modelplay" data-instrument="modelplay"></div>
+
+    <h2 id="caracteristiques"><span lang="fr">Caractéristiques</span><span lang="en">Specifications</span></h2>
+    <table class="specs">
+      <tr><th>Version</th><td>1.0.0</td></tr>
+      <tr><th><span lang="fr">Prix</span><span lang="en">Price</span></th><td><span lang="fr">Gratuit</span><span lang="en">Free</span></td></tr>
+      <tr><th><span lang="fr">Licence</span><span lang="en">License</span></th><td>GNU AGPL v3 (open source)</td></tr>
+      <tr><th>Type</th><td><span lang="fr">Synthé analogique virtuel, mono ou 8 voix</span><span lang="en">Virtual analog synth, mono or 8 voices</span></td></tr>
+      <tr><th>Formats</th><td><span lang="fr">AU, VST3, CLAP, LV2, application autonome</span><span lang="en">AU, VST3, CLAP, LV2, standalone application</span></td></tr>
+      <tr><th>macOS</th><td><span lang="fr">10.13 ou plus récent, Apple Silicon et Intel</span><span lang="en">10.13 or later, Apple Silicon and Intel</span></td></tr>
+      <tr><th>Windows</th><td><span lang="fr">10 / 11, 64 bits (VST3, CLAP, LV2, autonome)</span><span lang="en">10 / 11, 64-bit (VST3, CLAP, LV2, standalone)</span></td></tr>
+      <tr><th>Linux</th><td><span lang="fr">x86-64 et ARM64, dont Raspberry Pi 4/5</span><span lang="en">x86-64 and ARM64, including Raspberry Pi 4/5</span></td></tr>
+      <tr><th><span lang="fr">Traitement</span><span lang="en">Processing</span></th><td><span lang="fr">Suréchantillonnage x2, toutes fréquences d'échantillonnage</span><span lang="en">2x oversampling, any sample rate</span></td></tr>
+      <tr><th><span lang="fr">Latence</span><span lang="en">Latency</span></th><td><span lang="fr">3 échantillons</span><span lang="en">3 samples</span></td></tr>
+      <tr><th><span lang="fr">Charge processeur</span><span lang="en">CPU load</span></th><td><span lang="fr">≈ 1 % d'un cœur en mono, &lt; 5 % avec 8 voix (Apple M1, 48 kHz)</span><span lang="en">≈ 1 % of one core in mono, &lt; 5 % with 8 voices (Apple M1, 48 kHz)</span></td></tr>
+      <tr><th><span lang="fr">Paramètres automatisables</span><span lang="en">Automatable parameters</span></th><td>104</td></tr>
+      <tr><th>MIDI</th><td><span lang="fr">Notes et vélocité, pitch bend, molette, aftertouch, tout CC via MIDI learn</span><span lang="en">Notes and velocity, pitch bend, mod wheel, aftertouch, any CC via MIDI learn</span></td></tr>
+    </table>
+
+    <h2 id="telechargements"><span lang="fr">Téléchargements</span><span lang="en">Downloads</span></h2>
+    <div class="downloads">
+      <div class="dl">
+        <h3>macOS</h3>
+        <p lang="fr">AU, VST3, CLAP, LV2 et application. Apple Silicon + Intel.</p>
+        <p lang="en">AU, VST3, CLAP, LV2 and app. Apple Silicon + Intel.</p>
+        <a class="btn dark" data-asset="Model-Play-{modelplay}-macOS.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+      <div class="dl">
+        <h3>Windows</h3>
+        <p lang="fr">VST3, CLAP, LV2 et application. 64 bits.</p>
+        <p lang="en">VST3, CLAP, LV2 and app. 64-bit.</p>
+        <a class="btn dark" data-asset="Model-Play-{modelplay}-Windows.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+      <div class="dl">
+        <h3>Linux</h3>
+        <p lang="fr">VST3, CLAP, LV2 et application. x86-64.</p>
+        <p lang="en">VST3, CLAP, LV2 and app. x86-64.</p>
+        <a class="btn dark" data-asset="Model-Play-{modelplay}-Linux-x64.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+      <div class="dl">
+        <h3>Raspberry Pi</h3>
+        <p lang="fr">Linux ARM64 (Pi 4 / Pi 5, système 64 bits).</p>
+        <p lang="en">Linux ARM64 (Pi 4 / Pi 5, 64-bit OS).</p>
+        <a class="btn dark" data-asset="Model-Play-{modelplay}-Linux-ARM64.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+    </div>
+
+    <h3><span lang="fr">Installation</span><span lang="en">Installation</span></h3>
+    <div lang="fr">
+      <ul>
+        <li><b>macOS</b> : copiez <code>Model Play.component</code>, <code>.vst3</code>, <code>.clap</code>, <code>.lv2</code> dans <code>~/Bibliothèque/Audio/Plug-Ins/</code> (dossiers Components, VST3, CLAP, LV2) et glissez <code>Model Play.app</code> dans Applications. Le logiciel n'est pas signé par Apple : au premier lancement, clic droit → Ouvrir.</li>
+        <li><b>Windows</b> : copiez <code>Model Play.vst3</code> dans <code>C:\Program Files\Common Files\VST3</code> et <code>Model Play.clap</code> dans <code>C:\Program Files\Common Files\CLAP</code>. Si SmartScreen s'affiche : Informations complémentaires → Exécuter quand même.</li>
+        <li><b>Linux</b> : copiez les plugins dans <code>~/.vst3</code>, <code>~/.clap</code> et <code>~/.lv2</code>.</li>
+      </ul>
+      <p>Relancez ensuite votre logiciel de musique : Model Play apparaît sous « Load &amp; Play ».</p>
+    </div>
+    <div lang="en">
+      <ul>
+        <li><b>macOS</b>: copy <code>Model Play.component</code>, <code>.vst3</code>, <code>.clap</code>, <code>.lv2</code> into <code>~/Library/Audio/Plug-Ins/</code> (Components, VST3, CLAP, LV2 folders) and drag <code>Model Play.app</code> to Applications. The software is not signed with Apple: on first launch, right-click → Open.</li>
+        <li><b>Windows</b>: copy <code>Model Play.vst3</code> to <code>C:\Program Files\Common Files\VST3</code> and <code>Model Play.clap</code> to <code>C:\Program Files\Common Files\CLAP</code>. If SmartScreen shows up: More info → Run anyway.</li>
+        <li><b>Linux</b>: copy the plugins to <code>~/.vst3</code>, <code>~/.clap</code> and <code>~/.lv2</code>.</li>
+      </ul>
+      <p>Then restart your music software: Model Play shows up under "Load &amp; Play".</p>
+    </div>
+
+    <h2 id="code"><span lang="fr">Code source</span><span lang="en">Source code</span></h2>
+    <div class="downloads">
+      <div class="dl">
+        <span class="tag">open source</span>
+        <h3><span lang="fr">Code source</span><span lang="en">Source code</span></h3>
+        <p lang="fr">Tout le code C++ (JUCE), les tests (dont le rendu de référence qui garantit le son) et la compilation automatique Mac / Windows / Linux.</p>
+        <p lang="en">All the C++ code (JUCE), the tests (including the reference render that guards the sound) and the automatic Mac / Windows / Linux build.</p>
+        <a class="btn dark" data-asset="Model-Play-{modelplay}-source.zip">.zip</a>
+        <a class="btn dark" data-repo="MiniMoog">GitHub</a>
+      </div>
+    </div>
+
+    <p class="note" lang="fr">Minimoog et Model D sont des marques de Moog Music Inc., citées uniquement pour décrire l'inspiration sonore. Load &amp; Play n'est ni affilié à Moog Music, ni approuvé par Moog Music.</p>
+    <p class="note" lang="en">Minimoog and Model D are trademarks of Moog Music Inc., mentioned only to describe the sonic inspiration. Load &amp; Play is not affiliated with or endorsed by Moog Music.</p>
+  </main>
+
+  <footer class="site-footer">
+    <a class="law" href="what-about-the-law.html">what about the law?</a>
+    <small>Load &amp; Play — <span lang="fr">instruments gratuits et open source</span><span lang="en">free and open-source instruments</span></small>
+    <a class="footer-github" data-github href="#" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</body>
+</html>

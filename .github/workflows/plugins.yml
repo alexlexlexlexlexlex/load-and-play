@@ -1,0 +1,109 @@
+# Compile LP-60 et Model Play pour macOS, Windows et Linux (x64 et ARM64 / Raspberry Pi).
+# - À chaque envoi : vérifie que tout compile et que le son est bon (fichiers dans l'onglet Actions).
+# - Sur une étiquette de version (v1.0.0, v1.1.0…) : ajoute les zips à la Release du même nom,
+#   avec les noms qu'attendent les boutons de téléchargement du site.
+
+name: Plugins
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*"]
+    paths: ["LP60/**", "MiniMoog/**", ".github/workflows/plugins.yml"]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        synth:
+          - { name: LP-60, dir: LP60, target: LP60, option: LP60_INSTALL_PLUGINS, test: "demo.wav" }
+          - { name: Model-Play, dir: MiniMoog, target: ModelD, option: MODELD_INSTALL_PLUGINS, test: "demo.wav Tests/reference.f32" }
+        platform:
+          - { name: macOS, os: macos-14, formats: "AU VST3 CLAP LV2 Standalone" }
+          - { name: Windows, os: windows-2022, formats: "VST3 CLAP LV2 Standalone" }
+          - { name: Linux-x64, os: ubuntu-22.04, formats: "VST3 CLAP LV2 Standalone" }
+          - { name: Linux-ARM64, os: ubuntu-22.04-arm, formats: "VST3 CLAP LV2 Standalone" }
+
+    name: ${{ matrix.synth.name }} ${{ matrix.platform.name }}
+    runs-on: ${{ matrix.platform.os }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ matrix.synth.dir }}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dépendances Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libasound2-dev libjack-jackd2-dev libfreetype6-dev \
+            libfontconfig1-dev libx11-dev libxcomposite-dev libxcursor-dev libxext-dev \
+            libxinerama-dev libxrandr-dev libxrender-dev libgl1-mesa-dev
+
+      - name: Configuration
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            cmake -S . -B build -D${{ matrix.synth.option }}=OFF
+          else
+            cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -D${{ matrix.synth.option }}=OFF
+          fi
+
+      - name: Compilation
+        run: |
+          targets="RenderTest"
+          for format in ${{ matrix.platform.formats }}; do targets="$targets ${{ matrix.synth.target }}_$format"; done
+          cmake --build build --config Release --parallel --target $targets
+
+      - name: Tests du son
+        run: |
+          test=$(find build/RenderTest_artefacts -type f \( -name RenderTest -o -name RenderTest.exe \) | head -1)
+          "$test" ${{ matrix.synth.test }}
+
+      - name: Préparation du zip
+        run: |
+          version=1.0.0
+          if [ "$GITHUB_REF_TYPE" = "tag" ]; then version="${GITHUB_REF_NAME#v}"; fi
+          folder="${{ matrix.synth.name }}-$version-${{ matrix.platform.name }}"
+          mkdir -p "$folder"
+          cp -R build/${{ matrix.synth.target }}_artefacts/Release/* "$folder/"
+          rm -rf "$folder/JuceLibraryCode" "$folder"/*.a "$folder"/*.lib
+          cp LICENSE README.md "$folder/"
+          cmake -E tar cf "$folder.zip" --format=zip "$folder"
+          echo "ZIP=${{ matrix.synth.dir }}/$folder.zip" >> "$GITHUB_ENV"
+          echo "FOLDER=$folder" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.FOLDER }}
+          path: ${{ env.ZIP }}
+
+      - name: Ajout à la Release
+        if: github.ref_type == 'tag'
+        working-directory: .
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes "" || true
+          gh release upload "$GITHUB_REF_NAME" "$ZIP" --clobber
+
+  sources:
+    if: github.ref_type == 'tag'
+    runs-on: ubuntu-22.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Zips du code source
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          git archive --format=zip --prefix="LP-60-$version-source/" -o "LP-60-$version-source.zip" HEAD:LP60
+          git archive --format=zip --prefix="Model-Play-$version-source/" -o "Model-Play-$version-source.zip" HEAD:MiniMoog
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes "" || true
+          gh release upload "$GITHUB_REF_NAME" LP-60-$version-source.zip Model-Play-$version-source.zip --clobber

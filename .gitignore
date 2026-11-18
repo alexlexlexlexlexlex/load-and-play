@@ -1,0 +1,19 @@
+# Fichiers générés ou trop lourds pour le dépôt
+build/
+.DS_Store
+.claude/
+demo.wav
+__pycache__/
+
+# JUCE et l'extension CLAP : CMake les retélécharge s'ils manquent
+/MiniMoog/JUCE/
+/MiniMoog/clap-juce-extensions/
+/LP60/JUCE
+/LP60/clap-juce-extensions
+
+# Enregistrements du kit de mesures (publiés en zip dans les Releases)
+/Kit mesures LP-60 (JU-06A)/
+
+# Anciens paquets et fichiers préparés pour les Releases
+/Model D 1.0.0/
+/Publication*/

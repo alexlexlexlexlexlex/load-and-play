@@ -1,0 +1,184 @@
+<!doctype html>
+<html lang="fr" data-ui-lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LP-60 — Load & Play</title>
+  <meta name="description" content="LP-60 : synthé polyphonique gratuit inspiré du Juno-60, calé sur un Roland JU-06A. AU, VST3, CLAP, LV2 et application autonome pour Mac, Windows et Linux.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Permanent+Marker&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/site.js"></script>
+  <script type="module" src="assets/js/try.js"></script>
+  <script src="assets/js/closer.js" defer></script>
+</head>
+<body class="inner">
+  <header class="site-header">
+    <div class="left">
+      <a class="box-link" data-mail href="#">Contact</a>
+      <a class="box-link" data-github href="#" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <a class="logo" href="index.html">Load &amp; Play</a>
+    <div class="right">
+      <div class="lang-switch" role="group" aria-label="Langue / Language">
+        <button type="button" data-lang="fr" aria-pressed="true">FR</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <a class="back" href="index.html">← <span lang="fr">Accueil</span><span lang="en">Home</span></a>
+    <h1>LP-60</h1>
+    <p class="lead" lang="fr">Synthé polyphonique 6 voix inspiré du Roland Juno-60, gratuit et open source. Son DCO, son filtre, ses enveloppes, son LFO et son chorus ont été calés à la mesure sur un vrai Roland Boutique JU-06A.</p>
+    <p class="lead" lang="en">A free, open-source 6-voice polysynth inspired by the Roland Juno-60. Its DCO, filter, envelopes, LFO and chorus were tuned by measurement against a real Roland Boutique JU-06A.</p>
+
+    <ul class="toc">
+      <li><a class="btn dark" href="#de-plus-pres"><span lang="fr">De plus près</span><span lang="en">A closer look</span></a></li>
+      <li><a class="btn dark" href="#description">Description</a></li>
+      <li><a class="btn dark" href="#essayer"><span lang="fr">Essayer maintenant</span><span lang="en">Try it now</span></a></li>
+      <li><a class="btn dark" href="#caracteristiques"><span lang="fr">Caractéristiques</span><span lang="en">Specifications</span></a></li>
+      <li><a class="btn dark" href="#telechargements"><span lang="fr">Téléchargements</span><span lang="en">Downloads</span></a></li>
+      <li><a class="btn dark" href="#code"><span lang="fr">Code et tests</span><span lang="en">Code and tests</span></a></li>
+    </ul>
+
+    <section class="closer" id="de-plus-pres" data-closer="lp60">
+      <h2><span lang="fr">De plus près</span><span lang="en">A closer look</span></h2>
+    </section>
+
+    <h2 id="description">Description</h2>
+    <div lang="fr">
+      <p>Le LP-60 reprend l'architecture du Juno-60 : un oscillateur par voix (dent de scie, impulsion à largeur variable, sous-oscillateur, bruit), un passe-haut, un filtre 24 dB résonant, un VCA, une enveloppe ADSR, un LFO et le fameux chorus stéréo.</p>
+      <p>Chaque section a été comparée à un JU-06A enregistré réglage par réglage : 58 tests, chacun rejoué à l'identique dans le LP-60 puis mesuré de la même façon (hauteur, harmoniques, coupure du filtre, courbes d'enveloppe, vitesse et profondeur du LFO et du chorus, niveau du souffle). Trois mesures sur quatre sont dans la tolérance ; les écarts restants sont minimes.</p>
+      <h3>Ce qui fait son son</h3>
+      <ul>
+        <li><b>DCO</b> : dent de scie et impulsion cumulables, en phase comme sur l'original ; largeur 49 % au repos, 4 % au maximum, volume constant quel que soit le PWM.</li>
+        <li><b>Filtre</b> : 24 dB/octave, quatre étages saturés, résonance jusqu'à l'auto-oscillation (accordée sur la note), perte de graves mesurée.</li>
+        <li><b>Enveloppes</b> : attaque presque linéaire, decay et release exponentiels, sustain non linéaire, jusqu'à 10 octaves d'ouverture du filtre.</li>
+        <li><b>LFO</b> : triangle de 0,04 à 67 Hz (assez rapide pour salir le timbre), retard puis montée progressive.</li>
+        <li><b>Chorus</b> : modes I, II et I+II, tous stéréo, avec le souffle sombre des lignes à retard BBD, réglable.</li>
+        <li><b>Jeu</b> : 6 voix en rotation, arpégiateur UP / U&amp;D / DOWN sur 1 à 3 octaves, HOLD, 12 sons d'usine, lecteur de fichier MIDI (glissez un .mid sur la fenêtre).</li>
+      </ul>
+    </div>
+    <div lang="en">
+      <p>The LP-60 follows the Juno-60 architecture: one oscillator per voice (sawtooth, variable-width pulse, sub-oscillator, noise), a high-pass filter, a resonant 24 dB filter, a VCA, an ADSR envelope, an LFO and the famous stereo chorus.</p>
+      <p>Every section was compared with a JU-06A recorded setting by setting: 58 tests, each replayed identically in the LP-60 and measured the same way (pitch, harmonics, filter cutoff, envelope curves, LFO and chorus rate and depth, hiss level). Three measurements out of four are within tolerance; the remaining differences are small.</p>
+      <h3>What makes its sound</h3>
+      <ul>
+        <li><b>DCO</b>: sawtooth and pulse can be stacked, in phase like the original; 49 % width at rest, 4 % at maximum, constant level whatever the PWM.</li>
+        <li><b>Filter</b>: 24 dB/octave, four saturating stages, resonance up to self-oscillation (tuned to the note), measured bass loss.</li>
+        <li><b>Envelopes</b>: almost linear attack, exponential decay and release, non-linear sustain, up to 10 octaves of filter sweep.</li>
+        <li><b>LFO</b>: triangle from 0.04 to 67 Hz (fast enough to grit up the tone), delay then gradual fade-in.</li>
+        <li><b>Chorus</b>: modes I, II and I+II, all stereo, with the dark hiss of the BBD delay lines, adjustable.</li>
+        <li><b>Playing</b>: 6 rotating voices, UP / U&amp;D / DOWN arpeggiator over 1 to 3 octaves, HOLD, 12 factory sounds, MIDI file player (drop a .mid onto the window).</li>
+      </ul>
+    </div>
+
+    <h2 id="essayer"><span lang="fr">Essayer maintenant</span><span lang="en">Try it now</span></h2>
+    <p lang="fr">Jouez avec le clavier de l'écran, celui de l'ordinateur ou un clavier MIDI (Chrome, Edge, Firefox), ou lancez le séquenceur.</p>
+    <p lang="en">Play with the on-screen keyboard, your computer keyboard or a MIDI keyboard (Chrome, Edge, Firefox), or start the sequencer.</p>
+    <div class="try-panel inline" id="try-lp60" data-instrument="lp60"></div>
+
+    <h2 id="caracteristiques"><span lang="fr">Caractéristiques</span><span lang="en">Specifications</span></h2>
+    <table class="specs">
+      <tr><th><span lang="fr">Version</span><span lang="en">Version</span></th><td>1.0.0</td></tr>
+      <tr><th><span lang="fr">Prix</span><span lang="en">Price</span></th><td><span lang="fr">Gratuit</span><span lang="en">Free</span></td></tr>
+      <tr><th><span lang="fr">Licence</span><span lang="en">License</span></th><td>GNU AGPL v3 (open source)</td></tr>
+      <tr><th>Type</th><td><span lang="fr">Synthé analogique virtuel polyphonique, 6 voix</span><span lang="en">Virtual analog polysynth, 6 voices</span></td></tr>
+      <tr><th>Formats</th><td><span lang="fr">AU, VST3, CLAP, LV2, application autonome</span><span lang="en">AU, VST3, CLAP, LV2, standalone application</span></td></tr>
+      <tr><th>macOS</th><td><span lang="fr">10.13 ou plus récent, Apple Silicon et Intel</span><span lang="en">10.13 or later, Apple Silicon and Intel</span></td></tr>
+      <tr><th>Windows</th><td><span lang="fr">10 / 11, 64 bits (VST3, CLAP, LV2, autonome)</span><span lang="en">10 / 11, 64-bit (VST3, CLAP, LV2, standalone)</span></td></tr>
+      <tr><th>Linux</th><td><span lang="fr">x86-64 et ARM64, dont Raspberry Pi 4/5 (VST3, CLAP, LV2, autonome)</span><span lang="en">x86-64 and ARM64, including Raspberry Pi 4/5 (VST3, CLAP, LV2, standalone)</span></td></tr>
+      <tr><th><span lang="fr">Traitement</span><span lang="en">Processing</span></th><td><span lang="fr">Suréchantillonnage x2, toutes fréquences d'échantillonnage</span><span lang="en">2x oversampling, any sample rate</span></td></tr>
+      <tr><th><span lang="fr">Latence</span><span lang="en">Latency</span></th><td><span lang="fr">3 échantillons</span><span lang="en">3 samples</span></td></tr>
+      <tr><th><span lang="fr">Charge processeur</span><span lang="en">CPU load</span></th><td><span lang="fr">≈ 2,4 % d'un cœur avec 6 voix (Apple M1, 48 kHz)</span><span lang="en">≈ 2.4 % of one core with 6 voices (Apple M1, 48 kHz)</span></td></tr>
+      <tr><th>Sons d'usine / Presets</th><td>12</td></tr>
+      <tr><th><span lang="fr">Paramètres automatisables</span><span lang="en">Automatable parameters</span></th><td>39</td></tr>
+      <tr><th>MIDI</th><td><span lang="fr">Notes, pitch bend, molette, pédale de sustain, synchro au tempo de l'hôte (arpège)</span><span lang="en">Notes, pitch bend, mod wheel, sustain pedal, host tempo sync (arpeggiator)</span></td></tr>
+    </table>
+
+    <h2 id="telechargements"><span lang="fr">Téléchargements</span><span lang="en">Downloads</span></h2>
+    <div class="downloads">
+      <div class="dl">
+        <h3>macOS</h3>
+        <p lang="fr">AU, VST3, CLAP, LV2 et application. Apple Silicon + Intel.</p>
+        <p lang="en">AU, VST3, CLAP, LV2 and app. Apple Silicon + Intel.</p>
+        <a class="btn dark" data-asset="LP-60-{lp60}-macOS.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+      <div class="dl">
+        <h3>Windows</h3>
+        <p lang="fr">VST3, CLAP, LV2 et application. 64 bits.</p>
+        <p lang="en">VST3, CLAP, LV2 and app. 64-bit.</p>
+        <a class="btn dark" data-asset="LP-60-{lp60}-Windows.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+      <div class="dl">
+        <h3>Linux</h3>
+        <p lang="fr">VST3, CLAP, LV2 et application. x86-64.</p>
+        <p lang="en">VST3, CLAP, LV2 and app. x86-64.</p>
+        <a class="btn dark" data-asset="LP-60-{lp60}-Linux-x64.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+      <div class="dl">
+        <h3>Raspberry Pi</h3>
+        <p lang="fr">Linux ARM64 (Pi 4 / Pi 5, système 64 bits).</p>
+        <p lang="en">Linux ARM64 (Pi 4 / Pi 5, 64-bit OS).</p>
+        <a class="btn dark" data-asset="LP-60-{lp60}-Linux-ARM64.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+    </div>
+
+    <h3><span lang="fr">Installation</span><span lang="en">Installation</span></h3>
+    <div lang="fr">
+      <ul>
+        <li><b>macOS</b> : copiez <code>LP-60.component</code>, <code>.vst3</code>, <code>.clap</code>, <code>.lv2</code> dans <code>~/Bibliothèque/Audio/Plug-Ins/</code> (dossiers Components, VST3, CLAP, LV2) et glissez <code>LP-60.app</code> dans Applications. Le logiciel n'est pas signé par Apple : au premier lancement, clic droit → Ouvrir.</li>
+        <li><b>Windows</b> : copiez <code>LP-60.vst3</code> dans <code>C:\Program Files\Common Files\VST3</code> et <code>LP-60.clap</code> dans <code>C:\Program Files\Common Files\CLAP</code>. Si SmartScreen s'affiche : Informations complémentaires → Exécuter quand même.</li>
+        <li><b>Linux</b> : copiez les plugins dans <code>~/.vst3</code>, <code>~/.clap</code> et <code>~/.lv2</code>.</li>
+      </ul>
+      <p>Relancez ensuite votre logiciel de musique : le LP-60 apparaît sous « Load &amp; Play ».</p>
+    </div>
+    <div lang="en">
+      <ul>
+        <li><b>macOS</b>: copy <code>LP-60.component</code>, <code>.vst3</code>, <code>.clap</code>, <code>.lv2</code> into <code>~/Library/Audio/Plug-Ins/</code> (Components, VST3, CLAP, LV2 folders) and drag <code>LP-60.app</code> to Applications. The software is not signed with Apple: on first launch, right-click → Open.</li>
+        <li><b>Windows</b>: copy <code>LP-60.vst3</code> to <code>C:\Program Files\Common Files\VST3</code> and <code>LP-60.clap</code> to <code>C:\Program Files\Common Files\CLAP</code>. If SmartScreen shows up: More info → Run anyway.</li>
+        <li><b>Linux</b>: copy the plugins to <code>~/.vst3</code>, <code>~/.clap</code> and <code>~/.lv2</code>.</li>
+      </ul>
+      <p>Then restart your music software: the LP-60 shows up under "Load &amp; Play".</p>
+    </div>
+
+    <h2 id="code"><span lang="fr">Code source et fichiers de test</span><span lang="en">Source code and test files</span></h2>
+    <div class="downloads">
+      <div class="dl">
+        <span class="tag">open source</span>
+        <h3><span lang="fr">Code source</span><span lang="en">Source code</span></h3>
+        <p lang="fr">Tout le code C++ (JUCE), les tests et la compilation automatique Mac / Windows / Linux.</p>
+        <p lang="en">All the C++ code (JUCE), the tests and the automatic Mac / Windows / Linux build.</p>
+        <a class="btn dark" data-asset="LP-60-{lp60}-source.zip">.zip</a>
+        <a class="btn dark" data-repo="LP60">GitHub</a>
+      </div>
+      <div class="dl">
+        <span class="tag">JU-06A</span>
+        <h3><span lang="fr">Fichiers de test</span><span lang="en">Test files</span></h3>
+        <p lang="fr">Le kit de mesures : fiche des 58 tests, fichiers MIDI, enregistrements du JU-06A, rendus du LP-60 et rapport de comparaison.</p>
+        <p lang="en">The measurement kit: the 58-test sheet, MIDI files, JU-06A recordings, LP-60 renders and the comparison report.</p>
+        <a class="btn dark" data-asset="LP-60-kit-mesures-JU-06A.zip">.zip</a>
+      </div>
+      <div class="dl">
+        <span class="tag">Python</span>
+        <h3><span lang="fr">Outils de mesure</span><span lang="en">Measurement tools</span></h3>
+        <p lang="fr">Les scripts qui rejouent chaque test dans le LP-60 et le comparent à l'enregistrement.</p>
+        <p lang="en">The scripts that replay each test in the LP-60 and compare it with the recording.</p>
+        <a class="btn dark" data-repo="LP60/Tools">GitHub</a>
+      </div>
+    </div>
+
+    <p class="note" lang="fr">Juno-60 et JU-06A sont des marques de Roland Corporation, citées uniquement pour décrire l'inspiration sonore. Load &amp; Play n'est ni affilié à Roland, ni approuvé par Roland.</p>
+    <p class="note" lang="en">Juno-60 and JU-06A are trademarks of Roland Corporation, mentioned only to describe the sonic inspiration. Load &amp; Play is not affiliated with or endorsed by Roland.</p>
+  </main>
+
+  <footer class="site-footer">
+    <a class="law" href="what-about-the-law.html">what about the law?</a>
+    <small>Load &amp; Play — <span lang="fr">instruments gratuits et open source</span><span lang="en">free and open-source instruments</span></small>
+    <a class="footer-github" data-github href="#" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</body>
+</html>

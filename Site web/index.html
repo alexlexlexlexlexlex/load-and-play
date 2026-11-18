@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="fr" data-ui-lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Load & Play — instruments virtuels gratuits</title>
+  <meta name="description" content="LP-60 et Model Play : deux synthés virtuels gratuits et open source, à essayer maintenant et à télécharger pour Mac, Windows et Linux.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Permanent+Marker&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/site.js"></script>
+  <script type="module" src="assets/js/try.js"></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="left">
+      <a class="box-link" data-mail href="#">Contact</a>
+      <a class="box-link" data-github href="#" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <a class="logo" href="index.html">Load &amp; Play</a>
+    <div class="right">
+      <div class="lang-switch" role="group" aria-label="Langue / Language">
+        <button type="button" data-lang="fr" aria-pressed="true">FR</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main>
+    <section class="band-black">
+      <div class="stack">
+
+        <!-- LP-60 : le synthé en 3D sur la partie blanche, à gauche -->
+        <article class="instrument" id="lp-60">
+          <div class="card image-left">
+            <div class="device">
+              <div class="device-tilt">
+                <img src="assets/img/lp-60.jpg" width="2972" height="800" alt="Interface du LP-60">
+                <span class="device-edge"></span>
+              </div>
+            </div>
+            <div class="copy">
+              <h2>LP-60</h2>
+              <p class="tagline" lang="fr">Six voix, un chorus, et toute une décennie.</p>
+              <p class="tagline" lang="en">Six voices, one chorus, a whole decade.</p>
+              <p class="brief" lang="fr">Synthé polyphonique inspiré du Juno-60, calé à l'oreille et à la mesure sur un vrai Roland JU-06A, souffle du chorus compris.</p>
+              <p class="brief" lang="en">A polysynth inspired by the Juno-60, tuned by ear and by measurement against a real Roland JU-06A, chorus hiss included.</p>
+              <div class="actions">
+                <a class="btn solid" href="lp-60.html#telechargements"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+                <a class="btn" href="lp-60.html">Documentation</a>
+              </div>
+            </div>
+          </div>
+          <button class="try-toggle" type="button" data-try="try-lp60" aria-expanded="false">
+            <span class="chev">∨</span> click to try <span class="chev">∨</span>
+          </button>
+          <div class="try-panel" id="try-lp60" data-instrument="lp60" hidden></div>
+        </article>
+
+        <!-- Model Play : même chose, à droite -->
+        <article class="instrument" id="model-play">
+          <div class="card image-right">
+            <div class="device">
+              <div class="device-tilt">
+                <img src="assets/img/model-play.jpg" width="2772" height="1404" alt="Interface du Model Play">
+                <span class="device-edge"></span>
+              </div>
+            </div>
+            <div class="copy">
+              <h2>Model Play</h2>
+              <p class="tagline" lang="fr">La basse qui gronde, le lead qui chante.</p>
+              <p class="tagline" lang="en">Basses that growl, leads that sing.</p>
+              <p class="brief" lang="fr">Synthé analogique virtuel inspiré du Minimoog : trois oscillateurs, filtre en échelle 24 dB, et en bonus polyphonie, LFO, arpégiateur et effets.</p>
+              <p class="brief" lang="en">A virtual analog synth inspired by the Minimoog: three oscillators, a 24 dB ladder filter, plus polyphony, LFO, arpeggiator and effects.</p>
+              <div class="actions">
+                <a class="btn solid" href="model-play.html#telechargements"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+                <a class="btn" href="model-play.html">Documentation</a>
+              </div>
+            </div>
+          </div>
+          <button class="try-toggle" type="button" data-try="try-modelplay" aria-expanded="false">
+            <span class="chev">∨</span> click to try <span class="chev">∨</span>
+          </button>
+          <div class="try-panel" id="try-modelplay" data-instrument="modelplay" hidden></div>
+        </article>
+
+
+        <div class="coming">
+          <h2><span lang="fr">Plus d'instruments à venir</span><span lang="en">More instruments coming soon</span></h2>
+          <p class="more" lang="fr">D'autres synthés sont en cours d'échantillonnage et d'étalonnage. Ils arriveront ici, gratuits eux aussi.</p>
+          <p class="more" lang="en">More synths are being sampled and calibrated. They will land here, free as well.</p>
+          <div class="coming-slots" aria-hidden="true"><span></span><span></span><span></span></div>
+        </div>
+
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <a class="law" href="what-about-the-law.html">what about the law?</a>
+    <small>Load &amp; Play — <span lang="fr">instruments gratuits et open source</span><span lang="en">free and open-source instruments</span></small>
+    <a class="footer-github" data-github href="#" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</body>
+</html>
