@@ -12,6 +12,7 @@ deux instruments dans le navigateur et télécharger les plugins.
 | `MiniMoog/` | **Model Play**, inspiré du Minimoog : code source et tests |
 | `DuckHunt/` | **Duck Hunt**, effet de ducking par sidechain, MIDI ou tempo, en pleine bande, 3 bandes ou spectral |
 | `ChopChop/` | **Chop Chop**, repeater de voix distordu : séquenceur de 16 pas, drums en sidechain ou MIDI |
+| `GridPlay/` | **Grid Play** (en construction), lanceur de boucles MIDI façon session d'Ableton, avec APC mini |
 | `Site web/` | Le site (HTML, CSS, JavaScript), mis en ligne automatiquement sur GitHub Pages |
 | `.github/workflows/` | Compilation des plugins sur les machines de GitHub, mise en ligne du site |
 
@@ -24,7 +25,7 @@ Il faut CMake et Ninja (`pip3 install cmake ninja`) et un compilateur C++
 (Command Line Tools d'Apple sur Mac).
 
 ```bash
-cd LP60        # ou MiniMoog, DuckHunt, ChopChop
+cd LP60        # ou MiniMoog, DuckHunt, ChopChop, GridPlay
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```

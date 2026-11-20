@@ -1,0 +1,71 @@
+# Compile Grid Play (lanceur de boucles MIDI) pour macOS, Windows et Linux, et lance
+# les tests du séquenceur. L'application est rangée dans l'onglet Actions.
+
+name: Grid Play
+
+on:
+  push:
+    branches: [main]
+    paths: ["GridPlay/**", ".github/workflows/gridplay.yml"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - { name: macOS, os: macos-latest }
+          - { name: Windows, os: windows-2022 }
+          - { name: Linux-x64, os: ubuntu-22.04 }
+          - { name: Linux-ARM64, os: ubuntu-22.04-arm }
+
+    name: Grid Play ${{ matrix.platform.name }}
+    runs-on: ${{ matrix.platform.os }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: GridPlay
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dépendances Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libasound2-dev libjack-jackd2-dev libfreetype6-dev \
+            libfontconfig1-dev libx11-dev libxcomposite-dev libxcursor-dev libxext-dev \
+            libxinerama-dev libxrandr-dev libxrender-dev libgl1-mesa-dev
+
+      - name: Configuration
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            cmake -S . -B build
+          else
+            cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+          fi
+
+      - name: Compilation
+        run: cmake --build build --config Release --parallel --target SessionTest GridPlay
+
+      - name: Tests du séquenceur
+        run: |
+          test=$(find build/SessionTest_artefacts -type f \( -name SessionTest -o -name SessionTest.exe \) | head -1)
+          "$test"
+
+      - name: Préparation du zip
+        run: |
+          folder="Grid-Play-0.1.0-${{ matrix.platform.name }}"
+          mkdir -p "$folder"
+          cp -R build/GridPlay_artefacts/Release/* "$folder/"
+          rm -rf "$folder/JuceLibraryCode" "$folder"/*.a "$folder"/*.lib
+          cp LICENSE README.md "$folder/"
+          cmake -E tar cf "$folder.zip" --format=zip "$folder"
+          echo "ZIP=GridPlay/$folder.zip" >> "$GITHUB_ENV"
+          echo "FOLDER=$folder" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.FOLDER }}
+          path: ${{ env.ZIP }}
