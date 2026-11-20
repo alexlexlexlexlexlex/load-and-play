@@ -44,9 +44,7 @@
     const versions = site.versions || {};
 
     document.querySelectorAll ("[data-asset]").forEach (a => {
-      const name = a.dataset.asset
-        .replace ("{lp60}", versions.lp60 || "")
-        .replace ("{modelplay}", versions.modelplay || "");
+      const name = a.dataset.asset.replace (/\{(\w+)\}/g, (m, key) => versions[key] || "");
       if (base) {
         a.href = `${base}/releases/latest/download/${encodeURIComponent (name)}`;
       } else {

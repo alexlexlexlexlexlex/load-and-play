@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="fr" data-ui-lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Chop Chop — Load & Play</title>
+  <meta name="description" content="Chop Chop : repeater de voix distordu gratuit et open source, 16 pas, drums en sidechain. AU, VST3, CLAP, LV2 pour Mac, Windows et Linux.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Permanent+Marker&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/site.js"></script>
+  <script src="assets/js/products.js" defer></script>
+  <script src="assets/js/closer.js" defer></script>
+</head>
+<body class="inner">
+  <a class="float-back" href="index.html" aria-label="Accueil / Home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+    <span class="label"><span lang="fr">Accueil</span><span lang="en">Home</span></span>
+  </a>
+  <header class="site-header">
+    <div class="left">
+      <a class="box-link" data-mail href="#">Contact</a>
+      <a class="box-link" data-github href="#" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <a class="logo" href="index.html">Load &amp; Play</a>
+    <div class="right">
+      <div class="lang-switch" role="group" aria-label="Langue / Language">
+        <button type="button" data-lang="fr" aria-pressed="true">FR</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <h1>Chop Chop</h1>
+    <div class="intro">
+      <div>
+        <p class="lead" lang="fr">Repeater de voix distordu, gratuit et open source : il hache la voix au tempo, la fait bégayer, monter d'une octave, repartir à l'envers, la salit et la fait pomper avec les drums. Pour ce son de voix découpées, sales et ultra dynamiques qu'on entend dans la house et l'UK garage d'aujourd'hui.</p>
+        <p class="lead" lang="en">A free, open-source distorted vocal repeater: it chops the voice to the tempo, makes it stutter, jump an octave, run backwards, dirties it up and makes it pump with the drums. For that chopped, gritty, ultra-dynamic vocal sound you hear all over today's house and UK garage.</p>
+      </div>
+      <div class="page-actions">
+        <a class="btn dark pdf" href="docs/Chop-Chop-manuel.pdf" lang="fr" target="_blank" rel="noopener">Manuel d'utilisation</a>
+        <a class="btn dark pdf" href="docs/Chop-Chop-manual.pdf" lang="en" target="_blank" rel="noopener">User manual</a>
+      </div>
+    </div>
+
+    <ul class="toc">
+      <li><a class="btn dark" href="#de-plus-pres"><span lang="fr">De plus près</span><span lang="en">A closer look</span></a></li>
+      <li><a class="btn dark" href="#description">Description</a></li>
+      <li><a class="btn dark" href="#brancher"><span lang="fr">Dans votre logiciel</span><span lang="en">In your DAW</span></a></li>
+      <li><a class="btn dark" href="#caracteristiques"><span lang="fr">Caractéristiques</span><span lang="en">Specifications</span></a></li>
+      <li><a class="btn dark" href="#telechargements"><span lang="fr">Téléchargements</span><span lang="en">Downloads</span></a></li>
+      <li><a class="btn dark" href="#code"><span lang="fr">Code source</span><span lang="en">Source code</span></a></li>
+    </ul>
+
+    <section class="closer" id="de-plus-pres" data-closer="chopchop">
+      <h2><span lang="fr">De plus près</span><span lang="en">A closer look</span></h2>
+    </section>
+
+    <h2 id="description">Description</h2>
+    <div lang="fr">
+      <p>Chop Chop écoute la voix en continu. Quand un pas le demande, il rejoue le dernier bout de voix, de 1/4 à 1/64 de temps, calé sur le début d'une syllabe pour ne jamais couper un mot en plein milieu. Les bouts se répètent, roulent, se retournent, changent d'octave, puis passent par la saleté, le filtre et l'espace.</p>
+      <h3>Seize pas</h3>
+      <ul>
+        <li><b>THRU</b> : la voix passe telle quelle. <b>REPEAT</b> : le bout se répète, plusieurs REPEAT de suite gardent le même bout.</li>
+        <li><b>ROLL</b> : le bout est rejoué en boucles deux fois plus courtes à chaque tour, le fameux roulement.</li>
+        <li><b>REVERSE</b> : le bout à l'envers. <b>+12 / -12</b> : une octave plus haut ou plus bas, comme un sampler. <b>MUTE</b> : silence.</li>
+      </ul>
+      <h3>Les drums aux commandes</h3>
+      <ul>
+        <li>En mode <b>DRUMS</b>, la batterie envoyée en sidechain fait avancer les pas : chaque coup de kick, de caisse claire ou de tout le kit joue le pas suivant. Les bouts de voix tombent pile avec la batterie.</li>
+        <li>Dans tous les modes, les drums peuvent aussi salir la voix à chaque coup (DRUM DRIVE), ouvrir ou fermer le filtre (DRUM MOD) et la faire pomper (PUMP).</li>
+        <li>En mode <b>PATTERN</b>, les pas défilent au tempo du projet ; en mode <b>MIDI</b>, on rejoue la voix au clavier, à la hauteur de chaque note.</li>
+      </ul>
+      <h3>Et aussi</h3>
+      <ul>
+        <li>Hauteur qui monte ou descend à chaque répétition, volume qui décroît, part de hasard.</li>
+        <li>Trois saletés (saturation, fuzz, bitcrush), filtre résonant, delay au tempo en aller-retour et reverb.</li>
+        <li>11 presets : bégaiement de fin de mesure, voix hachée sur les drums, chipmunk rave, téléphone sale, rembobinage…</li>
+        <li>Aucune latence : utilisable en direct sur scène.</li>
+      </ul>
+    </div>
+    <div lang="en">
+      <p>Chop Chop keeps listening to the voice. Whenever a step asks for it, it replays the latest slice of voice, from 1/4 to 1/64 of a beat, aligned to the start of a syllable so it never cuts a word in half. Slices repeat, roll, flip, change octave, then go through dirt, filter and space.</p>
+      <h3>Sixteen steps</h3>
+      <ul>
+        <li><b>THRU</b>: the voice passes as is. <b>REPEAT</b>: the slice repeats, several REPEATs in a row keep the same slice.</li>
+        <li><b>ROLL</b>: the slice is replayed in loops half as long on every pass, the classic roll.</li>
+        <li><b>REVERSE</b>: the slice backwards. <b>+12 / -12</b>: an octave up or down, like a sampler. <b>MUTE</b>: silence.</li>
+      </ul>
+      <h3>The drums in charge</h3>
+      <ul>
+        <li>In <b>DRUMS</b> mode, the drum track sent to the sidechain drives the steps: every kick, snare or full-kit hit plays the next step. Vocal slices land right on the drums.</li>
+        <li>In every mode, the drums can also dirty the voice on each hit (DRUM DRIVE), open or close the filter (DRUM MOD) and make it pump (PUMP).</li>
+        <li>In <b>PATTERN</b> mode, the steps run at the project tempo; in <b>MIDI</b> mode, you replay the voice from a keyboard, at each note's pitch.</li>
+      </ul>
+      <h3>And also</h3>
+      <ul>
+        <li>Pitch that rises or falls on each repeat, fading level, a touch of randomness.</li>
+        <li>Three kinds of dirt (saturation, fuzz, bitcrush), resonant filter, ping-pong tempo delay and reverb.</li>
+        <li>11 presets: end-of-bar stutter, vocal chopped by the drums, chipmunk rave, dirty telephone, rewind…</li>
+        <li>Zero latency: playable live on stage.</li>
+      </ul>
+    </div>
+
+    <h2 id="brancher"><span lang="fr">Dans votre logiciel</span><span lang="en">In your DAW</span></h2>
+    <div lang="fr">
+      <p>Insérez Chop Chop sur la piste de voix, choisissez un preset et lancez la lecture : en mode PATTERN, il suit le tempo du projet. Pour les modes à drums, envoyez la piste (ou le groupe) de batterie sur son entrée sidechain :</p>
+      <ul>
+        <li><b>Cubase / Nuendo</b> : dans la fenêtre du plugin, activez <i>Side-Chain</i>, puis sur la piste de drums ajoutez un envoi vers « Chop Chop – Side-Chain ».</li>
+        <li><b>Logic Pro</b> : en haut de la fenêtre du plugin, menu <i>Side Chain</i> → choisissez la piste de drums.</li>
+        <li><b>Ableton Live</b> : dépliez le plugin, ouvrez <i>Sidechain</i> et choisissez la piste de drums dans <i>Audio From</i>.</li>
+        <li><b>Studio One</b> : bouton <i>Side-Chain</i> en haut du plugin, puis un envoi des drums vers Chop Chop.</li>
+        <li><b>Reaper</b> : bouton des broches → entrées 3/4 pour le sidechain, puis un envoi des drums vers les canaux 3/4.</li>
+        <li><b>Bitwig</b> : choisissez la source du sidechain dans le plugin. <b>FL Studio</b> : reliez la piste de drums à celle de Chop Chop en « sidechain », puis choisissez-la dans l'onglet de traitement du plugin.</li>
+      </ul>
+      <p>Astuce : automatisez MIX pour ne hacher que certains mots, comme dans les morceaux du genre. En mode MIDI, envoyez une piste MIDI vers Chop Chop (do 3 = hauteur d'origine).</p>
+    </div>
+    <div lang="en">
+      <p>Insert Chop Chop on the vocal track, pick a preset and press play: in PATTERN mode it follows the project tempo. For the drum-driven modes, send the drum track (or bus) to its sidechain input:</p>
+      <ul>
+        <li><b>Cubase / Nuendo</b>: in the plugin window, enable <i>Side-Chain</i>, then add a send from the drum track to "Chop Chop – Side-Chain".</li>
+        <li><b>Logic Pro</b>: at the top of the plugin window, <i>Side Chain</i> menu → pick the drum track.</li>
+        <li><b>Ableton Live</b>: unfold the device, open <i>Sidechain</i> and choose the drum track under <i>Audio From</i>.</li>
+        <li><b>Studio One</b>: <i>Side-Chain</i> button at the top of the plugin, then a send from the drums to Chop Chop.</li>
+        <li><b>Reaper</b>: pin connector button → inputs 3/4 for the sidechain, then a send from the drums to channels 3/4.</li>
+        <li><b>Bitwig</b>: pick the sidechain source in the device. <b>FL Studio</b>: route the drum track to Chop Chop's track as "sidechain", then select it in the plugin's processing tab.</li>
+      </ul>
+      <p>Tip: automate MIX to chop only certain words, the way the genre does it. In MIDI mode, send a MIDI track to Chop Chop (C3 = original pitch).</p>
+    </div>
+
+    <h2 id="caracteristiques"><span lang="fr">Caractéristiques</span><span lang="en">Specifications</span></h2>
+    <table class="specs">
+      <tr><th>Version</th><td>1.0.0</td></tr>
+      <tr><th><span lang="fr">Prix</span><span lang="en">Price</span></th><td><span lang="fr">Gratuit</span><span lang="en">Free</span></td></tr>
+      <tr><th><span lang="fr">Licence</span><span lang="en">License</span></th><td>GNU AGPL v3 (open source)</td></tr>
+      <tr><th>Type</th><td><span lang="fr">Repeater de voix distordu, séquenceur de 16 pas</span><span lang="en">Distorted vocal repeater, 16-step sequencer</span></td></tr>
+      <tr><th>Formats</th><td>AU, VST3, CLAP, LV2</td></tr>
+      <tr><th>macOS</th><td><span lang="fr">10.13 ou plus récent, Apple Silicon et Intel</span><span lang="en">10.13 or later, Apple Silicon and Intel</span></td></tr>
+      <tr><th>Windows</th><td><span lang="fr">10 / 11, 64 bits (VST3, CLAP, LV2)</span><span lang="en">10 / 11, 64-bit (VST3, CLAP, LV2)</span></td></tr>
+      <tr><th>Linux</th><td><span lang="fr">x86-64 et ARM64, dont Raspberry Pi 4/5</span><span lang="en">x86-64 and ARM64, including Raspberry Pi 4/5</span></td></tr>
+      <tr><th><span lang="fr">Entrées</span><span lang="en">Inputs</span></th><td><span lang="fr">Stéréo + drums en sidechain stéréo, MIDI</span><span lang="en">Stereo + stereo drum sidechain, MIDI</span></td></tr>
+      <tr><th><span lang="fr">Latence</span><span lang="en">Latency</span></th><td><span lang="fr">Aucune</span><span lang="en">None</span></td></tr>
+      <tr><th><span lang="fr">Mémoire de voix</span><span lang="en">Voice memory</span></th><td><span lang="fr">4 secondes, toutes fréquences d'échantillonnage</span><span lang="en">4 seconds, any sample rate</span></td></tr>
+      <tr><th><span lang="fr">Paramètres automatisables</span><span lang="en">Automatable parameters</span></th><td>43</td></tr>
+      <tr><th>Presets</th><td>11</td></tr>
+    </table>
+
+    <h2 id="telechargements"><span lang="fr">Téléchargements</span><span lang="en">Downloads</span></h2>
+    <div class="downloads">
+      <div class="dl">
+        <h3><span lang="fr">Manuel</span><span lang="en">Manual</span></h3>
+        <p lang="fr">Tous les réglages, le branchement dans les logiciels et les presets. PDF, aussi inclus dans chaque zip.</p>
+        <p lang="en">Every control, hooking it up in your DAW and the presets. PDF, also included in every zip.</p>
+        <a class="btn dark" href="docs/Chop-Chop-manuel.pdf" lang="fr" target="_blank" rel="noopener">PDF</a>
+        <a class="btn dark" href="docs/Chop-Chop-manual.pdf" lang="en" target="_blank" rel="noopener">PDF</a>
+      </div>
+      <div class="dl">
+        <h3>macOS</h3>
+        <p lang="fr">AU, VST3, CLAP et LV2. Apple Silicon + Intel.</p>
+        <p lang="en">AU, VST3, CLAP and LV2. Apple Silicon + Intel.</p>
+        <a class="btn dark" data-asset="Chop-Chop-{chopchop}-macOS.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+      <div class="dl">
+        <h3>Windows</h3>
+        <p lang="fr">VST3, CLAP et LV2. 64 bits.</p>
+        <p lang="en">VST3, CLAP and LV2. 64-bit.</p>
+        <a class="btn dark" data-asset="Chop-Chop-{chopchop}-Windows.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+      <div class="dl">
+        <h3>Linux</h3>
+        <p lang="fr">VST3, CLAP et LV2. x86-64.</p>
+        <p lang="en">VST3, CLAP and LV2. x86-64.</p>
+        <a class="btn dark" data-asset="Chop-Chop-{chopchop}-Linux-x64.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+      <div class="dl">
+        <h3>Raspberry Pi</h3>
+        <p lang="fr">Linux ARM64 (Pi 4 / Pi 5, système 64 bits).</p>
+        <p lang="en">Linux ARM64 (Pi 4 / Pi 5, 64-bit OS).</p>
+        <a class="btn dark" data-asset="Chop-Chop-{chopchop}-Linux-ARM64.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+    </div>
+
+    <h3>Installation</h3>
+    <div lang="fr">
+      <ul>
+        <li><b>macOS</b> : copiez <code>Chop Chop.component</code>, <code>.vst3</code>, <code>.clap</code> et <code>.lv2</code> dans <code>~/Bibliothèque/Audio/Plug-Ins/</code> (dossiers Components, VST3, CLAP, LV2). Le plugin n'est pas signé par Apple : si macOS le bloque, ouvrez Réglages Système → Confidentialité et sécurité → Autoriser quand même.</li>
+        <li><b>Windows</b> : copiez <code>Chop Chop.vst3</code> dans <code>C:\Program Files\Common Files\VST3</code> et <code>Chop Chop.clap</code> dans <code>C:\Program Files\Common Files\CLAP</code>.</li>
+        <li><b>Linux</b> : copiez les plugins dans <code>~/.vst3</code>, <code>~/.clap</code> et <code>~/.lv2</code>.</li>
+      </ul>
+      <p>Relancez ensuite votre logiciel de musique : Chop Chop apparaît dans les effets, sous « Load &amp; Play ».</p>
+    </div>
+    <div lang="en">
+      <ul>
+        <li><b>macOS</b>: copy <code>Chop Chop.component</code>, <code>.vst3</code>, <code>.clap</code> and <code>.lv2</code> into <code>~/Library/Audio/Plug-Ins/</code> (Components, VST3, CLAP, LV2 folders). The plugin is not signed with Apple: if macOS blocks it, open System Settings → Privacy &amp; Security → Allow Anyway.</li>
+        <li><b>Windows</b>: copy <code>Chop Chop.vst3</code> to <code>C:\Program Files\Common Files\VST3</code> and <code>Chop Chop.clap</code> to <code>C:\Program Files\Common Files\CLAP</code>.</li>
+        <li><b>Linux</b>: copy the plugins to <code>~/.vst3</code>, <code>~/.clap</code> and <code>~/.lv2</code>.</li>
+      </ul>
+      <p>Then restart your music software: Chop Chop shows up among the effects, under "Load &amp; Play".</p>
+    </div>
+
+    <h2 id="code"><span lang="fr">Code source</span><span lang="en">Source code</span></h2>
+    <div class="downloads">
+      <div class="dl">
+        <span class="tag">open source</span>
+        <h3><span lang="fr">Code source</span><span lang="en">Source code</span></h3>
+        <p lang="fr">Tout le code C++ (JUCE), les tests du moteur et la compilation automatique Mac / Windows / Linux.</p>
+        <p lang="en">All the C++ code (JUCE), the engine tests and the automatic Mac / Windows / Linux build.</p>
+        <a class="btn dark" data-asset="Chop-Chop-{chopchop}-source.zip">.zip</a>
+        <a class="btn dark" data-repo="ChopChop">GitHub</a>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <a class="law" href="what-about-the-law.html">what about the law?</a>
+    <small>Load &amp; Play — <span lang="fr">instruments gratuits et open source</span><span lang="en">free and open-source instruments</span></small>
+    <a class="footer-github" data-github href="#" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</body>
+</html>

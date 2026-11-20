@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Load & Play — instruments virtuels gratuits</title>
-  <meta name="description" content="LP-60 et Model Play : deux synthés virtuels gratuits et open source, à essayer maintenant et à télécharger pour Mac, Windows et Linux.">
+  <title>Load & Play — instruments et effets gratuits</title>
+  <meta name="description" content="LP-60, Model Play, Duck Hunt et Chop Chop : synthés et effets gratuits et open source, à essayer maintenant et à télécharger pour Mac, Windows et Linux.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Permanent+Marker&display=swap" rel="stylesheet">
@@ -35,12 +35,12 @@
         <!-- LP-60 : le synthé en 3D sur la partie blanche, à gauche -->
         <article class="instrument" id="lp-60">
           <div class="card image-left">
-            <div class="device">
+            <a class="device" href="lp-60.html" aria-label="LP-60">
               <div class="device-tilt">
                 <img src="assets/img/lp-60.jpg" width="2972" height="800" alt="Interface du LP-60">
                 <span class="device-edge"></span>
               </div>
-            </div>
+            </a>
             <div class="copy">
               <h2>LP-60</h2>
               <p class="tagline" lang="fr">Six voix, un chorus, et toute une décennie.</p>
@@ -62,12 +62,12 @@
         <!-- Model Play : même chose, à droite -->
         <article class="instrument" id="model-play">
           <div class="card image-right">
-            <div class="device">
+            <a class="device" href="model-play.html" aria-label="Model Play">
               <div class="device-tilt">
                 <img src="assets/img/model-play.jpg" width="2772" height="1404" alt="Interface du Model Play">
                 <span class="device-edge"></span>
               </div>
-            </div>
+            </a>
             <div class="copy">
               <h2>Model Play</h2>
               <p class="tagline" lang="fr">La basse qui gronde, le lead qui chante.</p>
@@ -84,6 +84,52 @@
             <span class="chev">∨</span> click to try <span class="chev">∨</span>
           </button>
           <div class="try-panel" id="try-modelplay" data-instrument="modelplay" hidden></div>
+        </article>
+
+        <!-- Duck Hunt : même carte, synthé remplacé par l'effet -->
+        <article class="instrument" id="duck-hunt">
+          <div class="card image-left tall">
+            <a class="device" href="duck-hunt.html" aria-label="Duck Hunt">
+              <div class="device-tilt">
+                <img src="assets/img/duck-hunt.jpg" width="1840" height="1232" alt="Interface de Duck Hunt">
+                <span class="device-edge"></span>
+              </div>
+            </a>
+            <div class="copy">
+              <h2>Duck Hunt</h2>
+              <p class="tagline" lang="fr">Le kick parle, le reste se pousse.</p>
+              <p class="tagline" lang="en">The kick speaks, everything else makes room.</p>
+              <p class="brief" lang="fr">Effet de ducking sans compresseur : une piste s'efface quand une autre joue, en pleine bande, en trois bandes ou fréquence par fréquence. Par sidechain, MIDI ou au tempo.</p>
+              <p class="brief" lang="en">Ducking without a compressor: one track steps back when another plays, full band, in three bands or frequency by frequency. Driven by sidechain, MIDI or tempo.</p>
+              <div class="actions">
+                <a class="btn solid" href="duck-hunt.html#telechargements"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+                <a class="btn" href="duck-hunt.html">Documentation</a>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <!-- Chop Chop -->
+        <article class="instrument" id="chop-chop">
+          <div class="card image-right compact">
+            <a class="device" href="chop-chop.html" aria-label="Chop Chop">
+              <div class="device-tilt">
+                <img src="assets/img/chop-chop.jpg" width="2080" height="1140" alt="Interface de Chop Chop">
+                <span class="device-edge"></span>
+              </div>
+            </a>
+            <div class="copy">
+              <h2>Chop Chop</h2>
+              <p class="tagline" lang="fr">Hache, bégaie, salit. Encore.</p>
+              <p class="tagline" lang="en">Chop, stutter, dirty it up. Again.</p>
+              <p class="brief" lang="fr">Repeater de voix distordu : seize pas qui hachent, répètent, retournent et transposent la voix, au tempo, au clavier ou déclenchés par vos drums en sidechain.</p>
+              <p class="brief" lang="en">A distorted vocal repeater: sixteen steps that chop, repeat, reverse and transpose the voice, at tempo, from the keyboard or fired by your drums through the sidechain.</p>
+              <div class="actions">
+                <a class="btn solid" href="chop-chop.html#telechargements"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+                <a class="btn" href="chop-chop.html">Documentation</a>
+              </div>
+            </div>
+          </div>
         </article>
 
 

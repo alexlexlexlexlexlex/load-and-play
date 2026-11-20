@@ -1,0 +1,115 @@
+/* Manuels PDF Load & Play : mêmes couleurs et polices que le site. */
+
+/* Marges de page : fixées par html2pdf (15 mm sur les côtés, 14 mm en haut, 16 mm en bas). */
+
+:root {
+  --ink: #0b0b0b;
+  --paper: #ffffff;
+  --grey: #8a8a8a;
+  --soft: #f2f2ef;
+  --accent: #e8862c;
+  --marker: "Permanent Marker", "Marker Felt", cursive;
+  --text: "Inter", -apple-system, "Helvetica Neue", sans-serif;
+}
+
+* { box-sizing: border-box; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+
+html, body { margin: 0; padding: 0; }
+body { font: 10pt/1.5 var(--text); color: var(--ink); background: var(--paper); }
+
+/* Une seule langue par manuel. */
+html[data-ui-lang="fr"] [lang="en"],
+html[data-ui-lang="en"] [lang="fr"] { display: none !important; }
+
+img { display: block; max-width: 100%; }
+a { color: inherit; }
+p { margin: 0 0 8pt; }
+ul { margin: 0 0 8pt; padding-left: 16pt; }
+li { margin-bottom: 3pt; }
+code { font: 8.6pt ui-monospace, "SF Mono", Menlo, monospace; background: #f1f1ef; padding: 0 3pt; border-radius: 2pt; }
+
+/* ---------- Couverture : le rectangle blanc qui passe au noir en diagonale ---------- */
+.cover {
+  height: 244mm;   /* WebKit imprime ~7 % plus grand : 244 mm remplissent la page */
+  overflow: hidden;
+  position: relative;
+  border-radius: 4mm;
+  padding: 14mm 14mm 12mm;
+  display: flex;
+  flex-direction: column;
+  background: linear-gradient(160deg, #ffffff 0%, #f4f4f2 34%, #6a6a6a 52%, #0b0b0b 64%, #0b0b0b 100%);
+  page-break-after: always;
+}
+.cover .brand { font: 22pt/1 var(--marker); }
+.cover h1 { font: 54pt/1 var(--marker); margin: 8mm 0 3mm; letter-spacing: 0.01em; }
+.cover .tagline { font-size: 15pt; font-weight: 600; margin: 0; }
+.cover .hero { margin: 8mm 8mm 0; perspective: 1400px; display: flex; justify-content: center; }
+.cover .hero img {
+  width: var(--hero-width, 100%);
+  border-radius: 4px;
+  transform: rotateX(18deg) rotateZ(-2deg);
+  box-shadow: 0 18px 40px rgba(0, 0, 0, 0.45);
+}
+.cover .brief { color: #cfcfcf; font-size: 11pt; max-width: 140mm; margin-top: auto; }
+.cover-foot { display: flex; gap: 6mm; color: #bdbdbd; font-size: 9pt; text-transform: uppercase; letter-spacing: 0.08em; margin-top: 4mm; }
+.cover-foot .what { color: var(--paper); font-weight: 700; }
+.cover .toc { color: var(--paper); margin-top: 6mm; border-top: 1px solid rgba(255, 255, 255, 0.25); padding-top: 5mm; }
+.cover .toc h2 { font: 9pt var(--text); font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: #bdbdbd; margin: 0 0 3mm; }
+.cover .toc ol { display: grid; grid-template-columns: 1fr 1fr 1fr; column-gap: 6mm; margin: 0; padding-left: 14pt; font-size: 9.5pt; }
+.cover .toc li { margin: 0 0 1mm; }
+
+/* ---------- Chapitres ---------- */
+.chapter { page-break-before: always; }
+.chapter.short { page-break-before: auto; margin-top: 12mm; }
+/* Un chapitre court qui ne tient pas en bas de page commence sur la page suivante. */
+.chapter.short, .chapter > h2 + .lead { page-break-inside: avoid; break-inside: avoid; }
+.chapter > h2, .part h3 { page-break-after: avoid; break-after: avoid; }
+.chapter > h2 {
+  font: 24pt/1.1 var(--marker);
+  margin: 0 0 6mm;
+  display: flex;
+  align-items: baseline;
+  gap: 4mm;
+  border-bottom: 2px solid var(--ink);
+  padding-bottom: 2mm;
+}
+.chapter > h2 .num { font: 700 11pt var(--text); color: var(--paper); background: var(--ink); border-radius: 3pt; padding: 2pt 6pt; transform: translateY(-3pt); }
+
+.lead p { font-size: 11.5pt; }
+.desc h3 { font-size: 11pt; margin: 6mm 0 2mm; }
+.desc p, .desc li { max-width: none; }
+
+/* ---------- L'interface ---------- */
+.part { page-break-inside: avoid; margin: 0 0 9mm; }
+.part h3 { font-size: 13pt; margin: 0 0 3mm; display: flex; align-items: center; gap: 3mm; }
+.badge, .spot {
+  display: inline-grid;
+  place-items: center;
+  min-width: 18pt;
+  height: 18pt;
+  border-radius: 9pt;
+  background: var(--ink);
+  color: var(--paper);
+  font: 700 9pt var(--text);
+}
+
+.overview { position: relative; margin-bottom: 4mm; border-radius: 4pt; overflow: hidden; }
+.overview .spot { position: absolute; transform: translate(-50%, -50%); background: var(--paper); color: var(--ink); box-shadow: 0 0 0 3pt rgba(255, 255, 255, 0.3), 0 2pt 6pt rgba(0, 0, 0, 0.5); }
+
+.crop { position: relative; overflow: hidden; border-radius: 4pt; margin-bottom: 3mm; background: #1c1c1c; }
+.crop img { position: absolute; max-width: none; }
+
+table { border-collapse: collapse; width: 100%; font-size: 8.8pt; }
+table.params { margin-top: 2mm; }
+table.params th { text-align: left; font-size: 7.5pt; text-transform: uppercase; letter-spacing: 0.08em; color: var(--grey); font-weight: 600; padding: 2pt 6pt; border-bottom: 1.5px solid var(--ink); }
+table.params td { padding: 3pt 6pt; border-bottom: 1px solid #e3e3e3; vertical-align: top; }
+table.params td:first-child { font-weight: 600; width: 38%; }
+table.params td:last-child { width: 18%; white-space: nowrap; }
+.muted { color: var(--grey); font-style: italic; }
+
+/* ---------- Presets, caractéristiques, licence ---------- */
+ol.presets { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8mm; padding-left: 16pt; }
+table.specs th, table.specs td { text-align: left; vertical-align: top; padding: 4pt 6pt; border-bottom: 1px solid #e3e3e3; }
+table.specs th { width: 34%; font-weight: 600; }
+.note { background: var(--soft); border-left: 3pt solid var(--ink); padding: 3mm 4mm; }
+.links { font-size: 9pt; color: #444; margin-top: 6mm; }

@@ -12,9 +12,14 @@
   <script src="assets/js/config.js"></script>
   <script src="assets/js/site.js"></script>
   <script type="module" src="assets/js/try.js"></script>
+  <script src="assets/js/products.js" defer></script>
   <script src="assets/js/closer.js" defer></script>
 </head>
 <body class="inner">
+  <a class="float-back" href="index.html" aria-label="Accueil / Home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+    <span class="label"><span lang="fr">Accueil</span><span lang="en">Home</span></span>
+  </a>
   <header class="site-header">
     <div class="left">
       <a class="box-link" data-mail href="#">Contact</a>
@@ -30,10 +35,17 @@
   </header>
 
   <main class="page">
-    <a class="back" href="index.html">← <span lang="fr">Accueil</span><span lang="en">Home</span></a>
     <h1>LP-60</h1>
-    <p class="lead" lang="fr">Synthé polyphonique 6 voix inspiré du Roland Juno-60, gratuit et open source. Son DCO, son filtre, ses enveloppes, son LFO et son chorus ont été calés à la mesure sur un vrai Roland Boutique JU-06A.</p>
-    <p class="lead" lang="en">A free, open-source 6-voice polysynth inspired by the Roland Juno-60. Its DCO, filter, envelopes, LFO and chorus were tuned by measurement against a real Roland Boutique JU-06A.</p>
+    <div class="intro">
+      <div>
+        <p class="lead" lang="fr">Synthé polyphonique 6 voix inspiré du Roland Juno-60, gratuit et open source. Son DCO, son filtre, ses enveloppes, son LFO et son chorus ont été calés à la mesure sur un vrai Roland Boutique JU-06A.</p>
+        <p class="lead" lang="en">A free, open-source 6-voice polysynth inspired by the Roland Juno-60. Its DCO, filter, envelopes, LFO and chorus were tuned by measurement against a real Roland Boutique JU-06A.</p>
+      </div>
+      <div class="page-actions">
+        <a class="btn dark pdf" href="docs/LP-60-manuel.pdf" lang="fr" target="_blank" rel="noopener">Manuel d'utilisation</a>
+        <a class="btn dark pdf" href="docs/LP-60-manual.pdf" lang="en" target="_blank" rel="noopener">User manual</a>
+      </div>
+    </div>
 
     <ul class="toc">
       <li><a class="btn dark" href="#de-plus-pres"><span lang="fr">De plus près</span><span lang="en">A closer look</span></a></li>
@@ -101,6 +113,13 @@
 
     <h2 id="telechargements"><span lang="fr">Téléchargements</span><span lang="en">Downloads</span></h2>
     <div class="downloads">
+      <div class="dl">
+        <h3><span lang="fr">Manuel</span><span lang="en">Manual</span></h3>
+        <p lang="fr">Tous les réglages, l'installation et les sons d'usine. PDF, aussi inclus dans chaque zip.</p>
+        <p lang="en">Every control, installation and factory sounds. PDF, also included in every zip.</p>
+        <a class="btn dark" href="docs/LP-60-manuel.pdf" lang="fr" target="_blank" rel="noopener">PDF</a>
+        <a class="btn dark" href="docs/LP-60-manual.pdf" lang="en" target="_blank" rel="noopener">PDF</a>
+      </div>
       <div class="dl">
         <h3>macOS</h3>
         <p lang="fr">AU, VST3, CLAP, LV2 et application. Apple Silicon + Intel.</p>

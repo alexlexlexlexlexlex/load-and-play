@@ -10,7 +10,7 @@ on:
   push:
     branches: [main]
     tags: ["v*"]
-    paths: ["LP60/**", "MiniMoog/**", "DuckHunt/**", "ChopChop/**", ".github/workflows/plugins.yml"]
+    paths: ["LP60/**", "MiniMoog/**", "DuckHunt/**", "ChopChop/**", "Site web/docs/**", ".github/workflows/plugins.yml"]
   workflow_dispatch:
     inputs:
       release:
@@ -94,6 +94,8 @@ jobs:
           cp -R build/${{ matrix.synth.target }}_artefacts/Release/* "$folder/"
           rm -rf "$folder/JuceLibraryCode" "$folder"/*.a "$folder"/*.lib
           cp LICENSE README.md "$folder/"
+          # Le manuel PDF (français et anglais), le même que sur le site.
+          cp "../Site web/docs/${{ matrix.synth.name }}-manuel.pdf" "../Site web/docs/${{ matrix.synth.name }}-manual.pdf" "$folder/"
           cmake -E tar cf "$folder.zip" --format=zip "$folder"
           echo "ZIP=${{ matrix.synth.dir }}/$folder.zip" >> "$GITHUB_ENV"
           echo "FOLDER=$folder" >> "$GITHUB_ENV"

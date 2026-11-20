@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="fr" data-ui-lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Duck Hunt — Load & Play</title>
+  <meta name="description" content="Duck Hunt : effet de ducking gratuit et open source, par sidechain, MIDI ou tempo, en pleine bande, 3 bandes ou spectral. AU, VST3, CLAP, LV2 pour Mac, Windows et Linux.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Permanent+Marker&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/site.js"></script>
+  <script src="assets/js/products.js" defer></script>
+  <script src="assets/js/closer.js" defer></script>
+</head>
+<body class="inner">
+  <a class="float-back" href="index.html" aria-label="Accueil / Home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+    <span class="label"><span lang="fr">Accueil</span><span lang="en">Home</span></span>
+  </a>
+  <header class="site-header">
+    <div class="left">
+      <a class="box-link" data-mail href="#">Contact</a>
+      <a class="box-link" data-github href="#" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <a class="logo" href="index.html">Load &amp; Play</a>
+    <div class="right">
+      <div class="lang-switch" role="group" aria-label="Langue / Language">
+        <button type="button" data-lang="fr" aria-pressed="true">FR</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <h1>Duck Hunt</h1>
+    <div class="intro">
+      <div>
+        <p class="lead" lang="fr">Effet de ducking gratuit et open source : une piste s'efface quand une autre joue, comme un sidechain compression, mais sans le compresseur. La baisse ne dépend que de la piste de référence, jamais du niveau de la piste baissée : pas de pompage parasite, pas de couleur. En pleine bande, en trois bandes, ou seulement aux fréquences où la référence joue.</p>
+        <p class="lead" lang="en">A free, open-source ducking effect: one track steps back when another plays, like sidechain compression without the compressor. The duck depends only on the reference track, never on the level of the ducked track: no unwanted pumping, no colouration. Full band, in three bands, or only at the frequencies where the reference plays.</p>
+      </div>
+      <div class="page-actions">
+        <a class="btn dark pdf" href="docs/Duck-Hunt-manuel.pdf" lang="fr" target="_blank" rel="noopener">Manuel d'utilisation</a>
+        <a class="btn dark pdf" href="docs/Duck-Hunt-manual.pdf" lang="en" target="_blank" rel="noopener">User manual</a>
+      </div>
+    </div>
+
+    <ul class="toc">
+      <li><a class="btn dark" href="#de-plus-pres"><span lang="fr">De plus près</span><span lang="en">A closer look</span></a></li>
+      <li><a class="btn dark" href="#description">Description</a></li>
+      <li><a class="btn dark" href="#brancher"><span lang="fr">Dans votre logiciel</span><span lang="en">In your DAW</span></a></li>
+      <li><a class="btn dark" href="#caracteristiques"><span lang="fr">Caractéristiques</span><span lang="en">Specifications</span></a></li>
+      <li><a class="btn dark" href="#telechargements"><span lang="fr">Téléchargements</span><span lang="en">Downloads</span></a></li>
+      <li><a class="btn dark" href="#code"><span lang="fr">Code source</span><span lang="en">Source code</span></a></li>
+    </ul>
+
+    <section class="closer" id="de-plus-pres" data-closer="duckhunt">
+      <h2><span lang="fr">De plus près</span><span lang="en">A closer look</span></h2>
+    </section>
+
+    <h2 id="description">Description</h2>
+    <div lang="fr">
+      <p>Un compresseur en sidechain baisse la piste selon son propre niveau : le résultat change avec la piste, colore le son et pompe parfois quand on ne le veut pas. Duck Hunt dessine directement la courbe de baisse à partir de la référence (ou du MIDI, ou du tempo) et l'applique telle quelle. Ce que vous voyez sur l'écran est exactement ce que vous entendez.</p>
+      <h3>Trois façons de déclencher</h3>
+      <ul>
+        <li><b>Sidechain</b> : le kick, la voix ou n'importe quelle piste envoyée sur l'entrée sidechain fait baisser la piste. Deux filtres permettent de ne réagir qu'à une partie de la référence.</li>
+        <li><b>MIDI</b> : chaque note envoyée au plugin déclenche la courbe, la vélocité peut doser la baisse. Pratique pour hacher un pad au rythme exact que vous voulez.</li>
+        <li><b>Tempo</b> : une baisse à chaque temps, de la ronde à la double croche, pointée ou en triolet, calée sur la position du projet. Rien à brancher.</li>
+      </ul>
+      <h3>Trois façons de baisser</h3>
+      <ul>
+        <li><b>Pleine bande</b> : tout le signal baisse, le ducking classique.</li>
+        <li><b>3 bandes</b> : graves, médiums et aigus baissent chacun selon la même bande de la référence, avec un dosage par bande. Le kick creuse les graves de la basse sans toucher à son attaque. Sans traitement, le son ressort identique, sans latence.</li>
+        <li><b>Spectral</b> : la piste ne se creuse qu'aux fréquences où la référence joue. Idéal pour faire de la place à une voix dans des guitares ou un pad, sans que tout le mix baisse.</li>
+      </ul>
+      <h3>Et aussi</h3>
+      <ul>
+        <li>Enveloppe attaque, maintien, retour et courbe réglable, de la pompe house à la baisse discrète.</li>
+        <li>Anticipation jusqu'à 20 ms pour que la baisse précède le coup, compensée par le logiciel.</li>
+        <li>Mode inversé (gate), mélange sec / traité, écoute de la référence filtrée.</li>
+        <li>10 presets : basse sous le kick, graves seulement, place pour la voix, voix radio, pompes, House Rave, hachures MIDI, gate.</li>
+      </ul>
+    </div>
+    <div lang="en">
+      <p>A sidechain compressor turns the track down according to its own level: the result changes with the track, colours the sound and sometimes pumps when you don't want it to. Duck Hunt draws the duck curve straight from the reference (or MIDI, or tempo) and applies it as is. What you see on the display is exactly what you hear.</p>
+      <h3>Three ways to trigger</h3>
+      <ul>
+        <li><b>Sidechain</b>: the kick, the vocal or any track sent to the sidechain input ducks the track. Two filters let it react to only part of the reference.</li>
+        <li><b>MIDI</b>: each note sent to the plugin fires the curve, velocity can set the depth. Handy for chopping a pad to exactly the rhythm you want.</li>
+        <li><b>Tempo</b>: one duck per beat, from whole notes to sixteenths, dotted or triplet, locked to the project position. Nothing to route.</li>
+      </ul>
+      <h3>Three ways to duck</h3>
+      <ul>
+        <li><b>Full band</b>: the whole signal goes down, classic ducking.</li>
+        <li><b>3 bands</b>: lows, mids and highs each duck from the same band of the reference, with an amount per band. The kick carves the bass lows without touching its attack. With nothing applied, the sound comes out identical, with no latency.</li>
+        <li><b>Spectral</b>: the track is carved only at the frequencies where the reference plays. Perfect for making room for a vocal inside guitars or a pad without the whole mix dipping.</li>
+      </ul>
+      <h3>And also</h3>
+      <ul>
+        <li>Attack, hold, release envelope with an adjustable curve, from house pump to a discreet dip.</li>
+        <li>Lookahead up to 20 ms so the duck lands before the hit, compensated by your host.</li>
+        <li>Inverted mode (gate), dry / wet mix, listen to the filtered reference.</li>
+        <li>10 presets: bass under the kick, lows only, room for the vocal, radio voice, pumps, House Rave, MIDI chops, gate.</li>
+      </ul>
+    </div>
+
+    <h2 id="brancher"><span lang="fr">Dans votre logiciel</span><span lang="en">In your DAW</span></h2>
+    <div lang="fr">
+      <p>Insérez Duck Hunt sur la piste à faire baisser, puis envoyez la piste de référence sur son entrée sidechain :</p>
+      <ul>
+        <li><b>Cubase / Nuendo</b> : dans la fenêtre du plugin, activez <i>Side-Chain</i>, puis sur la piste de référence ajoutez un envoi vers « Duck Hunt – Side-Chain ».</li>
+        <li><b>Logic Pro</b> : en haut de la fenêtre du plugin, menu <i>Side Chain</i> → choisissez la piste de référence.</li>
+        <li><b>Ableton Live</b> : dépliez le plugin (triangle), ouvrez <i>Sidechain</i> et choisissez la piste de référence dans <i>Audio From</i>.</li>
+        <li><b>Studio One</b> : bouton <i>Side-Chain</i> en haut du plugin, puis un envoi de la piste de référence vers Duck Hunt.</li>
+        <li><b>Reaper</b> : bouton des broches (<i>2 in 2 out</i>) → entrées 3/4 pour le sidechain, puis un envoi de la piste de référence vers les canaux 3/4.</li>
+        <li><b>Bitwig</b> : dans le plugin, choisissez la source du sidechain. <b>FL Studio</b> : reliez la piste de référence à la piste de Duck Hunt en « sidechain », puis choisissez-la dans l'onglet de traitement du plugin.</li>
+      </ul>
+      <p>En mode MIDI, envoyez une piste MIDI vers Duck Hunt. En mode tempo, il n'y a rien à brancher.</p>
+    </div>
+    <div lang="en">
+      <p>Insert Duck Hunt on the track to duck, then send the reference track to its sidechain input:</p>
+      <ul>
+        <li><b>Cubase / Nuendo</b>: in the plugin window, enable <i>Side-Chain</i>, then add a send from the reference track to "Duck Hunt – Side-Chain".</li>
+        <li><b>Logic Pro</b>: at the top of the plugin window, <i>Side Chain</i> menu → pick the reference track.</li>
+        <li><b>Ableton Live</b>: unfold the device (triangle), open <i>Sidechain</i> and choose the reference track under <i>Audio From</i>.</li>
+        <li><b>Studio One</b>: <i>Side-Chain</i> button at the top of the plugin, then a send from the reference track to Duck Hunt.</li>
+        <li><b>Reaper</b>: pin connector button (<i>2 in 2 out</i>) → inputs 3/4 for the sidechain, then a send from the reference track to channels 3/4.</li>
+        <li><b>Bitwig</b>: pick the sidechain source in the device. <b>FL Studio</b>: route the reference track to Duck Hunt's track as "sidechain", then select it in the plugin's processing tab.</li>
+      </ul>
+      <p>In MIDI mode, send a MIDI track to Duck Hunt. In tempo mode, there is nothing to route.</p>
+    </div>
+
+    <h2 id="caracteristiques"><span lang="fr">Caractéristiques</span><span lang="en">Specifications</span></h2>
+    <table class="specs">
+      <tr><th>Version</th><td>1.0.0</td></tr>
+      <tr><th><span lang="fr">Prix</span><span lang="en">Price</span></th><td><span lang="fr">Gratuit</span><span lang="en">Free</span></td></tr>
+      <tr><th><span lang="fr">Licence</span><span lang="en">License</span></th><td>GNU AGPL v3 (open source)</td></tr>
+      <tr><th>Type</th><td><span lang="fr">Effet de ducking, déclenché par sidechain, MIDI ou tempo</span><span lang="en">Ducking effect, triggered by sidechain, MIDI or tempo</span></td></tr>
+      <tr><th>Formats</th><td>AU, VST3, CLAP, LV2</td></tr>
+      <tr><th>macOS</th><td><span lang="fr">10.13 ou plus récent, Apple Silicon et Intel</span><span lang="en">10.13 or later, Apple Silicon and Intel</span></td></tr>
+      <tr><th>Windows</th><td><span lang="fr">10 / 11, 64 bits (VST3, CLAP, LV2)</span><span lang="en">10 / 11, 64-bit (VST3, CLAP, LV2)</span></td></tr>
+      <tr><th>Linux</th><td><span lang="fr">x86-64 et ARM64, dont Raspberry Pi 4/5</span><span lang="en">x86-64 and ARM64, including Raspberry Pi 4/5</span></td></tr>
+      <tr><th><span lang="fr">Entrées</span><span lang="en">Inputs</span></th><td><span lang="fr">Stéréo + sidechain stéréo, MIDI</span><span lang="en">Stereo + stereo sidechain, MIDI</span></td></tr>
+      <tr><th><span lang="fr">Latence</span><span lang="en">Latency</span></th><td><span lang="fr">Aucune en pleine bande et 3 bandes ; + l'anticipation choisie (≤ 20 ms) ; 1024 échantillons en spectral à 44,1 / 48 kHz. Toujours compensée par le logiciel.</span><span lang="en">None in full band and 3 bands; + the chosen lookahead (≤ 20 ms); 1024 samples in spectral at 44.1 / 48 kHz. Always compensated by the host.</span></td></tr>
+      <tr><th><span lang="fr">Paramètres automatisables</span><span lang="en">Automatable parameters</span></th><td>26</td></tr>
+      <tr><th>Presets</th><td>10</td></tr>
+    </table>
+
+    <h2 id="telechargements"><span lang="fr">Téléchargements</span><span lang="en">Downloads</span></h2>
+    <div class="downloads">
+      <div class="dl">
+        <h3><span lang="fr">Manuel</span><span lang="en">Manual</span></h3>
+        <p lang="fr">Tous les réglages, le branchement dans les logiciels et les presets. PDF, aussi inclus dans chaque zip.</p>
+        <p lang="en">Every control, hooking it up in your DAW and the presets. PDF, also included in every zip.</p>
+        <a class="btn dark" href="docs/Duck-Hunt-manuel.pdf" lang="fr" target="_blank" rel="noopener">PDF</a>
+        <a class="btn dark" href="docs/Duck-Hunt-manual.pdf" lang="en" target="_blank" rel="noopener">PDF</a>
+      </div>
+      <div class="dl">
+        <h3>macOS</h3>
+        <p lang="fr">AU, VST3, CLAP et LV2. Apple Silicon + Intel.</p>
+        <p lang="en">AU, VST3, CLAP and LV2. Apple Silicon + Intel.</p>
+        <a class="btn dark" data-asset="Duck-Hunt-{duckhunt}-macOS.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+      <div class="dl">
+        <h3>Windows</h3>
+        <p lang="fr">VST3, CLAP et LV2. 64 bits.</p>
+        <p lang="en">VST3, CLAP and LV2. 64-bit.</p>
+        <a class="btn dark" data-asset="Duck-Hunt-{duckhunt}-Windows.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+      <div class="dl">
+        <h3>Linux</h3>
+        <p lang="fr">VST3, CLAP et LV2. x86-64.</p>
+        <p lang="en">VST3, CLAP and LV2. x86-64.</p>
+        <a class="btn dark" data-asset="Duck-Hunt-{duckhunt}-Linux-x64.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+      <div class="dl">
+        <h3>Raspberry Pi</h3>
+        <p lang="fr">Linux ARM64 (Pi 4 / Pi 5, système 64 bits).</p>
+        <p lang="en">Linux ARM64 (Pi 4 / Pi 5, 64-bit OS).</p>
+        <a class="btn dark" data-asset="Duck-Hunt-{duckhunt}-Linux-ARM64.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+    </div>
+
+    <h3>Installation</h3>
+    <div lang="fr">
+      <ul>
+        <li><b>macOS</b> : copiez <code>Duck Hunt.component</code>, <code>.vst3</code>, <code>.clap</code> et <code>.lv2</code> dans <code>~/Bibliothèque/Audio/Plug-Ins/</code> (dossiers Components, VST3, CLAP, LV2). Le plugin n'est pas signé par Apple : si macOS le bloque, ouvrez Réglages Système → Confidentialité et sécurité → Autoriser quand même.</li>
+        <li><b>Windows</b> : copiez <code>Duck Hunt.vst3</code> dans <code>C:\Program Files\Common Files\VST3</code> et <code>Duck Hunt.clap</code> dans <code>C:\Program Files\Common Files\CLAP</code>.</li>
+        <li><b>Linux</b> : copiez les plugins dans <code>~/.vst3</code>, <code>~/.clap</code> et <code>~/.lv2</code>.</li>
+      </ul>
+      <p>Relancez ensuite votre logiciel de musique : Duck Hunt apparaît dans les effets, sous « Load &amp; Play ».</p>
+    </div>
+    <div lang="en">
+      <ul>
+        <li><b>macOS</b>: copy <code>Duck Hunt.component</code>, <code>.vst3</code>, <code>.clap</code> and <code>.lv2</code> into <code>~/Library/Audio/Plug-Ins/</code> (Components, VST3, CLAP, LV2 folders). The plugin is not signed with Apple: if macOS blocks it, open System Settings → Privacy &amp; Security → Allow Anyway.</li>
+        <li><b>Windows</b>: copy <code>Duck Hunt.vst3</code> to <code>C:\Program Files\Common Files\VST3</code> and <code>Duck Hunt.clap</code> to <code>C:\Program Files\Common Files\CLAP</code>.</li>
+        <li><b>Linux</b>: copy the plugins to <code>~/.vst3</code>, <code>~/.clap</code> and <code>~/.lv2</code>.</li>
+      </ul>
+      <p>Then restart your music software: Duck Hunt shows up among the effects, under "Load &amp; Play".</p>
+    </div>
+
+    <h2 id="code"><span lang="fr">Code source</span><span lang="en">Source code</span></h2>
+    <div class="downloads">
+      <div class="dl">
+        <span class="tag">open source</span>
+        <h3><span lang="fr">Code source</span><span lang="en">Source code</span></h3>
+        <p lang="fr">Tout le code C++ (JUCE), les tests du moteur et la compilation automatique Mac / Windows / Linux.</p>
+        <p lang="en">All the C++ code (JUCE), the engine tests and the automatic Mac / Windows / Linux build.</p>
+        <a class="btn dark" data-asset="Duck-Hunt-{duckhunt}-source.zip">.zip</a>
+        <a class="btn dark" data-repo="DuckHunt">GitHub</a>
+      </div>
+    </div>
+
+  </main>
+
+  <footer class="site-footer">
+    <a class="law" href="what-about-the-law.html">what about the law?</a>
+    <small>Load &amp; Play — <span lang="fr">instruments gratuits et open source</span><span lang="en">free and open-source instruments</span></small>
+    <a class="footer-github" data-github href="#" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</body>
+</html>

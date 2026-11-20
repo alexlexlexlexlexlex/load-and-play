@@ -141,6 +141,9 @@ html[data-ui-lang="en"] body [lang="fr"] { display: none !important; }
 
 /* Le synthé, incliné comme posé sur une table, avec son épaisseur et son ombre. */
 .device {
+  display: block;
+  color: inherit;
+  cursor: pointer;
   perspective: 1300px;
   padding: clamp(28px, 4vw, 56px) clamp(18px, 3vw, 44px) clamp(40px, 5vw, 64px);
   position: relative;
@@ -155,6 +158,12 @@ html[data-ui-lang="en"] body [lang="fr"] { display: none !important; }
   transition: transform 0.6s cubic-bezier(0.22, 0.8, 0.2, 1);
 }
 .card.image-right .device-tilt { width: 100%; margin-left: -24%; transform: rotateX(32deg) rotateY(10deg) rotateZ(-4deg); }
+.device:focus-visible { outline: 2px solid var(--accent); outline-offset: -6px; }
+/* Captures plus hautes que larges des effets : réduites pour que leurs cartes ne
+   dépassent pas celles des instruments. */
+.card.tall .device { padding-top: clamp(18px, 2.4vw, 32px); padding-bottom: clamp(28px, 3.4vw, 44px); }
+.card.tall .device-tilt { width: 88%; margin-left: 4%; }
+.card.image-right.compact .device-tilt { width: 92%; }
 .card:hover .device-tilt { transform: rotateX(24deg) rotateY(-6deg) rotateZ(3deg) translateZ(14px); }
 .card.image-right:hover .device-tilt { transform: rotateX(24deg) rotateY(6deg) rotateZ(-3deg) translateZ(14px); }
 
@@ -348,8 +357,50 @@ body.inner > * {
 .page .lead { font-size: 19px; max-width: 760px; }
 .page p, .page li { max-width: 780px; }
 
-.back { display: inline-block; margin-bottom: 18px; font-weight: 600; text-decoration: none; }
-.back:hover { text-decoration: underline; }
+/* Flèche retour : flotte au milieu de la bande noire de gauche, toujours visible. */
+body.inner > .float-back {
+  position: fixed;
+  z-index: 50;
+  top: 74%;
+  left: max(8px, calc((100vw - 1120px) / 4 - 26px));
+  width: 52px;
+  height: 52px;
+  margin: 0;
+  transform: translateY(-50%);
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: var(--ink);
+  color: var(--paper);
+  border: 1.5px solid rgba(255, 255, 255, 0.85);
+  text-decoration: none;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  transition: background-color 0.15s ease, color 0.15s ease, transform 0.15s ease;
+}
+body.inner > .float-back:hover { background: var(--paper); color: var(--ink); transform: translateY(-50%) translateX(-3px); }
+.float-back svg { width: 22px; height: 22px; }
+.float-back .label {
+  position: absolute;
+  left: calc(100% + 10px);
+  white-space: nowrap;
+  font: 600 12px/1 var(--text);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--paper);
+  background: var(--ink);
+  padding: 7px 9px;
+  border-radius: 6px;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
+}
+.float-back:hover .label, .float-back:focus-visible .label { opacity: 1; }
+
+/* Introduction des pages : le texte à gauche, le manuel PDF à droite, à part du sommaire. */
+.intro { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px 40px; align-items: start; }
+.intro .lead { margin: 0; }
+.page-actions { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; padding-top: 6px; }
+.btn.pdf::before { content: "PDF"; font-size: 10px; margin-right: 8px; padding: 2px 4px; border-radius: 3px; background: var(--accent); color: var(--ink); vertical-align: 1px; }
 
 /* Sommaire : une seule ligne, masqué quand il ne tient plus. */
 .toc { display: flex; flex-wrap: nowrap; gap: 8px; margin: 18px 0 0; padding: 0; list-style: none; }
@@ -785,6 +836,10 @@ a.disabled { opacity: 0.4; cursor: default; pointer-events: none; }
   .device { padding: 26px 18px 34px; }
   .device-tilt, .card.image-right .device-tilt { width: 112%; margin-left: -6%; }
   .toc { display: none; }
+  .intro { grid-template-columns: 1fr; }
+  .page-actions { padding-top: 0; }
+  body.inner > .float-back { top: auto; bottom: 14px; left: 10px; transform: none; width: 46px; height: 46px; }
+  body.inner > .float-back:hover { transform: none; }
   table.specs th { width: 42%; }
   .closer-bar { grid-template-columns: 1fr 1fr; }
   .closer-card { grid-column: 1 / -1; grid-row: 1; }

@@ -1,0 +1,2116 @@
+{
+ "lp60": {
+  "params": [
+   {
+    "name": "Arpeggio On",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arpeggio Mode",
+    "min": "UP",
+    "max": "DOWN",
+    "def": "UP",
+    "steps": 3,
+    "choices": [
+     "UP",
+     "U&D",
+     "DOWN"
+    ]
+   },
+   {
+    "name": "Arpeggio Range",
+    "min": "1",
+    "max": "3",
+    "def": "1",
+    "steps": 3,
+    "choices": [
+     "1",
+     "2",
+     "3"
+    ]
+   },
+   {
+    "name": "Arpeggio Rate",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "5.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Arpeggio Tempo Sync",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Hold",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "LFO Rate",
+    "min": "0.04 Hz",
+    "max": "67.0 Hz",
+    "def": "4.23 Hz",
+    "steps": 2147483647
+   },
+   {
+    "name": "LFO Delay Time",
+    "min": "0 ms",
+    "max": "1.75 s",
+    "def": "0 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "LFO Trigger Mode",
+    "min": "AUTO",
+    "max": "MAN",
+    "def": "AUTO",
+    "steps": 2,
+    "choices": [
+     "AUTO",
+     "MAN"
+    ]
+   },
+   {
+    "name": "DCO Range",
+    "min": "16'",
+    "max": "4'",
+    "def": "8'",
+    "steps": 3,
+    "choices": [
+     "16'",
+     "8'",
+     "4'"
+    ]
+   },
+   {
+    "name": "DCO LFO",
+    "min": "0 ct",
+    "max": "380 ct",
+    "def": "0 ct",
+    "steps": 2147483647
+   },
+   {
+    "name": "DCO PWM",
+    "min": "49 %",
+    "max": "4 %",
+    "def": "49 %",
+    "steps": 2147483647
+   },
+   {
+    "name": "DCO PWM Mode",
+    "min": "LFO",
+    "max": "ENV",
+    "def": "MAN",
+    "steps": 3,
+    "choices": [
+     "LFO",
+     "MAN",
+     "ENV"
+    ]
+   },
+   {
+    "name": "DCO Pulse",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "DCO Saw",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "DCO Sub On",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "DCO Sub Osc",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "0.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "DCO Noise",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "0.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "HPF Frequency",
+    "min": "0",
+    "max": "3",
+    "def": "0",
+    "steps": 4,
+    "choices": [
+     "0",
+     "1",
+     "2",
+     "3"
+    ]
+   },
+   {
+    "name": "VCF Frequency",
+    "min": "8 Hz",
+    "max": "80.68 kHz",
+    "def": "23.33 kHz",
+    "steps": 2147483647
+   },
+   {
+    "name": "VCF Resonance",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "0.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "VCF Envelope Polarity",
+    "min": "+",
+    "max": "-",
+    "def": "+",
+    "steps": 2,
+    "choices": [
+     "+",
+     "-"
+    ]
+   },
+   {
+    "name": "VCF Envelope",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "0.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "VCF LFO",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "0.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "VCF Keyboard Follow",
+    "min": "0 %",
+    "max": "100 %",
+    "def": "0 %",
+    "steps": 2147483647
+   },
+   {
+    "name": "VCA Mode",
+    "min": "ENV",
+    "max": "GATE",
+    "def": "ENV",
+    "steps": 2,
+    "choices": [
+     "ENV",
+     "GATE"
+    ]
+   },
+   {
+    "name": "VCA Level",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "7.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "ENV Attack",
+    "min": "1 ms",
+    "max": "3.00 s",
+    "def": "1 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "ENV Decay",
+    "min": "5 ms",
+    "max": "13.34 s",
+    "def": "749 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "ENV Sustain",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "10.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "ENV Release",
+    "min": "5 ms",
+    "max": "13.34 s",
+    "def": "62 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "Chorus I",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Chorus II",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Chorus Noise",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "5.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Master Tune",
+    "min": "-50 ct",
+    "max": "50 ct",
+    "def": "0 ct",
+    "steps": 2147483647
+   },
+   {
+    "name": "Bender DCO Range",
+    "min": "0 st",
+    "max": "12 st",
+    "def": "2 st",
+    "steps": 2147483647
+   },
+   {
+    "name": "Bender VCF",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "0.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Mod Wheel Vibrato",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "5.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Tempo (without host)",
+    "min": "40 BPM",
+    "max": "240 BPM",
+    "def": "120 BPM",
+    "steps": 2147483647
+   }
+  ],
+  "presets": [
+   "Init",
+   "Warm Pad",
+   "Strings",
+   "Brass",
+   "Bass",
+   "Sub Bass",
+   "Organ",
+   "Pluck Arp",
+   "Wide Lead",
+   "Sweep Pad",
+   "Bells",
+   "Noise FX"
+  ]
+ },
+ "modelplay": {
+  "params": [
+   {
+    "name": "Tune",
+    "min": "-1.00 st",
+    "max": "1.00 st",
+    "def": "0.00 st",
+    "steps": 2147483647
+   },
+   {
+    "name": "Glide",
+    "min": "0 ms",
+    "max": "5.00 s",
+    "def": "0 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "Modulation Mix",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "0.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Oscillator Modulation",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Osc 3 Control",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Osc 1 Range",
+    "min": "LO",
+    "max": "2'",
+    "def": "8'",
+    "steps": 6,
+    "choices": [
+     "LO",
+     "32'",
+     "16'",
+     "8'",
+     "4'",
+     "2'"
+    ]
+   },
+   {
+    "name": "Osc 1 Waveform",
+    "min": "Triangle",
+    "max": "Narrow Pulse",
+    "def": "Saw",
+    "steps": 6,
+    "choices": [
+     "Triangle",
+     "Tri-Saw",
+     "Saw",
+     "Square",
+     "Wide Pulse",
+     "Narrow Pulse"
+    ]
+   },
+   {
+    "name": "Osc 2 Range",
+    "min": "LO",
+    "max": "2'",
+    "def": "8'",
+    "steps": 6,
+    "choices": [
+     "LO",
+     "32'",
+     "16'",
+     "8'",
+     "4'",
+     "2'"
+    ]
+   },
+   {
+    "name": "Osc 2 Frequency",
+    "min": "-7.00 st",
+    "max": "7.00 st",
+    "def": "0.10 st",
+    "steps": 2147483647
+   },
+   {
+    "name": "Osc 2 Waveform",
+    "min": "Triangle",
+    "max": "Narrow Pulse",
+    "def": "Saw",
+    "steps": 6,
+    "choices": [
+     "Triangle",
+     "Tri-Saw",
+     "Saw",
+     "Square",
+     "Wide Pulse",
+     "Narrow Pulse"
+    ]
+   },
+   {
+    "name": "Osc 3 Range",
+    "min": "LO",
+    "max": "2'",
+    "def": "8'",
+    "steps": 6,
+    "choices": [
+     "LO",
+     "32'",
+     "16'",
+     "8'",
+     "4'",
+     "2'"
+    ]
+   },
+   {
+    "name": "Osc 3 Frequency",
+    "min": "-7.00 st",
+    "max": "7.00 st",
+    "def": "-0.10 st",
+    "steps": 2147483647
+   },
+   {
+    "name": "Osc 3 Waveform",
+    "min": "Triangle",
+    "max": "Narrow Pulse",
+    "def": "Triangle",
+    "steps": 6,
+    "choices": [
+     "Triangle",
+     "Rev Saw",
+     "Saw",
+     "Square",
+     "Wide Pulse",
+     "Narrow Pulse"
+    ]
+   },
+   {
+    "name": "Osc 1 On",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Osc 1 Volume",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "8.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Osc 2 On",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Osc 2 Volume",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "8.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Osc 3 On",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Osc 3 Volume",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "5.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Noise On",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Noise Volume",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "0.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Pink Noise",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Cutoff Frequency",
+    "min": "20 Hz",
+    "max": "20.00 kHz",
+    "def": "1.20 kHz",
+    "steps": 2147483647
+   },
+   {
+    "name": "Emphasis",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "2.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Amount of Contour",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "5.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Filter Modulation",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Keyboard Control 1",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Keyboard Control 2",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Bass Compensation",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Filter Attack",
+    "min": "1 ms",
+    "max": "10.00 s",
+    "def": "5 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "Filter Decay",
+    "min": "4 ms",
+    "max": "35.00 s",
+    "def": "400 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "Filter Sustain",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "3.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Loudness Attack",
+    "min": "1 ms",
+    "max": "10.00 s",
+    "def": "2 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "Loudness Decay",
+    "min": "4 ms",
+    "max": "35.00 s",
+    "def": "300 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "Loudness Sustain",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "8.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Decay",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Volume",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "7.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Pitch Bend Range",
+    "min": "1 st",
+    "max": "12 st",
+    "def": "2 st",
+    "steps": 2147483647
+   },
+   {
+    "name": "Analog Drift",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "3.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Retrigger",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Polyphonic",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Aftertouch Amount",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "0.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Velocity to Filter",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "0.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Modulation Amount",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "0.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Modulation from LFO",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Tempo (without host)",
+    "min": "40 BPM",
+    "max": "240 BPM",
+    "def": "120 BPM",
+    "steps": 2147483647
+   },
+   {
+    "name": "Osc 1 Frequency",
+    "min": "-7.00 st",
+    "max": "7.00 st",
+    "def": "0.00 st",
+    "steps": 2147483647
+   },
+   {
+    "name": "Osc 2 Fine Tune",
+    "min": "-50 ct",
+    "max": "50 ct",
+    "def": "0 ct",
+    "steps": 2147483647
+   },
+   {
+    "name": "Osc 3 Fine Tune",
+    "min": "-50 ct",
+    "max": "50 ct",
+    "def": "0 ct",
+    "steps": 2147483647
+   },
+   {
+    "name": "Osc 1 Rectify",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Osc 1 Offset",
+    "min": "-1.00",
+    "max": "1.00",
+    "def": "0.00",
+    "steps": 2147483647
+   },
+   {
+    "name": "Osc 2 Rectify",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Osc 2 Offset",
+    "min": "-1.00",
+    "max": "1.00",
+    "def": "0.00",
+    "steps": 2147483647
+   },
+   {
+    "name": "Osc 3 Rectify",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Osc 3 Offset",
+    "min": "-1.00",
+    "max": "1.00",
+    "def": "0.00",
+    "steps": 2147483647
+   },
+   {
+    "name": "Osc Sync 2 to 1",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "LFO Level",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "0.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "LFO Waveform",
+    "min": "Triangle",
+    "max": "Sample & Hold",
+    "def": "Triangle",
+    "steps": 5,
+    "choices": [
+     "Triangle",
+     "Square",
+     "Saw Up",
+     "Saw Down",
+     "Sample & Hold"
+    ]
+   },
+   {
+    "name": "LFO Rate",
+    "min": "0.05 Hz",
+    "max": "30.0 Hz",
+    "def": "2.00 Hz",
+    "steps": 2147483647
+   },
+   {
+    "name": "LFO Tempo Sync",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "LFO Sync Rate",
+    "min": "4/1",
+    "max": "1/16T",
+    "def": "1/4",
+    "steps": 11,
+    "choices": [
+     "4/1",
+     "2/1",
+     "1/1",
+     "1/2",
+     "1/4",
+     "1/8",
+     "1/16",
+     "1/32",
+     "1/4T",
+     "1/8T",
+     "1/16T"
+    ]
+   },
+   {
+    "name": "LFO Destination",
+    "min": "All Osc",
+    "max": "Volume",
+    "def": "All Osc",
+    "steps": 4,
+    "choices": [
+     "All Osc",
+     "Osc 2",
+     "Filter",
+     "Volume"
+    ]
+   },
+   {
+    "name": "VCO 3 Filter Mod",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "0.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "ADSR Release",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Filter Release",
+    "min": "4 ms",
+    "max": "35.00 s",
+    "def": "300 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "Loudness Release",
+    "min": "4 ms",
+    "max": "35.00 s",
+    "def": "300 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "Overdrive On",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Overdrive Gain",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "5.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Overdrive Low Cut",
+    "min": "20 Hz",
+    "max": "1.00 kHz",
+    "def": "20 Hz",
+    "steps": 2147483647
+   },
+   {
+    "name": "Overdrive High Cut",
+    "min": "1.00 kHz",
+    "max": "20.00 kHz",
+    "def": "20.00 kHz",
+    "steps": 2147483647
+   },
+   {
+    "name": "Chorus Mode",
+    "min": "Off",
+    "max": "I+II",
+    "def": "Off",
+    "steps": 4,
+    "choices": [
+     "Off",
+     "I",
+     "II",
+     "I+II"
+    ]
+   },
+   {
+    "name": "Chorus Level",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "10.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Autopan",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Delay On",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Delay Level",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "3.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Delay Time",
+    "min": "10 ms",
+    "max": "2.00 s",
+    "def": "350 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "Delay Tempo Sync",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Delay Sync Time",
+    "min": "4/1",
+    "max": "1/16T",
+    "def": "1/8",
+    "steps": 11,
+    "choices": [
+     "4/1",
+     "2/1",
+     "1/1",
+     "1/2",
+     "1/4",
+     "1/8",
+     "1/16",
+     "1/32",
+     "1/4T",
+     "1/8T",
+     "1/16T"
+    ]
+   },
+   {
+    "name": "Delay Right 2x",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Delay Feedback",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "4.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Arpeggiator On",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arpeggiator Mode",
+    "min": "Up",
+    "max": "Played",
+    "def": "Up",
+    "steps": 5,
+    "choices": [
+     "Up",
+     "Down",
+     "Up/Down",
+     "Random",
+     "Played"
+    ]
+   },
+   {
+    "name": "Arpeggiator Speed",
+    "min": "4/1",
+    "max": "1/16T",
+    "def": "1/8",
+    "steps": 11,
+    "choices": [
+     "4/1",
+     "2/1",
+     "1/1",
+     "1/2",
+     "1/4",
+     "1/8",
+     "1/16",
+     "1/32",
+     "1/4T",
+     "1/8T",
+     "1/16T"
+    ]
+   },
+   {
+    "name": "Arpeggiator Range",
+    "min": "1 Oct",
+    "max": "4 Oct",
+    "def": "1 Oct",
+    "steps": 4,
+    "choices": [
+     "1 Oct",
+     "2 Oct",
+     "3 Oct",
+     "4 Oct"
+    ]
+   },
+   {
+    "name": "Arpeggiator Gate Pattern",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arp Step 1",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arp Step 2",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arp Step 3",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arp Step 4",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arp Step 5",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arp Step 6",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arp Step 7",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arp Step 8",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arp Step 9",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arp Step 10",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arp Step 11",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arp Step 12",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arp Step 13",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arp Step 14",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arp Step 15",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Arp Step 16",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   }
+  ],
+  "presets": []
+ },
+ "duckhunt": {
+  "params": [
+   {
+    "name": "Trigger",
+    "min": "Sidechain",
+    "max": "Tempo",
+    "def": "Sidechain",
+    "steps": 3,
+    "choices": [
+     "Sidechain",
+     "MIDI",
+     "Tempo"
+    ]
+   },
+   {
+    "name": "Mode",
+    "min": "Full band",
+    "max": "Spectral",
+    "def": "Full band",
+    "steps": 3,
+    "choices": [
+     "Full band",
+     "3 bands",
+     "Spectral"
+    ]
+   },
+   {
+    "name": "Depth",
+    "min": "0.0 dB",
+    "max": "60.0 dB",
+    "def": "12.0 dB",
+    "steps": 2147483647
+   },
+   {
+    "name": "Threshold",
+    "min": "-60.0 dB",
+    "max": "0.0 dB",
+    "def": "-30.0 dB",
+    "steps": 2147483647
+   },
+   {
+    "name": "Range",
+    "min": "1.0 dB",
+    "max": "40.0 dB",
+    "def": "12.0 dB",
+    "steps": 2147483647
+   },
+   {
+    "name": "Attack",
+    "min": "0.10 ms",
+    "max": "500 ms",
+    "def": "5 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "Hold",
+    "min": "0 ms",
+    "max": "1.00 s",
+    "def": "20 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "Release",
+    "min": "5 ms",
+    "max": "3.00 s",
+    "def": "200 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "Curve",
+    "min": "-1.00",
+    "max": "1.00",
+    "def": "0.00",
+    "steps": 2147483647
+   },
+   {
+    "name": "Lookahead",
+    "min": "0 ms",
+    "max": "20 ms",
+    "def": "0 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "Division",
+    "min": "1/1",
+    "max": "1/16T",
+    "def": "1/4",
+    "steps": 10,
+    "choices": [
+     "1/1",
+     "1/2",
+     "1/4",
+     "1/8",
+     "1/16",
+     "1/4.",
+     "1/8.",
+     "1/4T",
+     "1/8T",
+     "1/16T"
+    ]
+   },
+   {
+    "name": "Velocity",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "SC Low Cut",
+    "min": "20 Hz",
+    "max": "2.00 kHz",
+    "def": "20 Hz",
+    "steps": 2147483647
+   },
+   {
+    "name": "SC High Cut",
+    "min": "200 Hz",
+    "max": "20.0 kHz",
+    "def": "20.0 kHz",
+    "steps": 2147483647
+   },
+   {
+    "name": "Low Crossover",
+    "min": "40 Hz",
+    "max": "1.00 kHz",
+    "def": "200 Hz",
+    "steps": 2147483647
+   },
+   {
+    "name": "High Crossover",
+    "min": "800 Hz",
+    "max": "12.0 kHz",
+    "def": "2.50 kHz",
+    "steps": 2147483647
+   },
+   {
+    "name": "Low Band",
+    "min": "0 %",
+    "max": "100 %",
+    "def": "100 %",
+    "steps": 2147483647
+   },
+   {
+    "name": "Mid Band",
+    "min": "0 %",
+    "max": "100 %",
+    "def": "100 %",
+    "steps": 2147483647
+   },
+   {
+    "name": "High Band",
+    "min": "0 %",
+    "max": "100 %",
+    "def": "100 %",
+    "steps": 2147483647
+   },
+   {
+    "name": "Focus Low",
+    "min": "20 Hz",
+    "max": "20.0 kHz",
+    "def": "20 Hz",
+    "steps": 2147483647
+   },
+   {
+    "name": "Focus High",
+    "min": "20 Hz",
+    "max": "20.0 kHz",
+    "def": "20.0 kHz",
+    "steps": 2147483647
+   },
+   {
+    "name": "Smoothing",
+    "min": "0 %",
+    "max": "100 %",
+    "def": "50 %",
+    "steps": 2147483647
+   },
+   {
+    "name": "Mix",
+    "min": "0 %",
+    "max": "100 %",
+    "def": "100 %",
+    "steps": 2147483647
+   },
+   {
+    "name": "Output",
+    "min": "-24.0 dB",
+    "max": "24.0 dB",
+    "def": "0.0 dB",
+    "steps": 2147483647
+   },
+   {
+    "name": "Invert",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Listen Sidechain",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   }
+  ],
+  "presets": [
+   "Init",
+   "Basse sous le kick",
+   "Kick : graves seulement",
+   "Place pour la voix",
+   "Voix sur la musique (radio)",
+   "Pompe 1/4",
+   "Pompe 1/8 graves",
+   "House Rave",
+   "Hachures MIDI",
+   "Gate par la référence"
+  ]
+ },
+ "chopchop": {
+  "params": [
+   {
+    "name": "Trigger",
+    "min": "Pattern",
+    "max": "MIDI",
+    "def": "Pattern",
+    "steps": 3,
+    "choices": [
+     "Pattern",
+     "Drums",
+     "MIDI"
+    ]
+   },
+   {
+    "name": "Step Rate",
+    "min": "1/8",
+    "max": "1/32",
+    "def": "1/16",
+    "steps": 3,
+    "choices": [
+     "1/8",
+     "1/16",
+     "1/32"
+    ]
+   },
+   {
+    "name": "Step 1",
+    "min": "THRU",
+    "max": "MUTE",
+    "def": "THRU",
+    "steps": 7,
+    "choices": [
+     "THRU",
+     "REPEAT",
+     "ROLL",
+     "REVERSE",
+     "+12",
+     "-12",
+     "MUTE"
+    ]
+   },
+   {
+    "name": "Step 2",
+    "min": "THRU",
+    "max": "MUTE",
+    "def": "THRU",
+    "steps": 7,
+    "choices": [
+     "THRU",
+     "REPEAT",
+     "ROLL",
+     "REVERSE",
+     "+12",
+     "-12",
+     "MUTE"
+    ]
+   },
+   {
+    "name": "Step 3",
+    "min": "THRU",
+    "max": "MUTE",
+    "def": "THRU",
+    "steps": 7,
+    "choices": [
+     "THRU",
+     "REPEAT",
+     "ROLL",
+     "REVERSE",
+     "+12",
+     "-12",
+     "MUTE"
+    ]
+   },
+   {
+    "name": "Step 4",
+    "min": "THRU",
+    "max": "MUTE",
+    "def": "THRU",
+    "steps": 7,
+    "choices": [
+     "THRU",
+     "REPEAT",
+     "ROLL",
+     "REVERSE",
+     "+12",
+     "-12",
+     "MUTE"
+    ]
+   },
+   {
+    "name": "Step 5",
+    "min": "THRU",
+    "max": "MUTE",
+    "def": "THRU",
+    "steps": 7,
+    "choices": [
+     "THRU",
+     "REPEAT",
+     "ROLL",
+     "REVERSE",
+     "+12",
+     "-12",
+     "MUTE"
+    ]
+   },
+   {
+    "name": "Step 6",
+    "min": "THRU",
+    "max": "MUTE",
+    "def": "THRU",
+    "steps": 7,
+    "choices": [
+     "THRU",
+     "REPEAT",
+     "ROLL",
+     "REVERSE",
+     "+12",
+     "-12",
+     "MUTE"
+    ]
+   },
+   {
+    "name": "Step 7",
+    "min": "THRU",
+    "max": "MUTE",
+    "def": "THRU",
+    "steps": 7,
+    "choices": [
+     "THRU",
+     "REPEAT",
+     "ROLL",
+     "REVERSE",
+     "+12",
+     "-12",
+     "MUTE"
+    ]
+   },
+   {
+    "name": "Step 8",
+    "min": "THRU",
+    "max": "MUTE",
+    "def": "THRU",
+    "steps": 7,
+    "choices": [
+     "THRU",
+     "REPEAT",
+     "ROLL",
+     "REVERSE",
+     "+12",
+     "-12",
+     "MUTE"
+    ]
+   },
+   {
+    "name": "Step 9",
+    "min": "THRU",
+    "max": "MUTE",
+    "def": "THRU",
+    "steps": 7,
+    "choices": [
+     "THRU",
+     "REPEAT",
+     "ROLL",
+     "REVERSE",
+     "+12",
+     "-12",
+     "MUTE"
+    ]
+   },
+   {
+    "name": "Step 10",
+    "min": "THRU",
+    "max": "MUTE",
+    "def": "THRU",
+    "steps": 7,
+    "choices": [
+     "THRU",
+     "REPEAT",
+     "ROLL",
+     "REVERSE",
+     "+12",
+     "-12",
+     "MUTE"
+    ]
+   },
+   {
+    "name": "Step 11",
+    "min": "THRU",
+    "max": "MUTE",
+    "def": "THRU",
+    "steps": 7,
+    "choices": [
+     "THRU",
+     "REPEAT",
+     "ROLL",
+     "REVERSE",
+     "+12",
+     "-12",
+     "MUTE"
+    ]
+   },
+   {
+    "name": "Step 12",
+    "min": "THRU",
+    "max": "MUTE",
+    "def": "THRU",
+    "steps": 7,
+    "choices": [
+     "THRU",
+     "REPEAT",
+     "ROLL",
+     "REVERSE",
+     "+12",
+     "-12",
+     "MUTE"
+    ]
+   },
+   {
+    "name": "Step 13",
+    "min": "THRU",
+    "max": "MUTE",
+    "def": "THRU",
+    "steps": 7,
+    "choices": [
+     "THRU",
+     "REPEAT",
+     "ROLL",
+     "REVERSE",
+     "+12",
+     "-12",
+     "MUTE"
+    ]
+   },
+   {
+    "name": "Step 14",
+    "min": "THRU",
+    "max": "MUTE",
+    "def": "THRU",
+    "steps": 7,
+    "choices": [
+     "THRU",
+     "REPEAT",
+     "ROLL",
+     "REVERSE",
+     "+12",
+     "-12",
+     "MUTE"
+    ]
+   },
+   {
+    "name": "Step 15",
+    "min": "THRU",
+    "max": "MUTE",
+    "def": "THRU",
+    "steps": 7,
+    "choices": [
+     "THRU",
+     "REPEAT",
+     "ROLL",
+     "REVERSE",
+     "+12",
+     "-12",
+     "MUTE"
+    ]
+   },
+   {
+    "name": "Step 16",
+    "min": "THRU",
+    "max": "MUTE",
+    "def": "THRU",
+    "steps": 7,
+    "choices": [
+     "THRU",
+     "REPEAT",
+     "ROLL",
+     "REVERSE",
+     "+12",
+     "-12",
+     "MUTE"
+    ]
+   },
+   {
+    "name": "Slice Size",
+    "min": "1/4",
+    "max": "1/64",
+    "def": "1/16",
+    "steps": 5,
+    "choices": [
+     "1/4",
+     "1/8",
+     "1/16",
+     "1/32",
+     "1/64"
+    ]
+   },
+   {
+    "name": "Rise",
+    "min": "-12.0 st",
+    "max": "+12.0 st",
+    "def": "0.0 st",
+    "steps": 2147483647
+   },
+   {
+    "name": "Decay",
+    "min": "0 %",
+    "max": "100 %",
+    "def": "100 %",
+    "steps": 2147483647
+   },
+   {
+    "name": "Chance",
+    "min": "0 %",
+    "max": "100 %",
+    "def": "100 %",
+    "steps": 2147483647
+   },
+   {
+    "name": "Pitch",
+    "min": "-12.0 st",
+    "max": "+12.0 st",
+    "def": "0.0 st",
+    "steps": 2147483647
+   },
+   {
+    "name": "Snap To Syllable",
+    "min": "Off",
+    "max": "On",
+    "def": "On",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Drum Band",
+    "min": "Kick",
+    "max": "All",
+    "def": "Kick",
+    "steps": 3,
+    "choices": [
+     "Kick",
+     "Snare",
+     "All"
+    ]
+   },
+   {
+    "name": "Sensitivity",
+    "min": "-60.0 dB",
+    "max": "0.0 dB",
+    "def": "-30.0 dB",
+    "steps": 2147483647
+   },
+   {
+    "name": "Hit Length",
+    "min": "1/32",
+    "max": "1/2",
+    "def": "1/8",
+    "steps": 5,
+    "choices": [
+     "1/32",
+     "1/16",
+     "1/8",
+     "1/4",
+     "1/2"
+    ]
+   },
+   {
+    "name": "Dirt",
+    "min": "Warm",
+    "max": "Crush",
+    "def": "Warm",
+    "steps": 3,
+    "choices": [
+     "Warm",
+     "Fuzz",
+     "Crush"
+    ]
+   },
+   {
+    "name": "Drive",
+    "min": "0.0 dB",
+    "max": "40.0 dB",
+    "def": "0.0 dB",
+    "steps": 2147483647
+   },
+   {
+    "name": "Drum Drive",
+    "min": "0.0 dB",
+    "max": "24.0 dB",
+    "def": "0.0 dB",
+    "steps": 2147483647
+   },
+   {
+    "name": "Filter",
+    "min": "Off",
+    "max": "Band-pass",
+    "def": "Off",
+    "steps": 4,
+    "choices": [
+     "Off",
+     "Low-pass",
+     "High-pass",
+     "Band-pass"
+    ]
+   },
+   {
+    "name": "Cutoff",
+    "min": "40 Hz",
+    "max": "18.0 kHz",
+    "def": "1000 Hz",
+    "steps": 2147483647
+   },
+   {
+    "name": "Resonance",
+    "min": "0.50",
+    "max": "10.00",
+    "def": "0.70",
+    "steps": 2147483647
+   },
+   {
+    "name": "Drum Filter Mod",
+    "min": "-100 %",
+    "max": "100 %",
+    "def": "0 %",
+    "steps": 2147483647
+   },
+   {
+    "name": "Pump",
+    "min": "0.0 dB",
+    "max": "24.0 dB",
+    "def": "0.0 dB",
+    "steps": 2147483647
+   },
+   {
+    "name": "Pump Release",
+    "min": "20 ms",
+    "max": "1.00 s",
+    "def": "150 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "Delay Time",
+    "min": "1/16",
+    "max": "1/2",
+    "def": "1/8.",
+    "steps": 6,
+    "choices": [
+     "1/16",
+     "1/8",
+     "1/8.",
+     "1/4",
+     "1/4.",
+     "1/2"
+    ]
+   },
+   {
+    "name": "Feedback",
+    "min": "0 %",
+    "max": "90 %",
+    "def": "35 %",
+    "steps": 2147483647
+   },
+   {
+    "name": "Echo",
+    "min": "0 %",
+    "max": "100 %",
+    "def": "0 %",
+    "steps": 2147483647
+   },
+   {
+    "name": "Reverb Size",
+    "min": "0 %",
+    "max": "100 %",
+    "def": "50 %",
+    "steps": 2147483647
+   },
+   {
+    "name": "Reverb",
+    "min": "0 %",
+    "max": "100 %",
+    "def": "0 %",
+    "steps": 2147483647
+   },
+   {
+    "name": "Mix",
+    "min": "0 %",
+    "max": "100 %",
+    "def": "100 %",
+    "steps": 2147483647
+   },
+   {
+    "name": "Output",
+    "min": "-24.0 dB",
+    "max": "12.0 dB",
+    "def": "0.0 dB",
+    "steps": 2147483647
+   }
+  ],
+  "presets": [
+   "Init",
+   "Bégaiement de fin de mesure",
+   "Voix hachée sur les drums",
+   "Le kick découpe",
+   "Chipmunk rave",
+   "Téléphone sale",
+   "Rembobinage",
+   "Pluie de répétitions",
+   "Gate hachée",
+   "Distorsion qui respire",
+   "Voix au clavier (MIDI)"
+  ]
+ }
+}

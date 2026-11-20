@@ -7,5 +7,5 @@ window.SITE = {
   // Exemple : user "mon-pseudo", repo "load-and-play".
   github: { user: "alexlexlexlexlexlex", repo: "load-and-play" },
 
-  versions: { lp60: "1.0.0", modelplay: "1.0.0" },
+  versions: { lp60: "1.0.0", modelplay: "1.0.0", duckhunt: "1.0.0", chopchop: "1.0.0" },
 };
