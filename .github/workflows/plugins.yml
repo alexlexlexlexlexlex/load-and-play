@@ -1,4 +1,4 @@
-# Compile LP-60 et Model Play pour macOS, Windows et Linux (x64 et ARM64 / Raspberry Pi).
+# Compile LP-60, Model Play et Duck Hunt pour macOS, Windows et Linux (x64 et ARM64 / Raspberry Pi).
 # - À chaque envoi : vérifie que tout compile et que le son est bon (fichiers dans l'onglet Actions).
 # - Sur une étiquette de version (v1.0.0, v1.1.0…) : ajoute les zips à la Release du même nom,
 #   avec les noms qu'attendent les boutons de téléchargement du site.
@@ -10,7 +10,7 @@ on:
   push:
     branches: [main]
     tags: ["v*"]
-    paths: ["LP60/**", "MiniMoog/**", ".github/workflows/plugins.yml"]
+    paths: ["LP60/**", "MiniMoog/**", "DuckHunt/**", ".github/workflows/plugins.yml"]
   workflow_dispatch:
     inputs:
       release:
@@ -27,8 +27,10 @@ jobs:
       fail-fast: false
       matrix:
         synth:
-          - { name: LP-60, dir: LP60, target: LP60, option: LP60_INSTALL_PLUGINS, reference: "" }
-          - { name: Model-Play, dir: MiniMoog, target: ModelD, option: MODELD_INSTALL_PLUGINS, reference: "Tests/reference.f32" }
+          - { name: LP-60, dir: LP60, target: LP60, option: LP60_INSTALL_PLUGINS, test: "demo.wav", reference: "", skip: "" }
+          - { name: Model-Play, dir: MiniMoog, target: ModelD, option: MODELD_INSTALL_PLUGINS, test: "demo.wav", reference: "Tests/reference.f32", skip: "" }
+          # Duck Hunt est un effet : pas d'application autonome.
+          - { name: Duck-Hunt, dir: DuckHunt, target: DuckHunt, option: DUCKHUNT_INSTALL_PLUGINS, test: "", reference: "", skip: "Standalone" }
         platform:
           - { name: macOS, os: macos-latest, formats: "AU VST3 CLAP LV2 Standalone" }
           - { name: Windows, os: windows-2022, formats: "VST3 CLAP LV2 Standalone" }
@@ -66,7 +68,10 @@ jobs:
       - name: Compilation
         run: |
           targets="RenderTest"
-          for format in ${{ matrix.platform.formats }}; do targets="$targets ${{ matrix.synth.target }}_$format"; done
+          for format in ${{ matrix.platform.formats }}; do
+            [ "$format" = "${{ matrix.synth.skip }}" ] && continue
+            targets="$targets ${{ matrix.synth.target }}_$format"
+          done
           cmake --build build --config Release --parallel --target $targets
 
       # La comparaison échantillon par échantillon avec le son de référence ne vaut que
@@ -77,7 +82,7 @@ jobs:
           test=$(find build/RenderTest_artefacts -type f \( -name RenderTest -o -name RenderTest.exe \) | head -1)
           reference=""
           if [ "$RUNNER_OS" = "macOS" ]; then reference="${{ matrix.synth.reference }}"; fi
-          "$test" demo.wav $reference
+          "$test" ${{ matrix.synth.test }} $reference
 
       - name: Préparation du zip
         run: |
@@ -118,5 +123,6 @@ jobs:
           version="${GITHUB_REF_NAME#v}"
           git archive --format=zip --prefix="LP-60-$version-source/" -o "LP-60-$version-source.zip" HEAD:LP60
           git archive --format=zip --prefix="Model-Play-$version-source/" -o "Model-Play-$version-source.zip" HEAD:MiniMoog
+          git archive --format=zip --prefix="Duck-Hunt-$version-source/" -o "Duck-Hunt-$version-source.zip" HEAD:DuckHunt
           gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes "" || true
-          gh release upload "$GITHUB_REF_NAME" LP-60-$version-source.zip Model-Play-$version-source.zip --clobber
+          gh release upload "$GITHUB_REF_NAME" LP-60-$version-source.zip Model-Play-$version-source.zip Duck-Hunt-$version-source.zip --clobber

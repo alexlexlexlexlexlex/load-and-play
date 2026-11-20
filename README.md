@@ -1,7 +1,7 @@
 # Load & Play
 
-Deux synthés virtuels gratuits et open source (AU, VST3, CLAP, LV2 et application
-autonome, pour macOS, Windows et Linux), et le site qui les présente.
+Deux synthés virtuels et un effet, gratuits et open source (AU, VST3, CLAP, LV2,
+pour macOS, Windows et Linux), et le site qui les présente.
 
 **Site : https://alexlexlexlexlexlex.github.io/load-and-play/** — on peut y jouer les
 deux instruments dans le navigateur et télécharger les plugins.
@@ -10,6 +10,7 @@ deux instruments dans le navigateur et télécharger les plugins.
 |---|---|
 | `LP60/` | **LP-60**, inspiré du Juno-60 et calé sur un Roland JU-06A : code source, tests, outils de mesure et de comparaison (`Tools/`) |
 | `MiniMoog/` | **Model Play**, inspiré du Minimoog : code source et tests |
+| `DuckHunt/` | **Duck Hunt**, effet de ducking par sidechain, MIDI ou tempo, en pleine bande, 3 bandes ou spectral |
 | `Site web/` | Le site (HTML, CSS, JavaScript), mis en ligne automatiquement sur GitHub Pages |
 | `.github/workflows/` | Compilation des plugins sur les machines de GitHub, mise en ligne du site |
 
@@ -22,7 +23,7 @@ Il faut CMake et Ninja (`pip3 install cmake ninja`) et un compilateur C++
 (Command Line Tools d'Apple sur Mac).
 
 ```bash
-cd LP60        # ou MiniMoog
+cd LP60        # ou MiniMoog, DuckHunt
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 ```
