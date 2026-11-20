@@ -6,6 +6,7 @@
 #include "SessionView.h"
 #include "TransportControls.h"
 #include "NoteEditor.h"
+#include "ChannelEditor.h"
 
 #include <juce_audio_utils/juce_audio_utils.h>
 
@@ -64,6 +65,8 @@ private:
     bool writeTo (const juce::File& file);
     void openPluginWindow (int track);
     void openEditor (int track, int scene);
+    void openChannel (int track);              // -1 : master
+    void openInsertWindow (int target, int slot);
     void closeEditor();
     void closePluginWindow (juce::AudioPluginInstance* plugin);
     void showScanner();
@@ -79,6 +82,7 @@ private:
 
     TransportButton playButton { TransportButton::Icon::play }, stopButton { TransportButton::Icon::stop };
     TempoControl tempo;
+    juce::TextButton linkButton { "Link" };
     juce::Label quantizeLabel, recordLabel;
     juce::ComboBox quantize, recordLength;
     juce::Label position, apcStatus;
@@ -93,6 +97,7 @@ private:
     juce::OwnedArray<PluginWindow> pluginWindows;
     std::unique_ptr<juce::DocumentWindow> scannerWindow;
     std::unique_ptr<juce::DocumentWindow> editorWindow;
+    juce::OwnedArray<juce::DocumentWindow> channelWindows;
     NoteEditor* editor = nullptr;
     std::unique_ptr<juce::DocumentWindow> settingsWindow;
 

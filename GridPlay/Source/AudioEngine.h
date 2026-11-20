@@ -10,6 +10,8 @@
 
 #include <map>
 
+#include <ableton/Link.hpp>
+
 namespace gridplay
 {
 class AudioEngine : public juce::AudioIODeviceCallback,
@@ -67,6 +69,21 @@ public:
     juce::AudioPluginInstance* getPlugin (int track);
     void storePluginStates();       // avant la sauvegarde
 
+    //==========================================================================
+    // Inserts d'effets d'une voie (piste : son index ; master : -1), jusqu'à 8.
+    static constexpr int masterTarget = -1;
+    void addInsert (int target, int slot, const juce::PluginDescription& description, juce::MemoryBlock state = {}, bool userChange = true);
+    void removeInsert (int target, int slot);
+    void moveInsert (int target, int from, int to);
+    juce::AudioPluginInstance* getInsert (int target, int slot);
+
+    // Retour audio des synthés externes : noms des entrées de la carte son.
+    juce::StringArray getAudioInputNames() const;
+    void ensureAudioInputs (int channelsNeeded);
+
+    // Niveaux des vu-mètres (crêtes qui retombent) : un par piste, puis le master.
+    std::vector<float> getMeters() const;
+
     // Appelé avant qu'un instrument disparaisse (pour fermer sa fenêtre).
     std::function<void (juce::AudioPluginInstance*)> onPluginRemoving;
     std::function<void (const juce::String& message)> onError;
@@ -85,6 +102,16 @@ public:
     void setController (const juce::String& inputIdentifier, std::function<void (const juce::MidiMessage&)> handler);
 
     double getSampleRate() const { return sampleRate; }
+
+    //==========================================================================
+    // Ableton Link : tempo et mesure partagés avec Serato DJ, Ableton Live, Traktor...
+    // (sur cet ordinateur ou le réseau local). Le tempo se règle alors pour tout le monde.
+    void setLinkEnabled (bool enabled);
+    bool isLinkEnabled() const;
+    int getLinkPeers() const;
+    void setTempo (double bpm);
+    // Pour les tests : phase de Grid Play et phase de Link dans la mesure, au même instant.
+    std::pair<double, double> getLinkPhases();
 
     // Crête de la sortie depuis la dernière lecture (pour un futur vu-mètre, et les tests).
     float takeOutputPeak() { return outputPeak.exchange (0.0f); }
@@ -110,13 +137,30 @@ private:
         juce::MidiOutput* port = nullptr;
         int channel = 1;
         int lastVolumeCC = -1;
+        EqProcessor eq;
+        std::vector<std::unique_ptr<juce::AudioPluginInstance>> inserts;   // alignés sur Track::inserts
+        float peak = 0.0f;
     };
+
+    std::vector<InsertSlot>* modelInserts (int target);
+    std::vector<std::unique_ptr<juce::AudioPluginInstance>>* instanceInserts (int target);
+    void runInsert (juce::AudioPluginInstance& plugin, juce::AudioBuffer<float>& audio, int numSamples);
+    void prepareInstance (juce::AudioPluginInstance& plugin);
 
     juce::CriticalSection lock;
     Session session;
     std::vector<std::unique_ptr<TrackOutput>> outputs;   // une par piste, sous le verrou
+    EqProcessor masterEqProcessor;
+    std::vector<std::unique_ptr<juce::AudioPluginInstance>> masterInsertInstances;
+    juce::AudioBuffer<float> trackBuffer, masterBuffer;
+    juce::MidiBuffer emptyMidi;
+    float masterPeak = 0.0f;
     std::atomic<int> changeCount { 0 };
     std::atomic<float> outputPeak { 0.0f };
+    std::unique_ptr<ableton::Link> link;
+    double outputLatencyMicros = 0.0;
+    bool linkWasPlaying = false;
+    void syncToLink (int numSamples);
 
     std::map<juce::String, std::unique_ptr<juce::MidiOutput>> openPorts;
     std::unique_ptr<juce::MidiOutput> virtualPort;

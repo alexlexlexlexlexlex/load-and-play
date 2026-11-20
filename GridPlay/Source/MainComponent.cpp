@@ -77,7 +77,19 @@ MainComponent::MainComponent() : session (engine)
     playButton.onClick = [this] { engine.perform ([] (Session& s) { s.play(); }); };
     stopButton.onClick = [this] { engine.perform ([] (Session& s) { s.stop(); }); };
 
-    tempo.onChange = [this] (double v) { engine.edit ([v] (Session& s) { s.song.tempo = v; }); };
+    tempo.onChange = [this] (double v) { engine.setTempo (v); };
+
+    // Ableton Link : bouton allumé = synchro avec Serato, Ableton Live... (le chiffre : autres participants).
+    linkButton.setClickingTogglesState (false);
+    linkButton.setColour (juce::TextButton::buttonOnColourId, theme::accent);
+    linkButton.setTooltip (juce::String::fromUTF8 ("Ableton Link : tempo et mesure synchronisés avec Serato DJ, Ableton Live, Traktor… "
+                                                   "sur cet ordinateur ou le réseau local. Dans Serato, activer Link : le bouton Sync devient « LINK »."));
+    linkButton.onClick = [this]
+    {
+        engine.setLinkEnabled (! engine.isLinkEnabled());
+        properties.getUserSettings()->setValue ("link", engine.isLinkEnabled());
+        timerCallback();
+    };
 
     quantizeLabel.setText ("LANCEMENT", juce::dontSendNotification);
     recordLabel.setText ("ENREGISTREMENT", juce::dontSendNotification);
@@ -119,7 +131,9 @@ MainComponent::MainComponent() : session (engine)
     pluginsButton.onClick = [this] { toggleWindow (scannerWindow, [this] { showScanner(); }); };
     settingsButton.onClick = [this] { toggleWindow (settingsWindow, [this] { showAudioSettings(); }); };
 
-    for (auto* c : std::initializer_list<juce::Component*> { &playButton, &stopButton, &tempo, &quantizeLabel, &quantize,
+    engine.setLinkEnabled (properties.getUserSettings()->getBoolValue ("link", false));
+
+    for (auto* c : std::initializer_list<juce::Component*> { &playButton, &stopButton, &tempo, &linkButton, &quantizeLabel, &quantize,
                                                              &recordLabel, &recordLength, &position, &apcStatus,
                                                              &pluginsButton, &settingsButton, &session })
         addAndMakeVisible (c);
@@ -127,6 +141,7 @@ MainComponent::MainComponent() : session (engine)
     session.onOpenPlugin = [this] (int t) { openPluginWindow (t); };
     session.onScanPlugins = [this] { showScanner(); };
     session.onEditClip = [this] (int t, int s) { openEditor (t, s); };
+    session.onOpenChannel = [this] (int t) { openChannel (t); };
 
     // --- Commandes et raccourcis ---
     commands.registerAllCommandsForTarget (this);
@@ -146,6 +161,7 @@ MainComponent::~MainComponent()
     saveSettings();
     engine.knownPlugins.removeChangeListener (this);
     pluginWindows.clear();
+    channelWindows.clear();
     closeEditor();
     scannerWindow.reset();
     settingsWindow.reset();
@@ -197,12 +213,14 @@ void MainComponent::resized()
     stopButton.setBounds (bar.removeFromLeft (36));
     bar.removeFromLeft (14);
     tempo.setBounds (bar.removeFromLeft (156));
-    bar.removeFromLeft (10);
+    bar.removeFromLeft (4);
+    linkButton.setBounds (bar.removeFromLeft (62));
+    bar.removeFromLeft (8);
     position.setBounds (bar.removeFromLeft (86));
     bar.removeFromLeft (4);
-    quantizeLabel.setBounds (bar.removeFromLeft (80));
-    quantize.setBounds (bar.removeFromLeft (96));
-    recordLabel.setBounds (bar.removeFromLeft (112));
+    quantizeLabel.setBounds (bar.removeFromLeft (74));
+    quantize.setBounds (bar.removeFromLeft (92));
+    recordLabel.setBounds (bar.removeFromLeft (104));
     recordLength.setBounds (bar.removeFromLeft (96));
     settingsButton.setBounds (bar.removeFromRight (104));
     bar.removeFromRight (6);
@@ -226,6 +244,10 @@ void MainComponent::timerCallback()
     struct SongSettings { double tempo, quantize; int recordBars; };
     const auto s = engine.read ([] (const Session& se) { return SongSettings { se.song.tempo, se.song.quantize, se.song.recordBars }; });
     tempo.setTempo (s.tempo);
+    const bool linked = engine.isLinkEnabled();
+    const int peers = engine.getLinkPeers();
+    linkButton.setToggleState (linked, juce::dontSendNotification);
+    linkButton.setButtonText (linked && peers > 0 ? juce::String::fromUTF8 ("Link · ") + juce::String (peers) : juce::String ("Link"));
     pluginsButton.setToggleState (scannerWindow != nullptr, juce::dontSendNotification);
     settingsButton.setToggleState (settingsWindow != nullptr, juce::dontSendNotification);
     for (int i = 0; i < 8; ++i)
@@ -360,7 +382,7 @@ void MainComponent::snapshot (const juce::File& png, std::function<void()> done)
             juce::PluginDirectoryScanner scanner (list, *format, juce::FileSearchPath (scanFolder), true, {}, false);
             juce::String name;
             while (scanner.scanNextFile (true, name)) {}
-            std::cerr << format->getName().toRawUTF8() << " : " << list.getNumTypes() << " instruments trouvés" << std::endl;
+            std::cerr << format->getName().toRawUTF8() << " : " << list.getNumTypes() << juce::String::fromUTF8 (" instruments trouvés") << std::endl;
         }
 
     // GRIDPLAY_TEST_PLUGIN=<chemin d'un .vst3> : charge cet instrument sur la piste 1.
@@ -374,7 +396,30 @@ void MainComponent::snapshot (const juce::File& png, std::function<void()> done)
         if (! found.isEmpty())
             engine.setTrackPlugin (0, *found[0]);
     }
+    // GRIDPLAY_TEST_LINK=1 : active Ableton Link et affiche tempo, participants et phases.
+    const bool testLink = juce::SystemStats::getEnvironmentVariable ("GRIDPLAY_TEST_LINK", {}).isNotEmpty();
+    if (testLink)
+        engine.setLinkEnabled (true);
+
     engine.perform ([] (Session& s) { s.launchScene (0); });
+
+    // GRIDPLAY_TEST_CHANNEL=piste : ouvre ses réglages de voie (image « -voie.png ») ;
+    // GRIDPLAY_TEST_INSERT=<chemin d'un .vst3> : met cet effet en premier insert de cette piste.
+    const auto channelTrack = juce::SystemStats::getEnvironmentVariable ("GRIDPLAY_TEST_CHANNEL", {});
+    if (channelTrack.isNotEmpty())
+    {
+        const auto insertPath = juce::SystemStats::getEnvironmentVariable ("GRIDPLAY_TEST_INSERT", {});
+        if (insertPath.isNotEmpty())
+        {
+            juce::OwnedArray<juce::PluginDescription> found;
+            for (auto* format : engine.formatManager.getFormats())
+                if (format->fileMightContainThisPluginType (insertPath))
+                    format->findAllTypesForFile (found, insertPath);
+            if (! found.isEmpty())
+                engine.addInsert (channelTrack.getIntValue(), 0, *found[0]);
+        }
+        openChannel (channelTrack.getIntValue());
+    }
 
     // GRIDPLAY_TEST_CLIP=piste,scène : ouvre l'éditeur de notes sur ce clip et en fait aussi une image.
     const auto editTarget = juce::StringArray::fromTokens (juce::SystemStats::getEnvironmentVariable ("GRIDPLAY_TEST_CLIP", {}), ",", {});
@@ -387,9 +432,18 @@ void MainComponent::snapshot (const juce::File& png, std::function<void()> done)
     {
         session.selectCell (1, 2);
         timerCallback();
+        if (engine.isLinkEnabled() && juce::SystemStats::getEnvironmentVariable ("GRIDPLAY_TEST_LINK", {}).isNotEmpty())
+            for (int i = 0; i < 5; ++i)
+            {
+                const auto phases = engine.getLinkPhases();
+                std::cerr << "Link : " << engine.getLinkPeers() << " participant(s), tempo "
+                          << engine.read ([] (const Session& s) { return s.song.tempo; })
+                          << ", phase Grid Play " << phases.first << ", phase Link " << phases.second << std::endl;
+                juce::Thread::sleep (150);
+            }
         if (auto* plugin = engine.getPlugin (0); plugin != nullptr && juce::SystemStats::getEnvironmentVariable ("GRIDPLAY_TEST_PLUGIN", {}).isNotEmpty())
             std::cerr << "Instrument de la piste 1 : " << plugin->getName().toRawUTF8()
-                      << ", crête de sortie " << engine.takeOutputPeak() << std::endl;
+                      << juce::String::fromUTF8 (", crête de sortie ") << engine.takeOutputPeak() << juce::String::fromUTF8 (", vu-mètre de la piste ") << engine.getMeters().front() << std::endl;
         if (editor != nullptr)
         {
             auto editorImage = editor->createComponentSnapshot (editor->getLocalBounds(), true, 2.0f);
@@ -398,6 +452,15 @@ void MainComponent::snapshot (const juce::File& png, std::function<void()> done)
             juce::FileOutputStream editorOut (file);
             juce::PNGImageFormat().writeImageToStream (editorImage, editorOut);
         }
+        for (auto* w : channelWindows)
+            if (auto* content = w->getContentComponent())
+            {
+                auto channelImage = content->createComponentSnapshot (content->getLocalBounds(), true, 2.0f);
+                const auto file = png.getSiblingFile (png.getFileNameWithoutExtension() + "-voie.png");
+                file.deleteFile();
+                juce::FileOutputStream channelOut (file);
+                juce::PNGImageFormat().writeImageToStream (channelImage, channelOut);
+            }
         auto image = createComponentSnapshot (getLocalBounds(), true, 2.0f);
         png.deleteFile();
         juce::FileOutputStream out (png);
@@ -466,6 +529,61 @@ void MainComponent::openEditor (int track, int scene)
     editor = content;
     editorWindow = std::move (window);
     editor->grabKeyboardFocus();
+}
+
+void MainComponent::openChannel (int track)
+{
+    const int id = track < 0 ? ChannelEditor::masterId
+                             : engine.read ([track] (const Session& s) { return juce::isPositiveAndBelow (track, s.song.numTracks()) ? s.song.tracks[(size_t) track].id : -2; });
+    if (id == -2)
+        return;
+    for (auto* w : channelWindows)
+        if (auto* channel = dynamic_cast<ChannelEditor*> (w->getContentComponent()); channel != nullptr && channel->getTrackId() == id)
+        {
+            channelWindows.removeObject (w);   // second clic sur « e » : on referme
+            return;
+        }
+
+    struct ChannelWindow : public juce::DocumentWindow
+    {
+        ChannelWindow (MainComponent& o) : juce::DocumentWindow ("Voie", theme::background, closeButton), owner (o) {}
+        void closeButtonPressed() override
+        {
+            juce::MessageManager::callAsync ([&o = owner, self = this] { o.channelWindows.removeObject (self); });
+        }
+        MainComponent& owner;
+    };
+
+    auto* window = new ChannelWindow (*this);
+    auto* content = new ChannelEditor (engine, id);
+    content->onOpenInsert = [this] (int target, int slot) { openInsertWindow (target, slot); };
+    content->onScanPlugins = [this] { showScanner(); };
+    content->onGone = [this, window] { juce::MessageManager::callAsync ([this, window] { channelWindows.removeObject (window); }); };
+    window->setContentOwned (content, true);
+    window->setName (juce::String::fromUTF8 ("Réglages de voie — ") + (id == ChannelEditor::masterId ? juce::String ("Master") : session.getSnapshot().tracks[(size_t) track].name));
+    window->setUsingNativeTitleBar (true);
+    window->setResizable (true, false);
+    window->setResizeLimits (820, 460, 2000, 1200);
+    window->centreWithSize (window->getWidth(), window->getHeight());
+    window->setVisible (true);
+    window->addKeyListener (commands.getKeyMappings());
+    channelWindows.add (window);
+}
+
+void MainComponent::openInsertWindow (int target, int slot)
+{
+    auto* plugin = engine.getInsert (target, slot);
+    if (plugin == nullptr)
+        return;
+    for (auto* w : pluginWindows)
+        if (&w->plugin == plugin)
+        {
+            w->toFront (true);
+            return;
+        }
+    const auto owner = target < 0 ? juce::String ("Master") : session.getSnapshot().tracks[(size_t) target].name;
+    pluginWindows.add (new PluginWindow (*plugin, owner + juce::String::fromUTF8 (" — ") + plugin->getName(),
+                                         [this] (PluginWindow* w) { pluginWindows.removeObject (w); }));
 }
 
 void MainComponent::closeEditor()

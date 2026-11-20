@@ -45,6 +45,11 @@ public:
     bool isPlaying() const          { return playing; }
     double getBeat() const          { return beat; }
 
+    // Synchro externe (Ableton Link) : saut de position, et vitesse légèrement corrigée
+    // pour rattraper un petit écart de phase sans à-coup.
+    void setBeat (double newBeat);
+    void setRateScale (double scale) { rateScale = scale; }
+
     //==========================================================================
     // État, pour l'écran et les LED de l'APC mini.
     SlotState getSlotState (int track, int scene) const;
@@ -106,6 +111,7 @@ private:
     double sampleRate = 44100.0;
     bool playing = false;
     double beat = 0.0;
+    double rateScale = 1.0;
 
     double boundaryAfter (double from) const;
     void queue (int track, Queued what, int slot);

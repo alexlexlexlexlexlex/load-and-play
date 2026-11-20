@@ -13,6 +13,9 @@ namespace
 {
 int failures = 0;
 
+void check (bool ok, const juce::String& what);
+void check (bool ok, const char* what) { check (ok, juce::String::fromUTF8 (what)); }
+
 void check (bool ok, const juce::String& what)
 {
     std::cout << (ok ? "  ok    " : "  ÉCHEC ") << what.toRawUTF8() << std::endl;
@@ -428,6 +431,79 @@ int main()
         check (! mutedPlayed && r.ons (0).size() == 1, "note en sourdine : pas jouée");
         auto xml = clipToXml (*clip);
         check (clipFromXml (*xml)->notes[1].muted, "la sourdine est sauvegardée");
+    }
+
+
+    //--------------------------------------------------------------------------
+    std::cout << "Égaliseur de voie" << std::endl;
+    {
+        ChannelEq flat;
+        check (flat.isNeutral() && std::abs (eqResponseDb (flat, 50.0, rate)) < 0.01f && std::abs (eqResponseDb (flat, 9000.0, rate)) < 0.01f,
+               "réglage par défaut : neutre (rien n'est calculé)");
+
+        ChannelEq bell;
+        bell.bands[1] = { true, EqType::peak, 1000.0f, 6.0f, 1.0f };
+        check (std::abs (eqResponseDb (bell, 1000.0, rate) - 6.0f) < 0.05f && std::abs (eqResponseDb (bell, 40.0, rate)) < 0.3f,
+               "cloche +6 dB à 1 kHz");
+
+        ChannelEq cut;
+        cut.bands[0] = { true, EqType::lowCut, 100.0f, 0.0f, 0.7f };
+        check (std::abs (eqResponseDb (cut, 100.0, rate) + 3.01f) < 0.2f && std::abs (eqResponseDb (cut, 25.0, rate) + 48.2f) < 1.0f
+                  && std::abs (eqResponseDb (cut, 2000.0, rate)) < 0.1f, "coupe-bas 24 dB/octave : -3 dB à 100 Hz, -48 dB deux octaves plus bas");
+
+        ChannelEq shelf;
+        shelf.bands[3] = { true, EqType::highShelf, 4000.0f, -9.0f, 0.7f };
+        check (std::abs (eqResponseDb (shelf, 18000.0, rate) + 9.0f) < 0.5f && std::abs (eqResponseDb (shelf, 200.0, rate)) < 0.2f, "plateau aigu -9 dB");
+
+        // Un sinus de 1 kHz à travers la cloche ressort deux fois plus fort (+6 dB).
+        EqProcessor processor;
+        processor.prepare (rate);
+        juce::AudioBuffer<float> buffer (2, 4800);
+        double inRms = 0.0, outRms = 0.0;
+        for (int b = 0; b < 10; ++b)
+        {
+            for (int i = 0; i < 4800; ++i)
+            {
+                const float x = 0.25f * (float) std::sin (juce::MathConstants<double>::twoPi * 1000.0 * (b * 4800 + i) / rate);
+                buffer.setSample (0, i, x);
+                buffer.setSample (1, i, x);
+                if (b >= 5) inRms += x * x;
+            }
+            processor.process (buffer, 4800, bell);
+            if (b >= 5)
+                for (int i = 0; i < 4800; ++i) outRms += buffer.getSample (0, i) * buffer.getSample (0, i);
+        }
+        const double gainDb = 10.0 * std::log10 (outRms / inRms);
+        check (std::abs (gainDb - 6.0) < 0.1, "traitement : +" + juce::String (gainDb, 2) + " dB mesurés sur un sinus de 1 kHz");
+
+
+        // Inserts : place fixe, déplacement façon Cubase.
+        std::vector<InsertSlot> chain { { "Comp", "x", {}, false }, { "EQ", "x", {}, false }, { "Reverb", "x", {}, false } };
+        moveSlot (chain, 0, 2);
+        check (chain[0].name == "EQ" && chain[1].name == "Reverb" && chain[2].name == "Comp", "déplacer la compression après la reverb : l'ordre change");
+        std::vector<InsertSlot> holes;
+        holes.resize (5);
+        holes[4] = { "Delay", "x", {}, false };
+        trimEmptyInserts (holes);
+        check (holes.size() == 5 && holes[0].isEmpty() && ! holes[4].isEmpty(), "un effet seul en case 5 garde sa place");
+        auto xmlHoles = std::make_unique<juce::XmlElement> ("T");
+        insertsToXml (holes, *xmlHoles);
+        std::vector<InsertSlot> backHoles;
+        insertsFromXml (*xmlHoles, backHoles);
+        check (backHoles.size() == 5 && backHoles[4].name == "Delay" && backHoles[0].isEmpty(), "la place des inserts se sauvegarde");
+
+        Song song = makeDefaultSong();
+        song.tracks[1].eq = bell;
+        song.tracks[1].pan = -0.5f;
+        song.tracks[1].audioInput = 2;
+        song.tracks[1].inserts.push_back ({ "Delay", "", {}, true });
+        song.masterEq = cut;
+        auto xml = songToXml (song);
+        Song back;
+        songFromXml (*xml, back);
+        check (back.tracks[1].eq == bell && std::abs (back.tracks[1].pan + 0.5f) < 1e-6f && back.tracks[1].audioInput == 2
+                  && back.tracks[1].inserts.size() == 1 && back.tracks[1].inserts[0].bypass && back.masterEq == cut,
+               "EQ, panoramique, retour audio, inserts et master se sauvegardent");
     }
 
     //--------------------------------------------------------------------------

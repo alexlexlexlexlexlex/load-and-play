@@ -27,9 +27,9 @@ juce::String NoteEditor::toolName (Tool t)
     {
         case Tool::select: return juce::String::fromUTF8 ("Sélection (1) : sélectionner, déplacer, changer la longueur");
         case Tool::split:  return "Ciseaux (3) : couper une note en deux";
-        case Tool::glue:   return "Colle (4) : joindre une note à la suivante de même hauteur";
+        case Tool::glue:   return juce::String::fromUTF8 ("Colle (4) : joindre une note à la suivante de même hauteur");
         case Tool::erase:  return "Gomme (5) : effacer des notes";
-        case Tool::zoom:   return "Zoom (6) : clic pour agrandir, Alt-clic pour réduire";
+        case Tool::zoom:   return juce::String::fromUTF8 ("Zoom (6) : clic pour agrandir, Alt-clic pour réduire");
         case Tool::mute:   return "Sourdine (7) : la note reste mais ne joue plus";
         case Tool::draw:   return "Crayon (8) : dessiner des notes (clic sur une note : l'effacer)";
     }
@@ -269,7 +269,7 @@ public:
         swing.setValue (o.quantizeSettings.swing * 100.0, juce::dontSendNotification);
         strength.setValue (o.quantizeSettings.strength * 100.0, juce::dontSendNotification);
         swing.setTooltip ("Retarde une note sur deux de la grille (groove)");
-        strength.setTooltip ("100 % : colle à la grille ; moins : rapproche seulement, le jeu reste humain");
+        strength.setTooltip (juce::String::fromUTF8 ("100 % : colle à la grille ; moins : rapproche seulement, le jeu reste humain"));
         swing.onValueChange = [this] { if (owner != nullptr) owner->quantizeSettings.swing = swing.getValue() / 100.0; };
         strength.onValueChange = [this] { if (owner != nullptr) owner->quantizeSettings.strength = strength.getValue() / 100.0; };
 
@@ -339,12 +339,12 @@ NoteEditor::NoteEditor (AudioEngine& e, ClipPtr c) : engine (e)
         lengthBox.addItem (notes::gridValues()[i].name, (int) i + 2);
     }
     lengthBox.addItem ("Quantif.", 1);
-    gridBox.setTooltip ("Quantification : sert au calage et à la touche Q (comme dans Cubase)");
-    lengthBox.setTooltip ("Longueur des notes dessinées au crayon");
+    gridBox.setTooltip (juce::String::fromUTF8 ("Quantification : sert au calage et à la touche Q (comme dans Cubase)"));
+    lengthBox.setTooltip (juce::String::fromUTF8 ("Longueur des notes dessinées au crayon"));
     gridBox.onChange = [this] { gridIndex = juce::jmax (0, gridBox.getSelectedId() - 1); repaint(); grabKeyboardFocus(); };
     lengthBox.onChange = [this] { lengthIndex = juce::jmax (0, lengthBox.getSelectedId() - 1); grabKeyboardFocus(); };
 
-    quantizeButton.setTooltip ("Quantifier les notes sélectionnées, ou toutes (Q)");
+    quantizeButton.setTooltip (juce::String::fromUTF8 ("Quantifier les notes sélectionnées, ou toutes (Q)"));
     quantizeButton.onClick = [this] { quantize(); grabKeyboardFocus(); };
     quantizeMore.setTooltip (juce::String::fromUTF8 ("Panneau de quantification : swing, force, fins de notes"));
     quantizeMore.onClick = [this] { showQuantizePanel(); };
@@ -353,8 +353,8 @@ NoteEditor::NoteEditor (AudioEngine& e, ClipPtr c) : engine (e)
     listenButton.setTooltip (juce::String::fromUTF8 ("Entendre les notes quand on les pose, les déplace ou clique le clavier"));
     listenButton.onClick = [this] { listen = ! listen; updateToolbar(); grabKeyboardFocus(); };
 
-    drumButton.setTooltip ("Drum map : les noms des sons de batterie (General MIDI) au lieu du clavier, notes en losanges. "
-                           "Se règle par piste.");
+    drumButton.setTooltip (juce::String::fromUTF8 ("Drum map : les noms des sons de batterie (General MIDI) au lieu du clavier, notes en losanges. "
+                                                   "Se règle par piste."));
     drumButton.onClick = [this]
     {
         const bool now = ! drumMode;
@@ -391,7 +391,7 @@ NoteEditor::NoteEditor (AudioEngine& e, ClipPtr c) : engine (e)
     velocityField->onStep = [this] (int d) { insertVelocity = juce::jlimit (1, 127, insertVelocity + d); updateToolbar(); };
 
     loopField = std::make_unique<InfoField>();
-    loopField->setTooltip ("Longueur de la boucle en mesures.temps (molette, ou glisser le triangle orange de la règle)");
+    loopField->setTooltip (juce::String::fromUTF8 ("Longueur de la boucle en mesures.temps (molette, ou glisser le triangle orange de la règle)"));
     loopField->onCommit = [this] (const juce::String& t)
     {
         const double beats = notes::parsePosition (t, true);

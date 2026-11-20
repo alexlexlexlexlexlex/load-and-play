@@ -160,6 +160,54 @@ public:
         };
 
         edit.onClick = [this] { if (owner.onOpenPlugin) owner.onOpenPlugin (index); };
+        channel.onClick = [this] { if (owner.onOpenChannel) owner.onOpenChannel (index); };
+        channel.setTooltip (juce::String::fromUTF8 ("Réglages de la voie : inserts d'effets, égaliseur, volume (comme le « e » de Cubase)"));
+        channel.setColour (juce::TextButton::buttonOnColourId, theme::accent);
+        addAndMakeVisible (channel);
+
+        // Retour audio : le son d'un synthé externe, par une entrée de la carte son.
+        audioReturn.setTooltip (juce::String::fromUTF8 ("Retour audio : l'entrée de la carte son où revient le son du synthé, "
+                                                        "pour le traiter sur cette piste (égaliseur, effets, volume)"));
+        audioReturn.onFill = [this] (LazyCombo& c)
+        {
+            c.clear (juce::dontSendNotification);
+            inputs = owner.engine.getAudioInputNames();
+            c.addItem ("Pas de retour audio", 1);
+            c.addSectionHeading (juce::String::fromUTF8 ("Stéréo"));
+            for (int i = 0; i + 1 < inputs.size(); i += 2)
+                c.addItem (juce::String::fromUTF8 ("Entrées ") + juce::String (i + 1) + "-" + juce::String (i + 2), 100 + i);
+            c.addSectionHeading ("Mono");
+            for (int i = 0; i < inputs.size(); ++i)
+                c.addItem (juce::String::fromUTF8 ("Entrée ") + juce::String (i + 1) + (inputs[i].isNotEmpty() ? "  (" + inputs[i] + ")" : juce::String()), 1000 + i);
+            if (inputs.isEmpty())
+                c.addItem (juce::String::fromUTF8 ("Aucune entrée : voir Audio / MIDI"), 2);
+        };
+        audioReturn.onChange = [this]
+        {
+            const int id = audioReturn.getSelectedId();
+            int first = -1;
+            bool stereo = true;
+            if (id >= 1000) { first = id - 1000; stereo = false; }
+            else if (id >= 100) first = id - 100;
+            else if (id != 1) return;
+            owner.engine.edit ([&] (Session& s) { auto& t = trackAt (s); t.audioInput = first; t.audioInputStereo = stereo; return 0; });
+            if (first >= 0)
+                owner.engine.ensureAudioInputs (first + (stereo ? 2 : 1));
+        };
+        addAndMakeVisible (audioReturn);
+
+        pan.setSliderStyle (juce::Slider::RotaryHorizontalVerticalDrag);
+        pan.setTextBoxStyle (juce::Slider::NoTextBox, false, 0, 0);
+        pan.setRange (-1.0, 1.0, 0.01);
+        pan.setDoubleClickReturnValue (true, 0.0);
+        pan.setRotaryParameters (juce::MathConstants<float>::pi * 1.2f, juce::MathConstants<float>::pi * 2.8f, true);
+        pan.setTooltip ("Panoramique (double-clic : au centre)");
+        pan.onValueChange = [this]
+        {
+            const float v = (float) pan.getValue();
+            owner.engine.edit ([&] (Session& s) { trackAt (s).pan = v; return 0; });
+        };
+        addAndMakeVisible (pan);
         arm.onClick = [this]
         {
             const bool exclusive = ! juce::ModifierKeys::currentModifiers.isCommandDown();
@@ -220,7 +268,21 @@ public:
         solo.setToggleState (t.solo, juce::dontSendNotification);
         if (! volume.isMouseButtonDown() && std::abs (volume.getValue() - t.volume) > 1.0e-4)
             volume.setValue (t.volume, juce::dontSendNotification);
+        if (! pan.isMouseButtonDown() && std::abs (pan.getValue() - t.pan) > 1.0e-4)
+            pan.setValue (t.pan, juce::dontSendNotification);
+        audioReturn.setVisible (t.outputType == OutputType::midiPort);
+        setText (audioReturn, t.audioInput < 0 ? juce::String ("Pas de retour audio")
+                            : t.audioInputStereo ? juce::String::fromUTF8 ("Entrées ") + juce::String (t.audioInput + 1) + "-" + juce::String (t.audioInput + 2)
+                                                 : juce::String::fromUTF8 ("Entrée ") + juce::String (t.audioInput + 1));
+        channel.setToggleState (t.inserts > 0 || t.eqActive, juce::dontSendNotification);
+        if (std::abs (t.meter - shownMeter) > 1.0e-4f)
+        {
+            shownMeter = t.meter;
+            repaint (meterBounds());
+        }
     }
+
+    juce::Rectangle<int> meterBounds() const { return { 5, getHeight() - 9, getWidth() - 10, 4 }; }
 
     void paint (juce::Graphics& g) override
     {
@@ -231,6 +293,15 @@ public:
         g.fillRoundedRectangle (r.withHeight (3.0f), 1.5f);
         theme::sectionTitle (g, juce::String::fromUTF8 ("ENTRÉE"), { 7, 5, 80, 14 });
         theme::sectionTitle (g, "SORTIE", { 7, 57, 80, 14 });
+
+        // Vu-mètre horizontal sous le volume.
+        const auto m = meterBounds().toFloat();
+        g.setColour (juce::Colour (0xff0b0b0b));
+        g.fillRoundedRectangle (m, 1.5f);
+        const float db = juce::Decibels::gainToDecibels (shownMeter, -60.0f);
+        const float level = juce::jlimit (0.0f, 1.0f, (db + 60.0f) / 66.0f);
+        g.setGradientFill (juce::ColourGradient (theme::play, m.getX(), 0.0f, juce::Colour (0xffff4a3d), m.getRight(), 0.0f, false));
+        g.fillRoundedRectangle (m.withWidth (m.getWidth() * level), 1.5f);
     }
 
     void resized() override
@@ -241,19 +312,24 @@ public:
         output.setBounds (5, 71, w, 20);
         outChannel.setBounds (5, 93, w, 18);
         edit.setBounds (5, 93, w, 18);
-        const int bw = (w - 8) / 3;
-        arm.setBounds (5, 117, bw, 20);
-        mute.setBounds (5 + bw + 4, 117, bw, 20);
-        solo.setBounds (5 + 2 * (bw + 4), 117, bw, 20);
-        volume.setBounds (3, 142, w + 4, 20);
+        audioReturn.setBounds (5, 115, w, 18);
+        const int bw = (w - 12) / 4;
+        arm.setBounds (5, 140, bw, 20);
+        mute.setBounds (5 + bw + 4, 140, bw, 20);
+        solo.setBounds (5 + 2 * (bw + 4), 140, bw, 20);
+        channel.setBounds (5 + 3 * (bw + 4), 140, bw, 20);
+        pan.setBounds (2, 166, 34, 34);
+        volume.setBounds (36, 172, w - 30, 22);
     }
 
     SessionView& owner;
     int index = 0;
-    LazyCombo input, inChannel, output, outChannel;
-    juce::TextButton edit { "Ouvrir" }, arm { juce::String::fromUTF8 ("●") }, mute { "M" }, solo { "S" };
+    LazyCombo input, inChannel, output, outChannel, audioReturn;
+    juce::TextButton edit { "Ouvrir" }, arm { juce::String::fromUTF8 ("●") }, mute { "M" }, solo { "S" }, channel { "e" };
+    juce::Slider pan;
+    float shownMeter = 0.0f;
     juce::Slider volume;
-    juce::StringArray inputNames, ports;
+    juce::StringArray inputNames, ports, inputs;
     juce::Array<juce::PluginDescription> instruments;
     bool refreshDisplay = false;
 };
@@ -279,13 +355,23 @@ public:
             const float v = (float) volume.getValue();
             owner.engine.edit ([&] (Session& s) { s.song.masterVolume = v; });
         };
-        volume.setTooltip (juce::String::fromUTF8 ("Volume général des instruments virtuels"));
+        volume.setTooltip (juce::String::fromUTF8 ("Volume général"));
+        channel.setButtonText ("e");
+        channel.setTooltip (juce::String::fromUTF8 ("Réglages du master : inserts d'effets et égaliseur"));
+        channel.setColour (juce::TextButton::buttonOnColourId, theme::accent);
+        channel.onClick = [this] { if (owner.onOpenChannel) owner.onOpenChannel (-1); };
+        addAndMakeVisible (channel);
     }
 
     void refresh()
     {
         if (! volume.isMouseButtonDown() && std::abs (volume.getValue() - owner.view.master) > 1.0e-4)
             volume.setValue (owner.view.master, juce::dontSendNotification);
+        if (std::abs (owner.view.masterMeter - shownMeter) > 1.0e-4f)
+        {
+            shownMeter = owner.view.masterMeter;
+            repaint (4, getHeight() - 9, getWidth() - 8, 4);
+        }
     }
 
     void paint (juce::Graphics& g) override
@@ -300,14 +386,26 @@ public:
         g.drawText ("Master", 10, 8, getWidth() - 20, 26, juce::Justification::left);
         g.setColour (theme::textDim);
         g.setFont (font (11.0f));
-        g.drawFittedText (juce::String::fromUTF8 ("Clic sur une case : lancer\nDouble-clic : nouveau clip, ou éditer\nGlisser un .mid : importer"),
-                          10, 40, getWidth() - 20, 70, juce::Justification::topLeft, 4);
+        g.drawFittedText (juce::String::fromUTF8 ("Clic sur une case : lancer\nDouble-clic : nouveau clip, ou éditer\nGlisser un .mid : importer\n« e » : effets et égaliseur"),
+                          10, 40, getWidth() - 20, 90, juce::Justification::topLeft, 5);
+        const auto m = juce::Rectangle<float> (4.0f, (float) getHeight() - 9.0f, (float) getWidth() - 8.0f, 4.0f);
+        g.setColour (juce::Colour (0xff0b0b0b));
+        g.fillRoundedRectangle (m, 1.5f);
+        const float level = juce::jlimit (0.0f, 1.0f, (juce::Decibels::gainToDecibels (shownMeter, -60.0f) + 60.0f) / 66.0f);
+        g.setGradientFill (juce::ColourGradient (theme::play, m.getX(), 0.0f, juce::Colour (0xffff4a3d), m.getRight(), 0.0f, false));
+        g.fillRoundedRectangle (m.withWidth (m.getWidth() * level), 1.5f);
     }
 
-    void resized() override { volume.setBounds (4, 142, getWidth() - 8, 20); }
+    void resized() override
+    {
+        channel.setBounds (getWidth() - 40, 10, 30, 22);
+        volume.setBounds (4, 172, getWidth() - 8, 22);
+    }
 
     SessionView& owner;
     juce::Slider volume;
+    juce::TextButton channel;
+    float shownMeter = 0.0f;
 };
 
 //==============================================================================
@@ -367,6 +465,11 @@ void SessionView::takeSnapshot()
             ti.pluginName = tr.pluginName;
             ti.outputChannel = tr.outputChannel;
             ti.volume = tr.volume;
+            ti.pan = tr.pan;
+            ti.audioInput = tr.audioInput;
+            ti.audioInputStereo = tr.audioInputStereo;
+            ti.inserts = (int) tr.inserts.size();
+            ti.eqActive = ! tr.eq.isNeutral();
             for (int sc = 0; sc < song.numScenes(); ++sc)
             {
                 auto& ci = view.cells[(size_t) (t * song.numScenes() + sc)];
@@ -390,6 +493,10 @@ void SessionView::takeSnapshot()
             view.scenes[(size_t) sc].active = s.isSceneActive (sc);
         }
     });
+    const auto meters = engine.getMeters();
+    for (size_t t = 0; t < view.tracks.size() && t + 1 < meters.size(); ++t)
+        view.tracks[t].meter = meters[t];
+    view.masterMeter = meters.empty() ? 0.0f : meters.back();
     selTrack = juce::jlimit (0, juce::jmax (0, (int) view.tracks.size() - 1), selTrack);
     selScene = juce::jlimit (0, juce::jmax (0, (int) view.scenes.size() - 1), selScene);
 }
@@ -458,8 +565,7 @@ void SessionView::timerCallback()
         updateScrollBars();
 
     const auto sig = signature();
-    if (sig != lastSignature)
-        updateStrips();
+    updateStrips();   // ne repeint que ce qui change (vu-mètres compris)
     // Pendant la lecture, les barres d'avancement et les clignotements bougent sans cesse.
     if (sig != lastSignature || view.playing)
         repaint (0, 0, getWidth(), getHeight() - mixerH - barT);

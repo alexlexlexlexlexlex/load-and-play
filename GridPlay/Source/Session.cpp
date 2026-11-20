@@ -142,6 +142,21 @@ void Session::setClipPosition (int track, double position)
     }
 }
 
+void Session::setBeat (double newBeat)
+{
+    const double delta = newBeat - beat;
+    beat = newBeat;
+    for (auto& rt : runtime)
+    {
+        for (auto& a : rt.active)
+            a.offBeat = -1.0;   // les notes en cours sont coupées
+        if (rt.queued != Queued::none && rt.queuedBeat >= 0.0)
+            rt.queuedBeat = rt.queuedOffset > 0.0 ? rt.queuedBeat + delta : -1.0;
+        if (rt.recording)
+            rt.recordStart += delta;
+    }
+}
+
 void Session::stopTrackNow (int track)
 {
     if (! juce::isPositiveAndBelow (track, song.numTracks()))
@@ -553,7 +568,7 @@ void Session::process (int numSamples, const std::vector<LiveEvent>& live, std::
 
     const double samplesPerBeat = sampleRate * 60.0 / song.tempo;
     const double b0 = beat;
-    const double b1 = playing ? b0 + numSamples / samplesPerBeat : b0;
+    const double b1 = playing ? b0 + numSamples / samplesPerBeat * rateScale : b0;
     const bool solo = anySolo();
 
     for (int t = 0; t < song.numTracks(); ++t)

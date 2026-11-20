@@ -3,6 +3,10 @@
 
 #include <juce_gui_basics/juce_gui_basics.h>
 
+#if __has_include (<BinaryData.h>)
+ #include <BinaryData.h>
+#endif
+
 namespace gridplay::theme
 {
 // Mêmes teintes que les plugins Load & Play : noir chaud, blanc cassé, bois, orange.
@@ -47,8 +51,23 @@ inline void woodCheek (juce::Graphics& g, juce::Rectangle<float> r)
 class LookAndFeel : public juce::LookAndFeel_V4
 {
 public:
+    // Source Sans 3 partout (sauf les textes en police à chasse fixe).
+    juce::Typeface::Ptr getTypefaceForFont (const juce::Font& f) override
+    {
+        if (f.getTypefaceName() != juce::Font::getDefaultSansSerifFontName() || regular == nullptr)
+            return juce::LookAndFeel_V4::getTypefaceForFont (f);
+        if (f.isItalic()) return italic;
+        if (f.isBold()) return bold;
+        return regular;
+    }
+
     LookAndFeel()
     {
+        regular = juce::Typeface::createSystemTypefaceFor (BinaryData::SourceSans3Regular_ttf, BinaryData::SourceSans3Regular_ttfSize);
+        bold = juce::Typeface::createSystemTypefaceFor (BinaryData::SourceSans3Bold_ttf, BinaryData::SourceSans3Bold_ttfSize);
+        italic = juce::Typeface::createSystemTypefaceFor (BinaryData::SourceSans3It_ttf, BinaryData::SourceSans3It_ttfSize);
+        if (bold == nullptr) bold = regular;
+        if (italic == nullptr) italic = regular;
         setColourScheme ({ panel, background, panelLight, textDim, text, accent, juce::Colours::black, panelLight, text });
         setColour (juce::ComboBox::backgroundColourId, panelLight);
         setColour (juce::ComboBox::outlineColourId, rule);
@@ -115,6 +134,66 @@ public:
         g.setColour (textDim);
         g.fillPath (arrow);
     }
+
+    // Potards des plugins Load & Play : jupe noire striée, chapeau alu, index blanc.
+    void drawRotarySlider (juce::Graphics& g, int x, int y, int width, int height, float sliderPos,
+                           float startAngle, float endAngle, juce::Slider& slider) override
+    {
+        const auto bounds = juce::Rectangle<int> (x, y, width, height).toFloat();
+        const auto centre = bounds.getCentre();
+        const float radius = juce::jmin (bounds.getWidth(), bounds.getHeight()) * 0.5f - 5.0f;
+
+        g.setColour (textDim);
+        for (int i = 0; i < 11; ++i)
+        {
+            const float angle = startAngle + (endAngle - startAngle) * (float) i / 10.0f;
+            g.drawLine ({ centre.getPointOnCircumference (radius + 1.5f, angle), centre.getPointOnCircumference (radius + 4.0f, angle) }, 1.0f);
+        }
+        g.setGradientFill (juce::ColourGradient (juce::Colour (0xff3a3a3a), centre.translated (-radius * 0.5f, -radius * 0.5f),
+                                                 juce::Colour (0xff050505), centre.translated (radius, radius), true));
+        g.fillEllipse (juce::Rectangle<float> (radius * 2.0f, radius * 2.0f).withCentre (centre));
+        g.setColour (juce::Colours::black);
+        for (int i = 0; i < 28; ++i)
+        {
+            const float angle = juce::MathConstants<float>::twoPi * (float) i / 28.0f;
+            g.drawLine ({ centre.getPointOnCircumference (radius * 0.8f, angle), centre.getPointOnCircumference (radius, angle) }, 1.0f);
+        }
+        const float cap = radius * 0.52f;
+        g.setGradientFill (juce::ColourGradient (juce::Colour (0xfff0f0f0), centre.translated (-cap, -cap),
+                                                 juce::Colour (0xff767676), centre.translated (cap, cap), false));
+        g.fillEllipse (juce::Rectangle<float> (cap * 2.0f, cap * 2.0f).withCentre (centre));
+        const float angle = startAngle + sliderPos * (endAngle - startAngle);
+        g.setColour (slider.isEnabled() ? text : textDim);
+        g.drawLine ({ centre.getPointOnCircumference (cap * 1.05f, angle), centre.getPointOnCircumference (radius * 0.95f, angle) }, 2.0f);
+    }
+
+    // Fader vertical : rainure sombre et chapeau gris, comme une table de mixage.
+    void drawLinearSlider (juce::Graphics& g, int x, int y, int width, int height, float sliderPos, float minPos, float maxPos,
+                           juce::Slider::SliderStyle style, juce::Slider& slider) override
+    {
+        if (style != juce::Slider::LinearVertical)
+        {
+            juce::LookAndFeel_V4::drawLinearSlider (g, x, y, width, height, sliderPos, minPos, maxPos, style, slider);
+            return;
+        }
+        const auto r = juce::Rectangle<int> (x, y, width, height).toFloat();
+        g.setColour (juce::Colour (0xff0b0b0b));
+        g.fillRoundedRectangle (r.withSizeKeepingCentre (5.0f, r.getHeight()), 2.5f);
+        g.setColour (textDim.withAlpha (0.6f));
+        for (int i = 0; i <= 10; ++i)
+        {
+            const float ty = r.getY() + r.getHeight() * (float) i / 10.0f;
+            g.fillRect (r.getCentreX() - 14.0f, ty, 6.0f, 1.0f);
+            g.fillRect (r.getCentreX() + 8.0f, ty, 6.0f, 1.0f);
+        }
+        const auto capArea = juce::Rectangle<float> (r.getCentreX() - 13.0f, sliderPos - 9.0f, 26.0f, 18.0f);
+        g.setGradientFill (juce::ColourGradient (juce::Colour (0xffdcdad2), 0.0f, capArea.getY(), juce::Colour (0xff6c6a64), 0.0f, capArea.getBottom(), false));
+        g.fillRoundedRectangle (capArea, 2.5f);
+        g.setColour (juce::Colours::black);
+        g.fillRect (capArea.getX() + 2.0f, capArea.getCentreY() - 0.75f, capArea.getWidth() - 4.0f, 1.5f);
+    }
+
+    juce::Typeface::Ptr regular, bold, italic;
 
     void positionComboBoxText (juce::ComboBox& box, juce::Label& label) override
     {

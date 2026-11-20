@@ -26,6 +26,17 @@ else()
     FetchContent_MakeAvailable(JUCE)
 endif()
 
+# Ableton Link (licence GPLv2 ou ultérieure) : synchro du tempo et de la mesure avec
+# Serato DJ, Ableton Live, Traktor... Téléchargé avec sa bibliothèque réseau asio.
+FetchContent_Declare(link
+    GIT_REPOSITORY https://github.com/Ableton/link.git
+    GIT_TAG Link-3.1.5
+    GIT_SHALLOW TRUE
+    GIT_SUBMODULES "modules/asio-standalone"
+    SOURCE_SUBDIR do-not-build)
+FetchContent_MakeAvailable(link)
+include(${link_SOURCE_DIR}/AbletonLinkConfig.cmake)
+
 # ---------------------------------------------------------------------------
 # Grid Play : lanceur de boucles MIDI façon session d'Ableton Live, qui joue des
 # instruments virtuels (VST3, AU, LV2) ou des ports MIDI, piloté à la souris, au
@@ -38,6 +49,7 @@ set(GRIDPLAY_SOURCES
     Source/ApcMini.cpp
     Source/SessionView.cpp
     Source/NoteEditor.cpp
+    Source/ChannelEditor.cpp
     Source/MainComponent.cpp)
 
 set(GRIDPLAY_DEFINITIONS
@@ -55,10 +67,19 @@ juce_add_gui_app(GridPlay
     PRODUCT_NAME "Grid Play"
     VERSION ${PROJECT_VERSION}
     ICON_BIG Resources/icon.png
-    MICROPHONE_PERMISSION_ENABLED FALSE
+    MICROPHONE_PERMISSION_ENABLED TRUE
+    MICROPHONE_PERMISSION_TEXT "Grid Play écoute les entrées de la carte son pour retravailler le son de vos synthés externes (retour audio)."
     DOCUMENT_EXTENSIONS gridplay)
 
 target_sources(GridPlay PRIVATE ${GRIDPLAY_SOURCES})
+
+# Police Source Sans 3 (Adobe, licence SIL OFL 1.1 : Resources/Fonts/OFL.txt), intégrée à l'appli.
+juce_add_binary_data(GridPlayFonts SOURCES
+    Resources/Fonts/SourceSans3-Regular.ttf
+    Resources/Fonts/SourceSans3-Semibold.ttf
+    Resources/Fonts/SourceSans3-Bold.ttf
+    Resources/Fonts/SourceSans3-It.ttf)
+target_link_libraries(GridPlay PRIVATE GridPlayFonts Ableton::Link)
 target_compile_definitions(GridPlay PRIVATE ${GRIDPLAY_DEFINITIONS})
 
 # Les Audio Units n'existent que sur Mac.

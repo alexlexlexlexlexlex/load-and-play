@@ -5,6 +5,8 @@
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_gui_basics/juce_gui_basics.h>
 
+#include "ChannelEq.h"
+
 #include <memory>
 #include <vector>
 
@@ -50,6 +52,40 @@ struct Clip
 using ClipPtr = std::shared_ptr<Clip>;
 
 //==============================================================================
+// Un effet en insert (VST3, AU, LV2), comme les inserts d'une voie de Cubase.
+constexpr int maxInserts = 8;
+
+struct InsertSlot
+{
+    juce::String name;
+    juce::String description;      // description du plugin (XML)
+    juce::MemoryBlock state;       // mis à jour à la sauvegarde
+    bool bypass = false;
+
+    bool isEmpty() const { return description.isEmpty() && name.isEmpty(); }
+};
+
+// Les inserts ont une place fixe (1 à 8) : l'ordre compte, une compression avant ou
+// après la reverb ne sonne pas pareil. Une case vide est un InsertSlot vide.
+// Déplace l'élément « from » à la place « to » (les autres glissent), comme dans Cubase.
+template <typename T>
+void moveSlot (std::vector<T>& v, int from, int to)
+{
+    const int needed = juce::jmax (from, to) + 1;
+    if ((int) v.size() < needed)
+        v.resize ((size_t) needed);
+    auto item = std::move (v[(size_t) from]);
+    v.erase (v.begin() + from);
+    v.insert (v.begin() + to, std::move (item));
+}
+
+inline void trimEmptyInserts (std::vector<InsertSlot>& slots)
+{
+    while (! slots.empty() && slots.back().isEmpty())
+        slots.pop_back();
+}
+
+//==============================================================================
 enum class OutputType { none, plugin, midiPort };
 
 struct Track
@@ -75,6 +111,15 @@ struct Track
     juce::MemoryBlock pluginState;        // état de l'instrument, mis à jour à la sauvegarde
 
     float volume = 0.85f;                 // 0..1, 0,85 = 0 dB
+    float pan = 0.0f;                     // -1 (gauche) .. 1 (droite)
+
+    // Retour audio : le son d'un synthé externe qui revient par la carte son (première entrée,
+    // -1 = aucun), pour le traiter sur la même piste que sa sortie MIDI.
+    int audioInput = -1;
+    bool audioInputStereo = true;
+
+    ChannelEq eq;
+    std::vector<InsertSlot> inserts;
     bool drumMap = false;                 // l'éditeur montre les sons de batterie (drum map GM)
     bool mute = false, solo = false, arm = false;
 
@@ -92,6 +137,8 @@ struct Song
     double quantize = beatsPerBar;   // lancement calé sur : 0 = aucun, sinon en temps
     int recordBars = 0;              // longueur d'enregistrement fixe (0 = libre)
     float masterVolume = 0.85f;
+    ChannelEq masterEq;
+    std::vector<InsertSlot> masterInserts;
     std::vector<Track> tracks;
     std::vector<Scene> scenes;
 
@@ -162,6 +209,79 @@ inline ClipPtr clipFromXml (const juce::XmlElement& xml)
     return clip;
 }
 
+inline void eqToXml (const ChannelEq& eq, juce::XmlElement& parent)
+{
+    auto* e = parent.createNewChildElement ("EQ");
+    e->setAttribute ("bypass", eq.bypass);
+    for (const auto& b : eq.bands)
+    {
+        auto* band = e->createNewChildElement ("Band");
+        band->setAttribute ("on", b.on);
+        band->setAttribute ("type", (int) b.type);
+        band->setAttribute ("frequency", (double) b.frequency);
+        band->setAttribute ("gain", (double) b.gain);
+        band->setAttribute ("q", (double) b.q);
+    }
+}
+
+inline void eqFromXml (const juce::XmlElement* parent, ChannelEq& eq)
+{
+    eq = {};
+    const auto* e = parent != nullptr ? parent->getChildByName ("EQ") : nullptr;
+    if (e == nullptr)
+        return;
+    eq.bypass = e->getBoolAttribute ("bypass");
+    size_t i = 0;
+    for (auto* band : e->getChildWithTagNameIterator ("Band"))
+    {
+        if (i >= eq.bands.size())
+            break;
+        auto& b = eq.bands[i++];
+        b.on = band->getBoolAttribute ("on", true);
+        b.type = (EqType) juce::jlimit (0, 4, band->getIntAttribute ("type"));
+        b.frequency = (float) juce::jlimit (10.0, 22000.0, band->getDoubleAttribute ("frequency", 1000.0));
+        b.gain = (float) juce::jlimit (-24.0, 24.0, band->getDoubleAttribute ("gain"));
+        b.q = (float) juce::jlimit (0.1, 18.0, band->getDoubleAttribute ("q", 0.7));
+    }
+}
+
+inline void insertsToXml (const std::vector<InsertSlot>& inserts, juce::XmlElement& parent)
+{
+    for (size_t i = 0; i < inserts.size(); ++i)
+    {
+        const auto& slot = inserts[i];
+        if (slot.isEmpty())
+            continue;
+        auto* e = parent.createNewChildElement ("Insert");
+        e->setAttribute ("slot", (int) i);
+        e->setAttribute ("name", slot.name);
+        e->setAttribute ("bypass", slot.bypass);
+        e->setAttribute ("state", slot.state.toBase64Encoding());
+        if (auto desc = juce::parseXML (slot.description))
+            e->addChildElement (desc.release());
+    }
+}
+
+inline void insertsFromXml (const juce::XmlElement& parent, std::vector<InsertSlot>& inserts)
+{
+    inserts.clear();
+    int next = 0;
+    for (auto* e : parent.getChildWithTagNameIterator ("Insert"))
+    {
+        const int index = juce::jlimit (0, maxInserts - 1, e->getIntAttribute ("slot", next));
+        next = index + 1;
+        InsertSlot slot;
+        slot.name = e->getStringAttribute ("name");
+        slot.bypass = e->getBoolAttribute ("bypass");
+        slot.state.fromBase64Encoding (e->getStringAttribute ("state"));
+        if (auto* desc = e->getChildByName ("PLUGIN"))
+            slot.description = desc->toString (juce::XmlElement::TextFormat().singleLine().withoutHeader());
+        if ((int) inserts.size() <= index)
+            inserts.resize ((size_t) index + 1);
+        inserts[(size_t) index] = std::move (slot);
+    }
+}
+
 inline std::unique_ptr<juce::XmlElement> songToXml (const Song& song)
 {
     auto xml = std::make_unique<juce::XmlElement> ("GridPlay");
@@ -170,6 +290,9 @@ inline std::unique_ptr<juce::XmlElement> songToXml (const Song& song)
     xml->setAttribute ("quantize", song.quantize);
     xml->setAttribute ("recordBars", song.recordBars);
     xml->setAttribute ("master", (double) song.masterVolume);
+    auto* master = xml->createNewChildElement ("Master");
+    eqToXml (song.masterEq, *master);
+    insertsToXml (song.masterInserts, *master);
 
     auto* scenes = xml->createNewChildElement ("Scenes");
     for (const auto& s : song.scenes)
@@ -192,6 +315,11 @@ inline std::unique_ptr<juce::XmlElement> songToXml (const Song& song)
         e->setAttribute ("solo", t.solo);
         e->setAttribute ("arm", t.arm);
         e->setAttribute ("drumMap", t.drumMap);
+        e->setAttribute ("pan", (double) t.pan);
+        e->setAttribute ("audioInput", t.audioInput);
+        e->setAttribute ("audioInputStereo", t.audioInputStereo);
+        eqToXml (t.eq, *e);
+        insertsToXml (t.inserts, *e);
         if (t.outputType == OutputType::plugin)
         {
             auto* p = e->createNewChildElement ("Plugin");
@@ -221,6 +349,11 @@ inline bool songFromXml (const juce::XmlElement& xml, Song& song)
     song.quantize = xml.getDoubleAttribute ("quantize", beatsPerBar);
     song.recordBars = xml.getIntAttribute ("recordBars", 0);
     song.masterVolume = (float) xml.getDoubleAttribute ("master", 0.85);
+    if (auto* master = xml.getChildByName ("Master"))
+    {
+        eqFromXml (master, song.masterEq);
+        insertsFromXml (*master, song.masterInserts);
+    }
 
     if (auto* scenes = xml.getChildByName ("Scenes"))
         for (auto* s : scenes->getChildWithTagNameIterator ("Scene"))
@@ -244,6 +377,11 @@ inline bool songFromXml (const juce::XmlElement& xml, Song& song)
             t.solo = e->getBoolAttribute ("solo");
             t.arm = e->getBoolAttribute ("arm");
             t.drumMap = e->getBoolAttribute ("drumMap");
+            t.pan = (float) juce::jlimit (-1.0, 1.0, e->getDoubleAttribute ("pan"));
+            t.audioInput = e->getIntAttribute ("audioInput", -1);
+            t.audioInputStereo = e->getBoolAttribute ("audioInputStereo", true);
+            eqFromXml (e, t.eq);
+            insertsFromXml (*e, t.inserts);
             if (auto* p = e->getChildByName ("Plugin"))
             {
                 t.pluginName = p->getStringAttribute ("name");

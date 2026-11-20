@@ -36,7 +36,11 @@ struct SessionSnapshot
         OutputType outputType = OutputType::none;
         juce::String outputPort, pluginName;
         int outputChannel = 1;
-        float volume = 0.85f;
+        float volume = 0.85f, pan = 0.0f, meter = 0.0f;
+        int audioInput = -1;
+        bool audioInputStereo = true;
+        int inserts = 0;
+        bool eqActive = false;
     };
     struct SceneInfo { juce::String name; bool active = false; };
     struct CellInfo { SlotState state = SlotState::empty; juce::String name; juce::Colour colour; int notes = 0; };
@@ -46,7 +50,7 @@ struct SessionSnapshot
     std::vector<CellInfo> cells;   // piste * nbScènes + scène
     bool playing = false;
     double beat = 0.0, tempo = 120.0;
-    float master = 0.85f;
+    float master = 0.85f, masterMeter = 0.0f;
 
     const CellInfo& cell (int t, int s) const { return cells[(size_t) (t * (int) scenes.size() + s)]; }
 };
@@ -74,6 +78,7 @@ public:
     bool hasClipSelected() const;
 
     std::function<void (int track)> onOpenPlugin;
+    std::function<void (int track)> onOpenChannel;     // réglages de voie (-1 : master)
     std::function<void()> onScanPlugins;
     std::function<void (int track, int scene)> onEditClip;   // double-clic sur un clip
 
@@ -93,7 +98,7 @@ public:
     void fileDragExit (const juce::StringArray& files) override;
     void filesDropped (const juce::StringArray& files, int x, int y) override;
 
-    static constexpr int headerH = 26, slotH = 28, trackW = 128, sceneW = 140, stopH = 30, mixerH = 166, barT = 10;
+    static constexpr int headerH = 26, slotH = 28, trackW = 128, sceneW = 140, stopH = 30, mixerH = 214, barT = 10;
 
 private:
     class TrackStrip;

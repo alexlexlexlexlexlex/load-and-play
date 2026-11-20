@@ -39,6 +39,35 @@ macOS (Apple Silicon et Intel), Windows et Linux (x64 et ARM64), comme les instr
     (sous Windows, passer par loopMIDI).
 - **M** (mute), **S** (solo, Cmd pour plusieurs), volume (gain de l'instrument, ou CC 7 sur un port MIDI).
 
+**Voies et mixage** : chaque piste est une voie de console. Sa source est l'instrument virtuel,
+ou le **retour audio** d'un synthé externe (une entrée de la carte son, choisie sous la sortie MIDI :
+on traite alors son son sur la même piste qui le joue). Puis l'**égaliseur**, jusqu'à **8 inserts
+d'effets** (VST3, AU, LV2), le panoramique et le volume, et enfin le **master** (égaliseur, inserts,
+volume). Le bouton **e** ouvre les réglages de la voie, comme dans Cubase :
+
+- **Inserts**, comme dans Cubase : 8 cases numérotées, et le son les traverse de 1 à 8 (une
+  compression avant ou après la reverb ne sonne pas pareil). Clic sur n'importe quelle case vide
+  (« + ») pour y mettre un effet ; **glisser** un effet sur une autre case pour changer sa place
+  (vers une case vide, il y va ; sur un effet, il s'intercale et les suivants descendent). Clic sur
+  le nom : ouvrir l'effet ; ⏻ : le contourner ; ▾ : le remplacer, le déplacer ou le retirer.
+- **Égaliseur** à 4 bandes : le type de chaque bande se choisit avec des pictogrammes (1 : plateau
+  grave, cloche ou coupe-bas ; 2 et 3 : cloche ou plateaux ; 4 : plateau aigu, cloche ou coupe-haut,
+  coupes à 24 dB/octave). On tire les points de la courbe
+  (fréquence et gain), molette sur un point pour la largeur, double-clic pour remettre à 0 dB ;
+  ou les potards sous la courbe. « EQ » le coupe, « Réinitialiser » le remet à plat.
+- **Fader**, panoramique et vu-mètre. Les vu-mètres sont aussi sous chaque piste de la console.
+
+Un second clic sur **e** referme la fenêtre.
+
+Les entrées de la carte son ne s'ouvrent qu'au premier retour audio choisi (macOS demande alors
+l'accès au micro). Muet et solo coupent aussi le son de la voie.
+
+**Ableton Link** : le bouton **Link** à côté du tempo synchronise Grid Play avec Serato DJ,
+Ableton Live, Traktor… sur le même ordinateur ou le réseau local : même tempo (le changer d'un côté
+le change partout) et même mesure (en démarrant, Grid Play attend la prochaine mesure du groupe).
+Le chiffre à côté de « Link » est le nombre d'autres participants. Dans Serato DJ, activer Link
+dans les réglages : le bouton Sync des platines devient « LINK ». Le choix est gardé d'une fois sur l'autre.
+
 **Tempo** : cliquer sur la valeur et glisser vers le haut ou le bas (Maj : au centième), molette,
 ou boutons - / + d'un BPM (maintenus : ça défile ; Maj : 0,1). Double-clic pour taper la valeur.
 Un second clic sur **Instruments** ou **Audio / MIDI** referme la fenêtre.
@@ -139,16 +168,12 @@ rouge = enregistrement, rouge clignotant = enregistrement en attente.
 
 1. **Matrice de lancement** : faite.
 2. **Éditeur de notes** façon éditeur MIDI de Cubase (interface et raccourcis) : fait.
-3. **Consolidation** (notes du 20 novembre 2026, à affiner ensemble) :
-   - Instruments virtuels en sortie : les jouer et les contrôler comme des instruments, et
-     traiter leur son en direct sur la piste.
-   - Synthés externes en sortie MIDI : si leur audio revient par la carte son, le retravailler
-     sur la même piste que la sortie MIDI, pour piloter et traiter ses synthés en live.
-   - **Inserts** d'effets par piste, comme dans Cubase, et sur le **master**.
-   - **EQ** sur chaque piste et sur le master, à la façon de Cubase.
-   - **Mode DJ / live** : chaque piste envoyable sur un fader de contrôle DJ (EQ Hi / Mid / Lo,
-     filtre, volume), un effet loop / roll, et un fader de BPM. À penser pour être simple à
-     jouer en live sur un ordinateur.
+3. **Consolidation** (notes du 20 novembre 2026) :
+   - Fait : instruments virtuels et retours audio des synthés externes traités sur leur piste,
+     inserts d'effets et égaliseur par piste et sur le master, panoramique, vu-mètres.
+   - Fait : **Ableton Link** pour se synchroniser avec Serato DJ et les autres logiciels.
+   - Abandonné (21 novembre 2026) : le mode DJ intégré. Les fonctions DJ seront plutôt confiées
+     à un logiciel de DJ (Serato, ou Mixxx adapté), synchronisé par Link.
 
 ## Compiler et tester
 
@@ -176,6 +201,9 @@ affiche la crête de sortie.
 | `Source/NoteEditor.*`, `NoteOps.h` | L'éditeur de notes et ses opérations (testées), drum map |
 | `Source/Theme.h`, `TransportControls.h` | Couleurs et style (ceux des plugins), transport et tempo |
 | `Resources/icon.png`, `Tools/make_icon.m` | L'icône de l'appli et le programme qui la dessine |
+| `build/_deps/link-src` | Ableton Link 3.1.5 (GPLv2+), téléchargé par CMake |
+| `Resources/Fonts/` | Police Source Sans 3 (Adobe, licence SIL OFL 1.1, voir `OFL.txt`), intégrée à l'appli |
+| `Source/ChannelEq.h`, `ChannelEditor.*` | L'égaliseur de voie (testé) et la fenêtre des réglages de voie |
 | `Source/MainComponent.*`, `Main.cpp` | Fenêtre, transport, menus, raccourcis, fichiers |
 
 Licence GNU AGPL v3.
