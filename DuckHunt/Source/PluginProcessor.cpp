@@ -262,7 +262,7 @@ int DuckHuntProcessor::getNumPrograms() { return (int) presets().size(); }
 
 const juce::String DuckHuntProcessor::getProgramName (int index)
 {
-    return juce::isPositiveAndBelow (index, getNumPrograms()) ? presets()[(size_t) index].name : "";
+    return juce::isPositiveAndBelow (index, getNumPrograms()) ? juce::String::fromUTF8 (presets()[(size_t) index].name) : juce::String();
 }
 
 void DuckHuntProcessor::setCurrentProgram (int index)
