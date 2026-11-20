@@ -4,6 +4,7 @@
 
 #include "ApcMini.h"
 #include "SessionView.h"
+#include "TransportControls.h"
 
 #include <juce_audio_utils/juce_audio_utils.h>
 
@@ -63,6 +64,7 @@ private:
     void closePluginWindow (juce::AudioPluginInstance* plugin);
     void showScanner();
     void showAudioSettings();
+    void toggleWindow (std::unique_ptr<juce::DocumentWindow>& window, std::function<void()> open);
     void saveSettings();
     void updateTitle();
 
@@ -71,8 +73,8 @@ private:
     AudioEngine engine;
     std::unique_ptr<ApcMini> apc;
 
-    juce::TextButton playButton, stopButton;
-    juce::Slider tempo;
+    TransportButton playButton { TransportButton::Icon::play }, stopButton { TransportButton::Icon::stop };
+    TempoControl tempo;
     juce::Label quantizeLabel, recordLabel;
     juce::ComboBox quantize, recordLength;
     juce::Label position, apcStatus;
@@ -86,7 +88,7 @@ private:
     std::unique_ptr<juce::FileChooser> chooser;
     juce::OwnedArray<PluginWindow> pluginWindows;
     std::unique_ptr<juce::DocumentWindow> scannerWindow;
-    std::unique_ptr<juce::DialogWindow> settingsWindow;
+    std::unique_ptr<juce::DocumentWindow> settingsWindow;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

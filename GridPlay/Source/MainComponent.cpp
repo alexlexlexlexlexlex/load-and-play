@@ -71,26 +71,13 @@ MainComponent::MainComponent() : session (engine)
     apc->onPadPressed = [this] (int t, int s) { session.selectCell (t, s); };
 
     // --- Barre de transport ---
-    playButton.setButtonText (juce::String::fromUTF8 ("▶"));
-    stopButton.setButtonText (juce::String::fromUTF8 ("■"));
     playButton.setTooltip ("Lecture (barre d'espace)");
     stopButton.setTooltip (juce::String::fromUTF8 ("Stop : arrête le transport et tous les clips"));
     playButton.setColour (juce::TextButton::buttonOnColourId, theme::play);
     playButton.onClick = [this] { engine.perform ([] (Session& s) { s.play(); }); };
     stopButton.onClick = [this] { engine.perform ([] (Session& s) { s.stop(); }); };
 
-    tempo.setSliderStyle (juce::Slider::IncDecButtons);
-    tempo.setIncDecButtonsMode (juce::Slider::incDecButtonsDraggable_Vertical);
-    tempo.setTextBoxStyle (juce::Slider::TextBoxLeft, false, 78, 24);
-    tempo.setRange (20.0, 300.0, 0.01);
-    tempo.textFromValueFunction = [] (double v) { return juce::String (v, 2) + " BPM"; };
-    tempo.valueFromTextFunction = [] (const juce::String& t) { return t.getDoubleValue(); };
-    tempo.setTooltip ("Tempo : glisser verticalement, ou double-cliquer pour taper une valeur");
-    tempo.onValueChange = [this]
-    {
-        const double v = tempo.getValue();
-        engine.edit ([v] (Session& s) { s.song.tempo = v; });
-    };
+    tempo.onChange = [this] (double v) { engine.edit ([v] (Session& s) { s.song.tempo = v; }); };
 
     quantizeLabel.setText ("Lancement", juce::dontSendNotification);
     recordLabel.setText ("Enregistrement", juce::dontSendNotification);
@@ -126,8 +113,9 @@ MainComponent::MainComponent() : session (engine)
 
     pluginsButton.setTooltip (juce::String::fromUTF8 ("Chercher les instruments virtuels installés (VST3, AU, LV2)"));
     settingsButton.setTooltip ("Carte son et appareils MIDI");
-    pluginsButton.onClick = [this] { showScanner(); };
-    settingsButton.onClick = [this] { showAudioSettings(); };
+    // Un second clic referme la fenêtre.
+    pluginsButton.onClick = [this] { toggleWindow (scannerWindow, [this] { showScanner(); }); };
+    settingsButton.onClick = [this] { toggleWindow (settingsWindow, [this] { showAudioSettings(); }); };
 
     for (auto* c : std::initializer_list<juce::Component*> { &playButton, &stopButton, &tempo, &quantizeLabel, &quantize,
                                                              &recordLabel, &recordLength, &position, &apcStatus,
@@ -197,7 +185,7 @@ void MainComponent::resized()
     bar.removeFromLeft (4);
     stopButton.setBounds (bar.removeFromLeft (36));
     bar.removeFromLeft (14);
-    tempo.setBounds (bar.removeFromLeft (130));
+    tempo.setBounds (bar.removeFromLeft (156));
     bar.removeFromLeft (10);
     position.setBounds (bar.removeFromLeft (86));
     bar.removeFromLeft (8);
@@ -227,8 +215,9 @@ void MainComponent::timerCallback()
 
     struct SongSettings { double tempo, quantize; int recordBars; };
     const auto s = engine.read ([] (const Session& se) { return SongSettings { se.song.tempo, se.song.quantize, se.song.recordBars }; });
-    if (! tempo.isMouseButtonDown() && std::abs (tempo.getValue() - s.tempo) > 1.0e-6)
-        tempo.setValue (s.tempo, juce::dontSendNotification);
+    tempo.setTempo (s.tempo);
+    pluginsButton.setToggleState (scannerWindow != nullptr, juce::dontSendNotification);
+    settingsButton.setToggleState (settingsWindow != nullptr, juce::dontSendNotification);
     for (int i = 0; i < 8; ++i)
         if (std::abs (quantizeValues[i] - s.quantize) < 1.0e-6 && quantize.getSelectedId() != i + 1)
             quantize.setSelectedId (i + 1, juce::dontSendNotification);
@@ -352,6 +341,18 @@ void MainComponent::openFile (const juce::File& file)
 
 void MainComponent::snapshot (const juce::File& png, std::function<void()> done)
 {
+    // GRIDPLAY_TEST_SCAN=<dossier> : scanne ce dossier comme la fenêtre Instruments (sans rien enregistrer).
+    const auto scanFolder = juce::SystemStats::getEnvironmentVariable ("GRIDPLAY_TEST_SCAN", {});
+    if (scanFolder.isNotEmpty())
+        for (auto* format : engine.formatManager.getFormats())
+        {
+            juce::KnownPluginList list;
+            juce::PluginDirectoryScanner scanner (list, *format, juce::FileSearchPath (scanFolder), true, {}, false);
+            juce::String name;
+            while (scanner.scanNextFile (true, name)) {}
+            std::cerr << format->getName().toRawUTF8() << " : " << list.getNumTypes() << " instruments trouvés" << std::endl;
+        }
+
     // GRIDPLAY_TEST_PLUGIN=<chemin d'un .vst3> : charge cet instrument sur la piste 1.
     const auto pluginPath = juce::SystemStats::getEnvironmentVariable ("GRIDPLAY_TEST_PLUGIN", {});
     if (pluginPath.isNotEmpty())
@@ -364,6 +365,8 @@ void MainComponent::snapshot (const juce::File& png, std::function<void()> done)
             engine.setTrackPlugin (0, *found[0]);
     }
     engine.perform ([] (Session& s) { s.launchScene (0); });
+    if (juce::SystemStats::getEnvironmentVariable ("GRIDPLAY_TEST_EDITOR", {}).isNotEmpty())
+        juce::Timer::callAfterDelay (1200, [this] { openPluginWindow (0); });
     juce::Timer::callAfterDelay (2300, [this, png, done]
     {
         session.selectCell (1, 2);
@@ -445,15 +448,38 @@ void MainComponent::showScanner()
 
 void MainComponent::showAudioSettings()
 {
-    auto* selector = new juce::AudioDeviceSelectorComponent (engine.deviceManager, 0, 0, 2, 2, false, false, true, false);
-    selector->setSize (520, 360);
-    juce::DialogWindow::LaunchOptions o;
-    o.content.setOwned (selector);
-    o.dialogTitle = "Audio / MIDI";
-    o.dialogBackgroundColour = theme::panel;
-    o.useNativeTitleBar = true;
-    o.resizable = false;
-    o.launchAsync();
+    if (settingsWindow != nullptr)
+    {
+        settingsWindow->toFront (true);
+        return;
+    }
+
+    struct SettingsWindow : public juce::DocumentWindow
+    {
+        SettingsWindow (MainComponent& o) : juce::DocumentWindow ("Audio / MIDI", theme::panel, closeButton), owner (o)
+        {
+            auto* selector = new juce::AudioDeviceSelectorComponent (owner.engine.deviceManager, 0, 0, 2, 2, false, false, true, false);
+            selector->setSize (520, 360);
+            setContentOwned (selector, true);
+            setUsingNativeTitleBar (true);
+            centreWithSize (getWidth(), getHeight());
+            setVisible (true);
+        }
+        void closeButtonPressed() override { owner.saveSettings(); juce::MessageManager::callAsync ([&o = owner] { o.settingsWindow.reset(); }); }
+        MainComponent& owner;
+    };
+    settingsWindow = std::make_unique<SettingsWindow> (*this);
+}
+
+void MainComponent::toggleWindow (std::unique_ptr<juce::DocumentWindow>& window, std::function<void()> open)
+{
+    if (window != nullptr)
+    {
+        saveSettings();
+        window.reset();
+    }
+    else
+        open();
 }
 
 //==============================================================================

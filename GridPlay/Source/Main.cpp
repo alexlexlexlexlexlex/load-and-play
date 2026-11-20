@@ -2,6 +2,9 @@
 
 #include "MainComponent.h"
 
+#include <cstdio>
+#include <cstdlib>
+
 namespace gridplay
 {
 class GridPlayApplication : public juce::JUCEApplication
@@ -27,7 +30,17 @@ public:
         openFromCommandLine (commandLine);
     }
 
-    void shutdown() override { window.reset(); }
+    void shutdown() override
+    {
+        // Ferme tout proprement : morceau, instruments, carte son, ports MIDI, réglages enregistrés.
+        window.reset();
+
+        // Puis quitte sans exécuter le nettoyage final des bibliothèques chargées. Certains
+        // instruments (vu avec ceux de Steinberg) plantent dans ce nettoyage, ce qui affichait
+        // « Grid Play a quitté de manière imprévue » alors que tout était déjà fermé.
+        std::fflush (nullptr);
+        std::_Exit (0);
+    }
 
     void systemRequestedQuit() override
     {

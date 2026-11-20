@@ -37,6 +37,10 @@ macOS (Apple Silicon et Intel), Windows et Linux (x64 et ARM64), comme les instr
     (sous Windows, passer par loopMIDI).
 - **M** (mute), **S** (solo, Cmd pour plusieurs), volume (gain de l'instrument, ou CC 7 sur un port MIDI).
 
+**Tempo** : cliquer sur la valeur et glisser vers le haut ou le bas (Maj : au centième), molette,
+ou boutons - / + d'un BPM (maintenus : ça défile ; Maj : 0,1). Double-clic pour taper la valeur.
+Un second clic sur **Instruments** ou **Audio / MIDI** referme la fenêtre.
+
 Les instruments installés se trouvent avec **Instruments** (puis « Options… » →
 « Scan for new or updated VST3 plug-ins », et AudioUnit sur Mac). La carte son se choisit
 dans **Audio / MIDI**. Les claviers MIDI branchés sont pris automatiquement.
@@ -69,6 +73,21 @@ rouge = enregistrement, rouge clignotant = enregistrement en attente.
 
 (Ctrl à la place de Cmd sous Windows et Linux.) Les morceaux s'enregistrent en `.gridplay`
 (XML lisible), avec l'état des instruments.
+
+## Feuille de route
+
+1. **Matrice de lancement** : faite.
+2. **Éditeur de notes** façon éditeur MIDI de Cubase (interface et raccourcis).
+3. **Consolidation** (notes du 20 novembre 2026, à affiner ensemble) :
+   - Instruments virtuels en sortie : les jouer et les contrôler comme des instruments, et
+     traiter leur son en direct sur la piste.
+   - Synthés externes en sortie MIDI : si leur audio revient par la carte son, le retravailler
+     sur la même piste que la sortie MIDI, pour piloter et traiter ses synthés en live.
+   - **Inserts** d'effets par piste, comme dans Cubase, et sur le **master**.
+   - **EQ** sur chaque piste et sur le master, à la façon de Cubase.
+   - **Mode DJ / live** : chaque piste envoyable sur un fader de contrôle DJ (EQ Hi / Mid / Lo,
+     filtre, volume), un effet loop / roll, et un fader de BPM. À penser pour être simple à
+     jouer en live sur un ordinateur.
 
 ## Compiler et tester
 

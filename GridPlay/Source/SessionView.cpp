@@ -1,5 +1,7 @@
 #include "SessionView.h"
 
+#include <cstring>
+
 namespace gridplay
 {
 namespace
@@ -410,16 +412,56 @@ void SessionView::updateStrips()
     master->refresh();
 }
 
+std::uint64_t SessionView::signature() const
+{
+    // Empreinte de tout ce qui est affiché : on ne redessine que si elle change (ou pendant la lecture).
+    std::uint64_t h = 1469598103934665603ull;
+    auto mix = [&h] (std::uint64_t v) { h ^= v; h *= 1099511628211ull; };
+    auto mixFloat = [&mix] (float f) { std::uint32_t bits; std::memcpy (&bits, &f, sizeof bits); mix (bits); };
+    for (const auto& t : view.tracks)
+    {
+        mix ((std::uint64_t) t.name.hashCode64());
+        mix (t.colour.getARGB());
+        mix ((t.arm ? 1u : 0u) | (t.mute ? 2u : 0u) | (t.solo ? 4u : 0u) | (t.active ? 8u : 0u) | (t.inputEnabled ? 16u : 0u));
+        mix ((std::uint64_t) t.inputDevice.hashCode64());
+        mix ((std::uint64_t) (t.inputChannel * 64 + t.outputChannel * 4 + (int) t.outputType));
+        mix ((std::uint64_t) t.outputPort.hashCode64());
+        mix ((std::uint64_t) t.pluginName.hashCode64());
+        mixFloat (t.volume);
+    }
+    for (const auto& sc : view.scenes)
+    {
+        mix ((std::uint64_t) sc.name.hashCode64());
+        mix (sc.active ? 1u : 0u);
+    }
+    for (const auto& c : view.cells)
+    {
+        mix ((std::uint64_t) c.state);
+        mix ((std::uint64_t) c.name.hashCode64());
+        mix (c.colour.getARGB());
+        mix ((std::uint64_t) c.notes);
+    }
+    mixFloat (view.master);
+    mix ((std::uint64_t) (selTrack * 4096 + selScene));
+    mix ((std::uint64_t) ((dropTrack + 1) * 4096 + dropScene + 1));
+    mix (hasKeyboardFocus (true) ? 1u : 0u);
+    return h;
+}
+
 void SessionView::timerCallback()
 {
     const auto before = std::make_pair (view.tracks.size(), view.scenes.size());
     takeSnapshot();
     if (before != std::make_pair (view.tracks.size(), view.scenes.size()))
-    {
         updateScrollBars();
-    }
-    updateStrips();
-    repaint (0, 0, getWidth(), getHeight() - mixerH - barT);
+
+    const auto sig = signature();
+    if (sig != lastSignature)
+        updateStrips();
+    // Pendant la lecture, les barres d'avancement et les clignotements bougent sans cesse.
+    if (sig != lastSignature || view.playing)
+        repaint (0, 0, getWidth(), getHeight() - mixerH - barT);
+    lastSignature = sig;
 }
 
 void SessionView::updateScrollBars()

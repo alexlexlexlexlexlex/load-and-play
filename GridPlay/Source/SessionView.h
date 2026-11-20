@@ -108,6 +108,7 @@ private:
     void timerCallback() override;
     void scrollBarMoved (juce::ScrollBar*, double newRangeStart) override;
     void takeSnapshot();
+    std::uint64_t signature() const;
     void updateStrips();
     void updateScrollBars();
     Hit findHit (juce::Point<int> p) const;
@@ -132,6 +133,7 @@ private:
     std::unique_ptr<MasterStrip> master;
 
     int selTrack = 0, selScene = 0;
+    std::uint64_t lastSignature = 0;
     bool dragging = false;
     int dragTrack = -1, dragScene = -1, dropTrack = -1, dropScene = -1;
     bool dragCopy = false;
