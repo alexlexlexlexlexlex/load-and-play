@@ -78,6 +78,9 @@ public:
     static juce::String virtualPortName();
     bool hasVirtualPort() const { return virtualPort != nullptr; }
 
+    // Écoute d'une note depuis l'éditeur (vélocité 0 = relâcher), même si la piste n'est pas armée.
+    void previewNote (int track, int pitch, int velocity);
+
     // L'APC mini : ses messages ne vont pas aux pistes mais à ce gestionnaire.
     void setController (const juce::String& inputIdentifier, std::function<void (const juce::MidiMessage&)> handler);
 
@@ -126,6 +129,9 @@ private:
     };
     juce::AbstractFifo fifo { 2048 };
     std::vector<InputEvent> fifoData = std::vector<InputEvent> (2048);
+
+    juce::AbstractFifo previewFifo { 256 };
+    std::vector<LiveEvent> previewData = std::vector<LiveEvent> (256);
 
     std::vector<LiveEvent> live;
     std::vector<juce::MidiBuffer> trackMidi;

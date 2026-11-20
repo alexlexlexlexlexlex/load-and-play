@@ -37,6 +37,7 @@ set(GRIDPLAY_SOURCES
     Source/AudioEngine.cpp
     Source/ApcMini.cpp
     Source/SessionView.cpp
+    Source/NoteEditor.cpp
     Source/MainComponent.cpp)
 
 set(GRIDPLAY_DEFINITIONS
@@ -53,6 +54,7 @@ juce_add_gui_app(GridPlay
     BUNDLE_ID com.loadandplay.gridplay
     PRODUCT_NAME "Grid Play"
     VERSION ${PROJECT_VERSION}
+    ICON_BIG Resources/icon.png
     MICROPHONE_PERMISSION_ENABLED FALSE
     DOCUMENT_EXTENSIONS gridplay)
 

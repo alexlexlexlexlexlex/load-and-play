@@ -56,8 +56,9 @@ public:
         addAndMakeVisible (value);
         value.setJustificationType (juce::Justification::centred);
         value.setFont (juce::Font (juce::FontOptions (15.0f, juce::Font::bold)));
-        value.setColour (juce::Label::backgroundColourId, theme::panelLight);
-        value.setColour (juce::Label::outlineColourId, theme::line);
+        value.setColour (juce::Label::backgroundColourId, juce::Colour (0xff0d0d0d));
+        value.setColour (juce::Label::outlineColourId, theme::rule);
+        value.setColour (juce::Label::textColourId, theme::text);
         value.setEditable (false, true, false);
         value.setMouseCursor (juce::MouseCursor::UpDownResizeCursor);
         value.setTooltip (juce::String::fromUTF8 ("Tempo : cliquer et glisser vers le haut ou le bas (Maj : au centième), "

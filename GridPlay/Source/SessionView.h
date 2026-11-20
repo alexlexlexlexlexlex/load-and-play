@@ -67,6 +67,7 @@ public:
     void copySelected();
     void pasteSelected();
     void renameSelected();
+    void editSelected();
     void insertTrack();
     void insertScene();
     void selectCell (int track, int scene);
@@ -118,7 +119,10 @@ private:
     void showSlotMenu (int track, int scene);
     void showTrackMenu (int track);
     void showSceneMenu (int scene);
-    void askText (const juce::String& title, const juce::String& initial, std::function<void (const juce::String&)> done);
+    void editInline (juce::Rectangle<int> area, const juce::String& initial, std::function<void (const juce::String&)> done);
+    void finishInlineEdit (bool keep);
+    juce::Rectangle<int> headerBounds (int track) const;
+    juce::Rectangle<int> sceneBounds (int scene) const;
     void importMidiFiles (const juce::StringArray& files, int track, int scene);
     void exportClip (int track, int scene);
     void createEmptyClip (int track, int scene, int bars);
@@ -140,6 +144,8 @@ private:
     juce::Point<int> dragStart;
     ClipPtr clipboard;
     std::unique_ptr<juce::FileChooser> chooser;
+    std::unique_ptr<juce::TextEditor> inlineEditor;
+    std::function<void (const juce::String&)> inlineDone;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SessionView)
 };

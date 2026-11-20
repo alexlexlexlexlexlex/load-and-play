@@ -29,11 +29,11 @@ public:
         : juce::DocumentWindow (title, theme::panel, juce::DocumentWindow::closeButton), plugin (p), closed (std::move (onClose))
     {
         setUsingNativeTitleBar (true);
-        juce::AudioProcessorEditor* editor = p.hasEditor() ? p.createEditorIfNeeded() : nullptr;
-        if (editor == nullptr)
-            editor = new juce::GenericAudioProcessorEditor (p);
-        setContentOwned (editor, true);
-        setResizable (editor->isResizable(), false);
+        juce::AudioProcessorEditor* view = p.hasEditor() ? p.createEditorIfNeeded() : nullptr;
+        if (view == nullptr)
+            view = new juce::GenericAudioProcessorEditor (p);
+        setContentOwned (view, true);
+        setResizable (view->isResizable(), false);
         centreWithSize (getWidth(), getHeight());
         setVisible (true);
     }
@@ -79,11 +79,11 @@ MainComponent::MainComponent() : session (engine)
 
     tempo.onChange = [this] (double v) { engine.edit ([v] (Session& s) { s.song.tempo = v; }); };
 
-    quantizeLabel.setText ("Lancement", juce::dontSendNotification);
-    recordLabel.setText ("Enregistrement", juce::dontSendNotification);
+    quantizeLabel.setText ("LANCEMENT", juce::dontSendNotification);
+    recordLabel.setText ("ENREGISTREMENT", juce::dontSendNotification);
     for (auto* l : { &quantizeLabel, &recordLabel })
     {
-        l->setFont (juce::Font (juce::FontOptions (11.0f)));
+        l->setFont (theme::font (10.5f, juce::Font::bold));
         l->setColour (juce::Label::textColourId, theme::textDim);
         l->setJustificationType (juce::Justification::centredRight);
     }
@@ -106,7 +106,9 @@ MainComponent::MainComponent() : session (engine)
 
     position.setFont (juce::Font (juce::FontOptions (juce::Font::getDefaultMonospacedFontName(), 15.0f, juce::Font::bold)));
     position.setJustificationType (juce::Justification::centred);
-    position.setColour (juce::Label::backgroundColourId, theme::panelLight);
+    position.setColour (juce::Label::backgroundColourId, juce::Colour (0xff0d0d0d));
+    position.setColour (juce::Label::outlineColourId, theme::rule);
+    position.setColour (juce::Label::textColourId, theme::accent);
     position.setTooltip ("Position : mesure . temps . double-croche");
     apcStatus.setFont (juce::Font (juce::FontOptions (12.0f)));
     apcStatus.setJustificationType (juce::Justification::centredRight);
@@ -124,7 +126,7 @@ MainComponent::MainComponent() : session (engine)
 
     session.onOpenPlugin = [this] (int t) { openPluginWindow (t); };
     session.onScanPlugins = [this] { showScanner(); };
-    session.onEditClip = [this] (int t, int s) { session.selectCell (t, s); session.renameSelected(); };
+    session.onEditClip = [this] (int t, int s) { openEditor (t, s); };
 
     // --- Commandes et raccourcis ---
     commands.registerAllCommandsForTarget (this);
@@ -132,7 +134,7 @@ MainComponent::MainComponent() : session (engine)
     addKeyListener (commands.getKeyMappings());
     setWantsKeyboardFocus (false);
 
-    setSize (1240, 760);
+    setSize (1320, 780);
     startTimerHz (15);
     timerCallback();
     juce::MessageManager::callAsync ([this] { session.grabKeyboardFocus(); });
@@ -144,6 +146,7 @@ MainComponent::~MainComponent()
     saveSettings();
     engine.knownPlugins.removeChangeListener (this);
     pluginWindows.clear();
+    closeEditor();
     scannerWindow.reset();
     settingsWindow.reset();
     apc.reset();
@@ -168,19 +171,27 @@ void MainComponent::changeListenerCallback (juce::ChangeBroadcaster*)
 //==============================================================================
 void MainComponent::paint (juce::Graphics& g)
 {
+    // Comme une façade de plugin Load & Play : joues en bois, en-tête, filet.
     g.fillAll (theme::background);
-    g.setColour (theme::panel);
-    g.fillRect (0, 0, getWidth(), 44);
-    g.setColour (theme::line);
-    g.fillRect (0, 44, getWidth(), 1);
-    g.setColour (theme::accent);
-    g.setFont (juce::Font (juce::FontOptions (16.0f, juce::Font::bold)));
-    g.drawText ("Grid Play", getWidth() - 110, 0, 100, 44, juce::Justification::centredRight);
+    g.setGradientFill (juce::ColourGradient (theme::panel.brighter (0.05f), 0.0f, 0.0f, theme::panel, 0.0f, (float) headerH, false));
+    g.fillRect (0, 0, getWidth(), headerH);
+    theme::woodCheek (g, { 0.0f, 0.0f, (float) cheek, (float) getHeight() });
+    theme::woodCheek (g, { (float) (getWidth() - cheek), 0.0f, (float) cheek, (float) getHeight() });
+
+    g.setColour (theme::text);
+    g.setFont (theme::font (27.0f).italicised());
+    g.drawText ("Grid Play", cheek + 14, 6, 160, 30, juce::Justification::centredLeft);
+    g.setColour (theme::textDim);
+    g.setFont (theme::font (10.5f, juce::Font::bold).withExtraKerningFactor (0.35f));
+    g.drawText ("LOAD & PLAY", cheek + 16, 34, 160, 14, juce::Justification::centredLeft);
+
+    g.setColour (theme::rule);
+    g.fillRect (cheek + 10, headerH - 1, getWidth() - 2 * cheek - 20, 1);
 }
 
 void MainComponent::resized()
 {
-    auto bar = getLocalBounds().removeFromTop (44).reduced (10, 9);
+    auto bar = getLocalBounds().removeFromTop (headerH).withTrimmedLeft (cheek + 170).withTrimmedRight (cheek + 12).reduced (0, 12);
     playButton.setBounds (bar.removeFromLeft (36));
     bar.removeFromLeft (4);
     stopButton.setBounds (bar.removeFromLeft (36));
@@ -188,19 +199,18 @@ void MainComponent::resized()
     tempo.setBounds (bar.removeFromLeft (156));
     bar.removeFromLeft (10);
     position.setBounds (bar.removeFromLeft (86));
-    bar.removeFromLeft (8);
-    quantizeLabel.setBounds (bar.removeFromLeft (70));
-    quantize.setBounds (bar.removeFromLeft (100));
-    recordLabel.setBounds (bar.removeFromLeft (100));
-    recordLength.setBounds (bar.removeFromLeft (100));
-    bar.removeFromRight (100);   // nom de l'appli
+    bar.removeFromLeft (4);
+    quantizeLabel.setBounds (bar.removeFromLeft (80));
+    quantize.setBounds (bar.removeFromLeft (96));
+    recordLabel.setBounds (bar.removeFromLeft (112));
+    recordLength.setBounds (bar.removeFromLeft (96));
     settingsButton.setBounds (bar.removeFromRight (104));
     bar.removeFromRight (6);
-    pluginsButton.setBounds (bar.removeFromRight (100));
+    pluginsButton.setBounds (bar.removeFromRight (104));
     bar.removeFromRight (10);
     apcStatus.setBounds (bar);
 
-    session.setBounds (getLocalBounds().withTrimmedTop (45));
+    session.setBounds (getLocalBounds().withTrimmedTop (headerH).withTrimmedLeft (cheek).withTrimmedRight (cheek));
 }
 
 void MainComponent::timerCallback()
@@ -365,6 +375,12 @@ void MainComponent::snapshot (const juce::File& png, std::function<void()> done)
             engine.setTrackPlugin (0, *found[0]);
     }
     engine.perform ([] (Session& s) { s.launchScene (0); });
+
+    // GRIDPLAY_TEST_CLIP=piste,scène : ouvre l'éditeur de notes sur ce clip et en fait aussi une image.
+    const auto editTarget = juce::StringArray::fromTokens (juce::SystemStats::getEnvironmentVariable ("GRIDPLAY_TEST_CLIP", {}), ",", {});
+    if (editTarget.size() == 2)
+        openEditor (editTarget[0].getIntValue(), editTarget[1].getIntValue());
+
     if (juce::SystemStats::getEnvironmentVariable ("GRIDPLAY_TEST_EDITOR", {}).isNotEmpty())
         juce::Timer::callAfterDelay (1200, [this] { openPluginWindow (0); });
     juce::Timer::callAfterDelay (2300, [this, png, done]
@@ -374,6 +390,14 @@ void MainComponent::snapshot (const juce::File& png, std::function<void()> done)
         if (auto* plugin = engine.getPlugin (0); plugin != nullptr && juce::SystemStats::getEnvironmentVariable ("GRIDPLAY_TEST_PLUGIN", {}).isNotEmpty())
             std::cerr << "Instrument de la piste 1 : " << plugin->getName().toRawUTF8()
                       << ", crête de sortie " << engine.takeOutputPeak() << std::endl;
+        if (editor != nullptr)
+        {
+            auto editorImage = editor->createComponentSnapshot (editor->getLocalBounds(), true, 2.0f);
+            const auto file = png.getSiblingFile (png.getFileNameWithoutExtension() + "-editeur.png");
+            file.deleteFile();
+            juce::FileOutputStream editorOut (file);
+            juce::PNGImageFormat().writeImageToStream (editorImage, editorOut);
+        }
         auto image = createComponentSnapshot (getLocalBounds(), true, 2.0f);
         png.deleteFile();
         juce::FileOutputStream out (png);
@@ -403,6 +427,51 @@ void MainComponent::openPluginWindow (int track)
         }
     const auto title = session.getSnapshot().tracks[(size_t) track].name + juce::String::fromUTF8 (" — ") + plugin->getName();
     pluginWindows.add (new PluginWindow (*plugin, title, [this] (PluginWindow* w) { pluginWindows.removeObject (w); }));
+}
+
+void MainComponent::openEditor (int track, int scene)
+{
+    auto clip = engine.read ([&] (const Session& s) { return s.song.clipAt (track, scene); });
+    if (clip == nullptr)
+        return;
+    session.selectCell (track, scene);
+
+    if (editorWindow != nullptr && editor != nullptr)
+    {
+        editor->setClip (clip);
+        editorWindow->toFront (true);
+        editor->grabKeyboardFocus();
+        return;
+    }
+
+    struct EditorWindow : public juce::DocumentWindow
+    {
+        EditorWindow (MainComponent& o) : juce::DocumentWindow (juce::String::fromUTF8 ("Éditeur de notes"), theme::background, allButtons), owner (o) {}
+        void closeButtonPressed() override { juce::MessageManager::callAsync ([&o = owner] { o.closeEditor(); }); }
+        MainComponent& owner;
+    };
+
+    auto window = std::make_unique<EditorWindow> (*this);
+    auto* content = new NoteEditor (engine, clip);
+    content->onClipGone = [this] { juce::MessageManager::callAsync ([this] { closeEditor(); }); };
+    content->onCloseRequested = [this] { juce::MessageManager::callAsync ([this] { closeEditor(); }); };
+    content->setSize (1180, 680);
+    window->setContentOwned (content, true);
+    window->setUsingNativeTitleBar (true);
+    window->setResizable (true, false);
+    window->setResizeLimits (760, 440, 10000, 10000);
+    window->centreWithSize (window->getWidth(), window->getHeight());
+    window->setVisible (true);
+    window->addKeyListener (commands.getKeyMappings());   // Cmd S, Cmd O... marchent aussi depuis l'éditeur
+    editor = content;
+    editorWindow = std::move (window);
+    editor->grabKeyboardFocus();
+}
+
+void MainComponent::closeEditor()
+{
+    editor = nullptr;
+    editorWindow.reset();
 }
 
 void MainComponent::closePluginWindow (juce::AudioPluginInstance* plugin)
@@ -487,7 +556,7 @@ void MainComponent::toggleWindow (std::unique_ptr<juce::DocumentWindow>& window,
 void MainComponent::getAllCommands (juce::Array<juce::CommandID>& c)
 {
     c.addArray ({ newSong, openSong, saveSong, saveSongAs, insertTrack, insertScene, deleteSelection, duplicate,
-                  copyClip, pasteClip, renameClip, launchSelection, playStop, stopAllClips, audioSettings, scanPlugins });
+                  copyClip, pasteClip, renameClip, launchSelection, playStop, stopAllClips, audioSettings, scanPlugins, editClip });
 }
 
 void MainComponent::getCommandInfo (juce::CommandID id, juce::ApplicationCommandInfo& info)
@@ -511,6 +580,7 @@ void MainComponent::getCommandInfo (juce::CommandID id, juce::ApplicationCommand
         case playStop:        info.setInfo ("Lecture / Stop", {}, "Transport", 0); info.addDefaultKeypress (juce::KeyPress::spaceKey, 0); break;
         case stopAllClips:    info.setInfo (juce::String::fromUTF8 ("Arrêter tous les clips"), {}, "Transport", 0); break;
         case audioSettings:   info.setInfo ("Audio / MIDI...", {}, "Options", 0); info.addDefaultKeypress (',', cmd); break;
+        case editClip:        info.setInfo (juce::String::fromUTF8 ("Éditer les notes du clip"), {}, "Edition", 0); info.addDefaultKeypress ('e', cmd); info.setActive (session.hasClipSelected()); break;
         case scanPlugins:     info.setInfo ("Instruments virtuels...", {}, "Options", 0); break;
         default: break;
     }
@@ -550,6 +620,7 @@ bool MainComponent::perform (const InvocationInfo& info)
         case stopAllClips:    engine.perform ([] (Session& s) { s.stopAllClips(); }); break;
         case audioSettings:   showAudioSettings(); break;
         case scanPlugins:     showScanner(); break;
+        case editClip:        session.editSelected(); break;
         default: return false;
     }
     return true;
@@ -576,6 +647,7 @@ juce::PopupMenu MainComponent::getMenuForIndex (int index, const juce::String&)
             m.addCommandItem (&commands, insertTrack);
             m.addCommandItem (&commands, insertScene);
             m.addSeparator();
+            m.addCommandItem (&commands, editClip);
             m.addCommandItem (&commands, renameClip);
             m.addCommandItem (&commands, duplicate);
             m.addCommandItem (&commands, copyClip);

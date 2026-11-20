@@ -42,6 +42,7 @@ void Session::queue (int track, Queued what, int slot)
     rt.queued = what;
     rt.queuedSlot = slot;
     rt.queuedBeat = -1.0;
+    rt.queuedOffset = 0.0;
     if (! playing && what != Queued::stop)
         play();
     else if (! playing)
@@ -62,6 +63,97 @@ void Session::launchSlot (int track, int scene)
         queue (track, Queued::record, scene);
     else
         queue (track, Queued::stop, -1);
+}
+
+void Session::playClipFrom (int track, int scene, double position)
+{
+    auto clip = song.clipAt (track, scene);
+    if (clip == nullptr)
+        return;
+    auto& rt = runtime[(size_t) track];
+    const double pos = juce::jlimit (0.0, clip->length, position) >= clip->length ? 0.0 : juce::jlimit (0.0, clip->length, position);
+
+    if (! playing)
+    {
+        // Rien ne joue : le transport démarre à la position du curseur, la grille reste celle du clip.
+        play();
+        beat = pos;
+        for (auto& a : rt.active)
+            a.offBeat = -1.0;
+        rt.queued = Queued::none;
+        rt.queuedSlot = -1;
+        rt.playingSlot = scene;
+        rt.clipStart = 0.0;
+        return;
+    }
+
+    const double q = song.quantize;
+    if (q <= 0.0)
+    {
+        // Sans quantification : tout de suite.
+        if (rt.recording)
+            finishRecording (track, beat);
+        for (auto& a : rt.active)
+            a.offBeat = -1.0;
+        rt.queued = Queued::none;
+        rt.queuedSlot = -1;
+        rt.playingSlot = scene;
+        rt.clipStart = beat - pos;
+        return;
+    }
+
+    // Le transport tourne : on attend le moment où la grille arrive à la position du curseur,
+    // pour que le clip parte d'un début de mesure (ou de pas de quantification) comme les autres.
+    const double start = pos + std::ceil ((beat - pos) / q - epsilon) * q;
+    rt.queued = Queued::play;
+    rt.queuedSlot = scene;
+    rt.queuedBeat = start;
+    rt.queuedOffset = pos;
+}
+
+void Session::setClipPosition (int track, double position)
+{
+    if (! juce::isPositiveAndBelow (track, song.numTracks()) || ! playing)
+        return;
+    auto& rt = runtime[(size_t) track];
+    auto clip = song.clipAt (track, rt.playingSlot);
+    if (clip == nullptr)
+        return;
+
+    // Comme le curseur de Cubase : toute la lecture saute, les autres clips restent calés.
+    const double length = clip->length;
+    const double loop = std::floor ((beat - rt.clipStart) / length);
+    double target = rt.clipStart + loop * length + juce::jlimit (0.0, length, position);
+    while (target < 0.0)
+        target += length;
+    const double delta = target - beat;
+    beat = target;
+    for (auto& other : runtime)
+    {
+        for (auto& a : other.active)
+            a.offBeat = -1.0;
+        if (other.queued != Queued::none)
+        {
+            if (other.queuedOffset > 0.0) other.queuedBeat += delta;
+            else other.queuedBeat = -1.0;
+        }
+        if (other.recording)
+            other.recordStart += delta;
+    }
+}
+
+void Session::stopTrackNow (int track)
+{
+    if (! juce::isPositiveAndBelow (track, song.numTracks()))
+        return;
+    auto& rt = runtime[(size_t) track];
+    if (rt.recording)
+        finishRecording (track, beat);
+    for (auto& a : rt.active)
+        a.offBeat = -1.0;
+    rt.playingSlot = -1;
+    rt.queued = Queued::none;
+    rt.queuedSlot = -1;
 }
 
 void Session::stopTrack (int track)
@@ -364,6 +456,8 @@ void Session::applyQueued (int track, double at, int sample, juce::MidiBuffer& o
     auto& rt = runtime[(size_t) track];
     const auto what = rt.queued;
     const int slot = rt.queuedSlot;
+    const double offset = rt.queuedOffset;
+    rt.queuedOffset = 0.0;
     rt.queued = Queued::none;
     rt.queuedSlot = -1;
     rt.queuedBeat = -1.0;
@@ -382,7 +476,7 @@ void Session::applyQueued (int track, double at, int sample, juce::MidiBuffer& o
     if (what == Queued::play && song.clipAt (track, slot) != nullptr)
     {
         rt.playingSlot = slot;
-        rt.clipStart = at;
+        rt.clipStart = at - offset;
     }
     else if (what == Queued::record && juce::isPositiveAndBelow (slot, song.numScenes()))
     {
@@ -420,7 +514,7 @@ void Session::playRange (int track, double from, double to, double blockStart, d
             const double length = clip->length;
             for (const auto& n : clip->notes)
             {
-                if (n.start >= length)
+                if (n.start >= length || n.muted)
                     continue;
                 const double first = rt.clipStart + n.start;
                 double k = from > first ? std::ceil ((from - first) / length - epsilon) : 0.0;

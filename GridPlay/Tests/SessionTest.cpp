@@ -3,6 +3,7 @@
 
 #include "../Source/Session.h"
 #include "../Source/ApcProtocol.h"
+#include "../Source/NoteOps.h"
 
 #include <iostream>
 
@@ -309,6 +310,124 @@ int main()
                   && read->notes[4].velocity == 64 && std::abs (read->length - 8.0) < 1e-9,
                "export puis import d'un fichier .mid");
         file.deleteFile();
+    }
+
+
+    //--------------------------------------------------------------------------
+    std::cout << "Éditeur de notes" << std::endl;
+    {
+        using namespace notes;
+        check (formatPosition (0.0) == "1.1.1.0" && formatPosition (4.0 + 2.0 + 0.25 + 10.0 / 480.0) == "2.3.2.10", "positions au format Cubase");
+        check (formatLength (0.25) == "0.0.1.0" && formatLength (5.5) == "1.1.2.0", "longueurs au format Cubase");
+        check (std::abs (parsePosition ("2.3.2.10", false) - (6.25 + 10.0 / 480.0)) < 1e-9 && std::abs (parsePosition ("3", false) - 8.0) < 1e-9
+                  && std::abs (parsePosition ("0.1", true) - 1.0) < 1e-9 && parsePosition ("abc", false) < 0.0, "lecture d'une position tapée");
+        check (pitchName (60) == "C3" && pitchName (0) == "C-2" && pitchName (61) == "C#3" && pitchName (127) == "G8", "do 3 = 60, comme Cubase");
+        check (parsePitch ("C3") == 60 && parsePitch ("f#2") == 54 && parsePitch ("Db3") == 61 && parsePitch ("C-2") == 0
+                  && parsePitch ("64") == 64 && parsePitch ("H2") == -1, "lecture d'une hauteur tapée");
+
+        std::vector<Note> n { { 0.1, 0.3, 60, 100 }, { 1.9, 0.6, 62, 90 }, { 3.0, 0.5, 60, 80 } };
+        auto q = n;
+        quantizeStarts (q, {}, 0.25);
+        check (std::abs (q[0].start - 0.0) < 1e-9 && std::abs (q[1].start - 2.0) < 1e-9 && std::abs (q[2].start - 3.0) < 1e-9, "Q sans sélection : toutes les notes");
+        q = n;
+        quantizeStarts (q, { 1 }, 1.0);
+        check (std::abs (q[0].start - 0.1) < 1e-9 && std::abs (q[1].start - 2.0) < 1e-9, "Q : seulement la sélection");
+        quantizeLengths (q, {}, 0.25);
+        check (std::abs (q[0].length - 0.25) < 1e-9 && std::abs (q[1].length - 0.5) < 1e-9, "quantification des longueurs");
+
+        auto t = n;
+        transpose (t, { 0, 2 }, 12);
+        check (t[0].pitch == 72 && t[1].pitch == 62 && t[2].pitch == 72, "transposition de la sélection");
+        transpose (t, { 0 }, 60);
+        check (t[0].pitch == 72, "pas de transposition hors du clavier");
+
+        auto d = n;
+        nudge (d, { 0, 1 }, -1.0);
+        check (std::abs (d[0].start) < 1e-9 && std::abs (d[1].start - 1.8) < 1e-9, "décaler à gauche s'arrête au début du clip");
+
+        auto sp = n;
+        auto sel = splitAt (sp, { 1 }, 1, 2.0);
+        check (sp.size() == 4 && std::abs (sp[1].length - 0.1) < 1e-9 && std::abs (sp[3].start - 2.0) < 1e-9 && std::abs (sp[3].length - 0.5) < 1e-9
+                  && sel.size() == 2, "ciseaux : une note en deux");
+
+        std::vector<Note> g { { 0.0, 0.5, 60, 100 }, { 2.0, 1.0, 60, 100 }, { 1.0, 0.5, 64, 100 } };
+        const int kept = glue (g, 0);
+        check (g.size() == 2 && kept == 0 && std::abs (g[0].length - 3.0) < 1e-9, "colle : jusqu'à la fin de la note suivante de même hauteur");
+
+        auto l = n;
+        legato (l, {}, 4.0);
+        check (std::abs (l[0].length - 1.8) < 1e-9 && std::abs (l[1].length - 1.1) < 1e-9 && std::abs (l[2].length - 1.0) < 1e-9, "legato");
+
+        auto dup = n;
+        auto copies = duplicate (dup, { 0, 1 });
+        check (dup.size() == 5 && copies.size() == 2 && std::abs (dup[3].start - 2.5) < 1e-9 && std::abs (dup[4].start - 4.3) < 1e-9,
+               "Cmd D : copie juste après la sélection");
+
+        erase (dup, copies);
+        check (dup.size() == 3, "supprimer");
+
+
+        // Panneau de quantification : swing et force.
+        QuantizeSettings qs;
+        qs.grid = 0.5;
+        qs.swing = 1.0;
+        std::vector<Note> sw { { 0.05, 0.25, 60, 100 }, { 0.48, 0.25, 60, 100 }, { 1.02, 0.25, 60, 100 } };
+        quantize (sw, {}, qs);
+        check (std::abs (sw[0].start) < 1e-9 && std::abs (sw[1].start - 0.75) < 1e-9 && std::abs (sw[2].start - 1.0) < 1e-9
+                  && std::abs (sw[1].length - 0.25) < 1e-9, "swing 100 % : une croche sur deux retardée d'une double, longueur gardée");
+        qs.swing = 0.0;
+        qs.strength = 0.5;
+        std::vector<Note> st { { 0.2, 0.25, 60, 100 } };
+        quantize (st, {}, qs);
+        check (std::abs (st[0].start - 0.1) < 1e-9, "force 50 % : à mi-chemin de la grille");
+        qs.strength = 1.0;
+        qs.lengths = true;
+        std::vector<Note> ln { { 0.1, 0.32, 60, 100 } };
+        quantize (ln, {}, qs);
+        check (std::abs (ln[0].start) < 1e-9 && std::abs (ln[0].length - 0.5) < 1e-9, "fins de notes quantifiées aussi");
+
+        // Lecture depuis le curseur de l'éditeur, puis déplacement du curseur pendant la lecture.
+        {
+            Runner pr;
+            pr.session.setClip (0, 0, fourNotes (60));
+            pr.session.playClipFrom (0, 0, 2.0);
+            pr.run (pr.blocksUntil (1.0));
+            const auto first = pr.ons (0);
+            check (first.size() == 1 && first[0].pitch == 62 && first[0].sample == 0, "lecture depuis le temps 3 du clip : la 3e note tout de suite");
+            pr.session.setClipPosition (0, 0.0);
+            pr.run (2);
+            const auto after = pr.ons (0);
+            check (after.size() == 2 && after[1].pitch == 60, "curseur ramené au début : la 1re note rejoue");
+            check (std::abs (pr.session.getBeat() - 2.0 * block / samplesPerBeat) < 1e-9, "déplacer le curseur déplace toute la lecture");
+        }
+        {
+            // Le transport tourne déjà : la lecture depuis le curseur reste calée sur la grille.
+            Runner sy;
+            sy.session.setClip (1, 0, fourNotes (40));
+            sy.session.setClip (0, 0, fourNotes (60));
+            sy.session.launchSlot (1, 0);
+            sy.run (sy.blocksUntil (5.5));                  // mesure 2, temps 2.5
+            sy.session.playClipFrom (0, 0, 2.0);             // curseur sur le temps 3 du clip
+            sy.run (sy.blocksUntil (8.0));
+            const auto ons = sy.ons (0);
+            check (! ons.empty() && ons[0].pitch == 62 && ons[0].sample == at (6.0),
+                   "départ au prochain temps 3 de la mesure (temps 6), pas tout de suite");
+            check (ons.size() == 2 && ons[1].pitch == 63 && ons[1].sample == at (7.0), "le clip reste calé sur les mesures des autres");
+        }
+
+        // Une note en sourdine ne joue pas.
+        Runner r;
+        auto clip = std::make_shared<Clip>();
+        clip->length = 4.0;
+        clip->notes = { { 0.0, 0.5, 60, 100 }, { 1.0, 0.5, 62, 100, true } };
+        r.session.setClip (0, 0, clip);
+        r.session.launchSlot (0, 0);
+        r.run (r.blocksUntil (3.0));
+        bool mutedPlayed = false;
+        for (const auto& e : r.ons (0)) if (e.pitch == 62) mutedPlayed = true;
+        check (! mutedPlayed && r.ons (0).size() == 1, "note en sourdine : pas jouée");
+        auto xml = clipToXml (*clip);
+        check (clipFromXml (*xml)->notes[1].muted, "la sourdine est sauvegardée");
     }
 
     //--------------------------------------------------------------------------

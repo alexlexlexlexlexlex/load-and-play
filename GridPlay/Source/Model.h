@@ -34,6 +34,7 @@ struct Note
     double length = 0.25;
     int pitch = 60;
     int velocity = 100;
+    bool muted = false;    // note en sourdine : affichée, pas jouée
 };
 
 struct Clip
@@ -74,6 +75,7 @@ struct Track
     juce::MemoryBlock pluginState;        // état de l'instrument, mis à jour à la sauvegarde
 
     float volume = 0.85f;                 // 0..1, 0,85 = 0 dB
+    bool drumMap = false;                 // l'éditeur montre les sons de batterie (drum map GM)
     bool mute = false, solo = false, arm = false;
 
     std::vector<ClipPtr> slots;           // une case par scène, nullptr = vide
@@ -141,6 +143,8 @@ inline std::unique_ptr<juce::XmlElement> clipToXml (const Clip& clip)
         e->setAttribute ("l", n.length);
         e->setAttribute ("p", n.pitch);
         e->setAttribute ("v", n.velocity);
+        if (n.muted)
+            e->setAttribute ("m", true);
     }
     return xml;
 }
@@ -154,7 +158,7 @@ inline ClipPtr clipFromXml (const juce::XmlElement& xml)
     for (auto* e : xml.getChildWithTagNameIterator ("N"))
         clip->notes.push_back ({ e->getDoubleAttribute ("s"), e->getDoubleAttribute ("l", 0.25),
                                  juce::jlimit (0, 127, e->getIntAttribute ("p", 60)),
-                                 juce::jlimit (1, 127, e->getIntAttribute ("v", 100)) });
+                                 juce::jlimit (1, 127, e->getIntAttribute ("v", 100)), e->getBoolAttribute ("m") });
     return clip;
 }
 
@@ -187,6 +191,7 @@ inline std::unique_ptr<juce::XmlElement> songToXml (const Song& song)
         e->setAttribute ("mute", t.mute);
         e->setAttribute ("solo", t.solo);
         e->setAttribute ("arm", t.arm);
+        e->setAttribute ("drumMap", t.drumMap);
         if (t.outputType == OutputType::plugin)
         {
             auto* p = e->createNewChildElement ("Plugin");
@@ -238,6 +243,7 @@ inline bool songFromXml (const juce::XmlElement& xml, Song& song)
             t.mute = e->getBoolAttribute ("mute");
             t.solo = e->getBoolAttribute ("solo");
             t.arm = e->getBoolAttribute ("arm");
+            t.drumMap = e->getBoolAttribute ("drumMap");
             if (auto* p = e->getChildByName ("Plugin"))
             {
                 t.pluginName = p->getStringAttribute ("name");
@@ -302,6 +308,8 @@ inline bool clipToMidiFile (const Clip& clip, double tempo, const juce::File& fi
     seq.addEvent (juce::MidiMessage::timeSignatureMetaEvent (beatsPerBar, 4), 0.0);
     for (const auto& n : clip.notes)
     {
+        if (n.muted)
+            continue;
         seq.addEvent (juce::MidiMessage::noteOn (1, n.pitch, (juce::uint8) n.velocity), std::round (n.start * ticks));
         seq.addEvent (juce::MidiMessage::noteOff (1, n.pitch), std::round ((n.start + n.length) * ticks));
     }

@@ -32,6 +32,13 @@ public:
     void launchSlot (int track, int scene);
     void stopTrack (int track);
     void launchScene (int scene);
+    // Éditeur : joue ce clip à partir d'une position (en temps dans le clip), en restant calé
+    // sur la même grille que les autres clips : si le transport tourne, il part au prochain
+    // moment où la mesure en cours arrive à cette position ; à l'arrêt, le transport démarre
+    // à cette position. setClipPosition déplace toute la lecture (comme le curseur de Cubase).
+    void playClipFrom (int track, int scene, double position);
+    void setClipPosition (int track, double position);
+    void stopTrackNow (int track);   // arrêt immédiat (bouton stop de l'éditeur)
     void stopAllClips();
     void play();
     void stop();
@@ -81,6 +88,7 @@ private:
         Queued queued = Queued::none;
         int queuedSlot = -1;
         double queuedBeat = -1.0;         // calculé par le premier bloc qui le voit
+        double queuedOffset = 0.0;        // position dans le clip au départ (lecture depuis le curseur)
 
         bool recording = false;
         int recordSlot = -1;

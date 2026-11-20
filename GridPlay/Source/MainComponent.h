@@ -5,6 +5,7 @@
 #include "ApcMini.h"
 #include "SessionView.h"
 #include "TransportControls.h"
+#include "NoteEditor.h"
 
 #include <juce_audio_utils/juce_audio_utils.h>
 
@@ -28,6 +29,7 @@ public:
     std::function<void()> onTitleChanged;
 
     void paint (juce::Graphics&) override;
+    static constexpr int headerH = 60, cheek = 12;
     void resized() override;
 
     // Commandes
@@ -48,7 +50,7 @@ private:
     {
         newSong = 1, openSong, saveSong, saveSongAs,
         insertTrack, insertScene, deleteSelection, duplicate, copyClip, pasteClip, renameClip,
-        launchSelection, playStop, stopAllClips, audioSettings, scanPlugins
+        launchSelection, playStop, stopAllClips, audioSettings, scanPlugins, editClip
     };
 
     class PluginWindow;
@@ -61,6 +63,8 @@ private:
     void saveAs (std::function<void()> then);
     bool writeTo (const juce::File& file);
     void openPluginWindow (int track);
+    void openEditor (int track, int scene);
+    void closeEditor();
     void closePluginWindow (juce::AudioPluginInstance* plugin);
     void showScanner();
     void showAudioSettings();
@@ -88,6 +92,8 @@ private:
     std::unique_ptr<juce::FileChooser> chooser;
     juce::OwnedArray<PluginWindow> pluginWindows;
     std::unique_ptr<juce::DocumentWindow> scannerWindow;
+    std::unique_ptr<juce::DocumentWindow> editorWindow;
+    NoteEditor* editor = nullptr;
     std::unique_ptr<juce::DocumentWindow> settingsWindow;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)

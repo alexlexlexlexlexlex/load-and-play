@@ -107,6 +107,15 @@ juce::MidiOutput* AudioEngine::openPort (const juce::String& name)
     return nullptr;
 }
 
+void AudioEngine::previewNote (int track, int pitch, int velocity)
+{
+    const auto message = velocity > 0 ? juce::MidiMessage::noteOn (1, juce::jlimit (0, 127, pitch), (juce::uint8) juce::jlimit (1, 127, velocity))
+                                      : juce::MidiMessage::noteOff (1, juce::jlimit (0, 127, pitch));
+    const auto scope = previewFifo.write (1);
+    if (scope.blockSize1 > 0)
+        previewData[(size_t) scope.startIndex1] = { track, message };
+}
+
 void AudioEngine::setController (const juce::String& inputIdentifier, std::function<void (const juce::MidiMessage&)> handler)
 {
     const juce::ScopedLock sl (controllerLock);
@@ -213,6 +222,15 @@ void AudioEngine::audioDeviceIOCallbackWithContext (const float* const*, int,
     };
     route (scope.startIndex1, scope.blockSize1);
     route (scope.startIndex2, scope.blockSize2);
+
+    // Notes écoutées depuis l'éditeur.
+    const auto preview = previewFifo.read (previewFifo.getNumReady());
+    for (int i = 0; i < preview.blockSize1 + preview.blockSize2; ++i)
+    {
+        const int index = i < preview.blockSize1 ? preview.startIndex1 + i : preview.startIndex2 + i - preview.blockSize1;
+        if (live.size() < live.capacity() && juce::isPositiveAndBelow (previewData[(size_t) index].track, song.numTracks()))
+            live.push_back (previewData[(size_t) index]);
+    }
 
     session.process (numSamples, live, trackMidi);
 

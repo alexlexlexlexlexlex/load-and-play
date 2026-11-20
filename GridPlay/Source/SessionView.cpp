@@ -224,14 +224,13 @@ public:
 
     void paint (juce::Graphics& g) override
     {
-        g.setColour (theme::panel);
-        g.fillRect (getLocalBounds().reduced (1, 0));
+        const auto r = getLocalBounds().toFloat().reduced (2.0f, 2.0f);
+        g.setGradientFill (juce::ColourGradient (theme::panel.brighter (0.04f), 0.0f, r.getY(), theme::panel, 0.0f, r.getBottom(), false));
+        g.fillRoundedRectangle (r, 5.0f);
         g.setColour (info().colour);
-        g.fillRect (1, 0, getWidth() - 2, 3);
-        g.setColour (theme::textDim);
-        g.setFont (font (10.0f, true));
-        g.drawText (juce::String::fromUTF8 ("ENTRÉE"), 6, 6, 60, 12, juce::Justification::left);
-        g.drawText ("SORTIE", 6, 58, 60, 12, juce::Justification::left);
+        g.fillRoundedRectangle (r.withHeight (3.0f), 1.5f);
+        theme::sectionTitle (g, juce::String::fromUTF8 ("ENTRÉE"), { 7, 5, 80, 14 });
+        theme::sectionTitle (g, "SORTIE", { 7, 57, 80, 14 });
     }
 
     void resized() override
@@ -291,17 +290,18 @@ public:
 
     void paint (juce::Graphics& g) override
     {
-        g.setColour (theme::panel);
-        g.fillRect (getLocalBounds().reduced (1, 0));
+        const auto r = getLocalBounds().toFloat().reduced (2.0f, 2.0f);
+        g.setGradientFill (juce::ColourGradient (theme::panel.brighter (0.04f), 0.0f, r.getY(), theme::panel, 0.0f, r.getBottom(), false));
+        g.fillRoundedRectangle (r, 5.0f);
         g.setColour (theme::accent);
-        g.fillRect (1, 0, getWidth() - 2, 3);
+        g.fillRoundedRectangle (r.withHeight (3.0f), 1.5f);
         g.setColour (theme::text);
-        g.setFont (font (13.0f, true));
-        g.drawText ("Master", 8, 8, getWidth() - 16, 18, juce::Justification::left);
+        g.setFont (font (20.0f).italicised());
+        g.drawText ("Master", 10, 8, getWidth() - 20, 26, juce::Justification::left);
         g.setColour (theme::textDim);
         g.setFont (font (11.0f));
-        g.drawFittedText ("Clic sur une case : lancer\nDouble-clic sur une case vide : nouveau clip\nGlisser un .mid : importer",
-                          8, 32, getWidth() - 16, 70, juce::Justification::topLeft, 4);
+        g.drawFittedText (juce::String::fromUTF8 ("Clic sur une case : lancer\nDouble-clic : nouveau clip, ou éditer\nGlisser un .mid : importer"),
+                          10, 40, getWidth() - 20, 70, juce::Justification::topLeft, 4);
     }
 
     void resized() override { volume.setBounds (4, 142, getWidth() - 8, 20); }
@@ -331,6 +331,8 @@ SessionView::SessionView (AudioEngine& e) : engine (e)
 SessionView::~SessionView()
 {
     stopTimer();
+    if (inlineEditor != nullptr)
+        inlineEditor->onFocusLost = nullptr;
 }
 
 //==============================================================================
@@ -509,7 +511,7 @@ void SessionView::paint (juce::Graphics& g)
     const int right = gridRight(), bottom = slotsBottom();
     const bool blinkOn = view.playing ? std::fmod (view.beat, 1.0) < 0.5 : (juce::Time::getMillisecondCounter() / 250) % 2 == 0;
 
-    // --- Cases ---
+    // --- Cases : des pads arrondis, comme sur un contrôleur ---
     {
         juce::Graphics::ScopedSaveState save (g);
         g.reduceClipRegion (0, headerH, right, bottom - headerH);
@@ -518,39 +520,51 @@ void SessionView::paint (juce::Graphics& g)
             const auto& tr = view.tracks[(size_t) t];
             for (int s = 0; s < nS; ++s)
             {
-                const auto r = slotBounds (t, s);
-                if (r.getBottom() < headerH || r.getY() > bottom || r.getRight() < 0 || r.getX() > right)
+                const auto ri = slotBounds (t, s);
+                if (ri.getBottom() < headerH || ri.getY() > bottom || ri.getRight() < 0 || ri.getX() > right)
                     continue;
+                const auto r = ri.toFloat().reduced (1.0f, 1.0f);
                 const auto& c = view.cell (t, s);
-                const auto button = r.withWidth (20).toFloat();
+                const auto button = r.withWidth (20.0f);
 
                 if (c.state == SlotState::empty)
                 {
                     g.setColour (theme::slot);
-                    g.fillRect (r);
+                    g.fillRoundedRectangle (r, 4.0f);
+                    g.setColour (juce::Colour (0xff2c2a27));
+                    g.drawRoundedRectangle (r.reduced (0.5f), 4.0f, 1.0f);
                     if (tr.arm)
                     {
-                        g.setColour (theme::record.withAlpha (0.55f));
-                        g.fillEllipse (button.withSizeKeepingCentre (8, 8));
+                        g.setColour (theme::record.withAlpha (0.6f));
+                        g.drawEllipse (button.withSizeKeepingCentre (9, 9), 1.5f);
                     }
                     else
                     {
-                        g.setColour (juce::Colour (0xff4a4a4a));
-                        g.fillRect (button.withSizeKeepingCentre (7, 7));
+                        g.setColour (juce::Colour (0xff45423d));
+                        g.fillRoundedRectangle (button.withSizeKeepingCentre (7, 7), 1.0f);
+                    }
+                    if (c.state == SlotState::empty && t == dropTrack && s == dropScene)
+                    {
+                        g.setColour (theme::accent);
+                        g.drawRoundedRectangle (r, 4.0f, 2.0f);
                     }
                 }
                 else
                 {
-                    const bool playing = c.state == SlotState::playing || c.state == SlotState::recording;
-                    g.setColour (playing ? c.colour : c.colour.withMultipliedBrightness (0.82f));
-                    g.fillRect (r);
-                    if (playing)
+                    const bool live = c.state == SlotState::playing || c.state == SlotState::recording;
+                    const auto base = live ? c.colour : c.colour.withMultipliedSaturation (0.85f).withMultipliedBrightness (0.72f);
+                    g.setGradientFill (juce::ColourGradient (base.brighter (0.12f), 0.0f, r.getY(), base.darker (0.12f), 0.0f, r.getBottom(), false));
+                    g.fillRoundedRectangle (r, 4.0f);
+                    g.setColour (juce::Colours::white.withAlpha (0.18f));
+                    g.drawHorizontalLine ((int) r.getY() + 1, r.getX() + 4.0f, r.getRight() - 4.0f);
+                    if (live)
                     {
-                        // Avancement dans la boucle.
-                        g.setColour (juce::Colours::black.withAlpha (0.25f));
-                        g.fillRect (r.getX(), r.getBottom() - 3, (int) (r.getWidth() * tr.progress), 3);
+                        // Avancement dans la boucle, et halo.
+                        g.setColour (juce::Colours::black.withAlpha (0.28f));
+                        g.fillRoundedRectangle (r.getX() + 3.0f, r.getBottom() - 4.0f, (r.getWidth() - 6.0f) * (float) tr.progress, 2.5f, 1.0f);
+                        g.setColour ((c.state == SlotState::recording ? theme::record : theme::play).withAlpha (0.9f));
+                        g.drawRoundedRectangle (r.expanded (0.5f), 4.5f, 1.5f);
                     }
-                    juce::Colour mark = juce::Colours::black.withAlpha (0.55f);
                     if (c.state == SlotState::recording || c.state == SlotState::recordQueued)
                     {
                         g.setColour (juce::Colours::black.withAlpha (0.35f));
@@ -563,69 +577,67 @@ void SessionView::paint (juce::Graphics& g)
                     }
                     else
                     {
-                        if (c.state == SlotState::playing) mark = juce::Colours::black;
-                        drawTriangle (g, button, mark);
+                        drawTriangle (g, button, juce::Colours::black.withAlpha (c.state == SlotState::playing ? 0.9f : 0.5f));
                         if (c.state == SlotState::playing || (c.state == SlotState::playQueued && blinkOn))
                             drawTriangle (g, button.reduced (1.5f), theme::play);
                     }
                     g.setColour (juce::Colours::black.withAlpha (0.85f));
-                    g.setFont (font (12.5f));
+                    g.setFont (font (12.5f, true));
                     g.drawText (c.name.isNotEmpty() ? c.name : juce::String ("Clip"),
-                                r.withTrimmedLeft (20).withTrimmedRight (4), juce::Justification::centredLeft, true);
+                                r.withTrimmedLeft (20).withTrimmedRight (4).toNearestInt(), juce::Justification::centredLeft, true);
+                    if (t == dropTrack && s == dropScene)
+                    {
+                        g.setColour (theme::accent);
+                        g.drawRoundedRectangle (r, 4.0f, 2.0f);
+                    }
                 }
 
-                if (c.state == SlotState::recordQueued && blinkOn && c.name.isEmpty())
+                if (t == selTrack && s == selScene)
                 {
-                    g.setColour (theme::record);
-                    g.fillEllipse (button.withSizeKeepingCentre (9, 9));
-                }
-
-                if (t == selTrack && s == selScene && hasKeyboardFocus (true))
-                {
-                    g.setColour (theme::selection);
-                    g.drawRect (r.expanded (1), 2);
-                }
-                else if (t == selTrack && s == selScene)
-                {
-                    g.setColour (theme::selection.withAlpha (0.5f));
-                    g.drawRect (r.expanded (1), 1);
-                }
-                if (t == dropTrack && s == dropScene)
-                {
-                    g.setColour (theme::accent);
-                    g.drawRect (r.expanded (1), 2);
+                    g.setColour (theme::selection.withAlpha (hasKeyboardFocus (true) ? 0.95f : 0.45f));
+                    g.drawRoundedRectangle (r.expanded (1.0f), 5.0f, hasKeyboardFocus (true) ? 2.0f : 1.0f);
                 }
             }
-            // Ligne « + » sous la dernière scène : rien, la colonne des scènes s'en charge.
         }
-        // Colonne « + » : nouvelle piste.
-        const int addX = nT * trackW - scrollX;
-        g.setColour (theme::textDim.withAlpha (0.08f));
-        g.fillRect (addX + 1, headerH, trackW - 2, nS * slotH - scrollY);
+        // Colonne « + » : nouvelle piste, en pointillés comme les emplacements « à venir » du site.
+        const auto add = juce::Rectangle<float> ((float) (nT * trackW - scrollX) + 3.0f, (float) headerH + 2.0f - (float) scrollY,
+                                                 (float) trackW - 6.0f, (float) (nS * slotH) - 4.0f);
+        juce::Path outline;
+        outline.addRoundedRectangle (add, 5.0f);
+        juce::Path dashed;
+        const float dashes[] = { 4.0f, 4.0f };
+        juce::PathStrokeType (1.0f).createDashedStroke (dashed, outline, dashes, 2);
+        g.setColour (juce::Colour (0xff3a3733));
+        g.fillPath (dashed);
     }
 
-    // --- Têtes de pistes ---
+    // --- Têtes de pistes : sombres, filet de couleur en haut, nom en blanc cassé ---
     {
         juce::Graphics::ScopedSaveState save (g);
         g.reduceClipRegion (0, 0, right, headerH);
         for (int t = 0; t <= nT; ++t)
         {
-            const juce::Rectangle<int> r (t * trackW - scrollX + 1, 1, trackW - 2, headerH - 2);
+            const auto r = juce::Rectangle<int> (t * trackW - scrollX + 1, 1, trackW - 2, headerH - 2).toFloat().reduced (1.0f, 0.0f);
             if (t == nT)
             {
-                g.setColour (theme::panel);
-                g.fillRect (r);
                 g.setColour (theme::textDim);
-                g.setFont (font (15.0f, true));
-                g.drawText ("+", r, juce::Justification::centred);
+                g.setFont (font (16.0f, true));
+                g.drawText ("+", r.toNearestInt(), juce::Justification::centred);
                 continue;
             }
             const auto& tr = view.tracks[(size_t) t];
-            g.setColour (t == selTrack ? tr.colour : tr.colour.withMultipliedBrightness (0.8f));
-            g.fillRect (r);
-            g.setColour (juce::Colours::black.withAlpha (0.85f));
+            g.setColour (t == selTrack ? theme::panelLight : theme::panel);
+            g.fillRoundedRectangle (r, 4.0f);
+            g.setColour (tr.colour);
+            g.fillRoundedRectangle (r.withHeight (3.0f), 1.5f);
+            g.setColour (theme::text);
             g.setFont (font (12.5f, true));
-            g.drawText (tr.name, r.reduced (6, 0), juce::Justification::centredLeft, true);
+            g.drawText (tr.name, r.reduced (8, 0).withTrimmedTop (2).toNearestInt(), juce::Justification::centredLeft, true);
+            if (tr.active)
+            {
+                g.setColour (theme::play);
+                g.fillEllipse (r.getRight() - 12.0f, r.getCentreY() - 2.0f, 5.0f, 5.0f);
+            }
         }
     }
 
@@ -637,12 +649,12 @@ void SessionView::paint (juce::Graphics& g)
         g.fillRect (0, bottom, right, stopH);
         for (int t = 0; t < nT; ++t)
         {
-            const juce::Rectangle<int> r (t * trackW - scrollX + 1, bottom + 4, trackW - 2, stopH - 8);
+            const auto r = juce::Rectangle<int> (t * trackW - scrollX + 1, bottom + 5, trackW - 2, stopH - 10).toFloat().reduced (2.0f, 0.0f);
             const bool active = view.tracks[(size_t) t].active;
-            g.setColour (active ? theme::panelLight.brighter (0.15f) : theme::panelLight);
-            g.fillRect (r);
+            g.setColour (active ? theme::panelLight.brighter (0.12f) : theme::panelLight);
+            g.fillRoundedRectangle (r, 4.0f);
             g.setColour (active ? theme::text : theme::textDim);
-            g.fillRect (r.toFloat().withSizeKeepingCentre (8, 8));
+            g.fillRoundedRectangle (r.withSizeKeepingCentre (8, 8), 1.0f);
         }
     }
 
@@ -651,44 +663,42 @@ void SessionView::paint (juce::Graphics& g)
         const int x = right;
         g.setColour (theme::panel);
         g.fillRect (x, 0, sceneW, bottom + stopH);
-        g.setColour (theme::text);
-        g.setFont (font (12.5f, true));
-        g.drawText (juce::String::fromUTF8 ("Scènes"), x + 8, 0, sceneW - 16, headerH, juce::Justification::centredLeft);
+        theme::sectionTitle (g, juce::String::fromUTF8 ("SCÈNES"), { x + 10, 0, sceneW - 20, headerH });
 
         juce::Graphics::ScopedSaveState save (g);
         g.reduceClipRegion (x, headerH, sceneW, bottom - headerH);
         for (int s = 0; s <= nS; ++s)
         {
-            const juce::Rectangle<int> r (x + 1, headerH + s * slotH - scrollY + 1, sceneW - 2, slotH - 2);
+            const auto r = sceneBounds (s).toFloat().reduced (3.0f, 1.0f);
             if (s == nS)
             {
                 g.setColour (theme::textDim);
-                g.setFont (font (15.0f, true));
-                g.drawText ("+", r, juce::Justification::centred);
+                g.setFont (font (16.0f, true));
+                g.drawText ("+", r.toNearestInt(), juce::Justification::centred);
                 continue;
             }
             const auto& sc = view.scenes[(size_t) s];
-            g.setColour (sc.active ? juce::Colour (0xff3d4a36) : theme::panelLight);
-            g.fillRect (r);
-            drawTriangle (g, r.withWidth (22).toFloat(), sc.active ? theme::play : theme::textDim);
+            g.setColour (sc.active ? juce::Colour (0xff2f3a28) : theme::panelLight);
+            g.fillRoundedRectangle (r, 4.0f);
+            drawTriangle (g, r.withWidth (22.0f), sc.active ? theme::play : theme::textDim);
             g.setColour (theme::text);
             g.setFont (font (12.5f));
-            g.drawText (sc.name, r.withTrimmedLeft (24), juce::Justification::centredLeft, true);
+            g.drawText (sc.name, r.withTrimmedLeft (24).toNearestInt(), juce::Justification::centredLeft, true);
         }
     }
     {
-        const juce::Rectangle<int> r (right + 1, bottom + 4, sceneW - 2, stopH - 8);
+        const auto r = juce::Rectangle<int> (right + 1, bottom + 5, sceneW - 2, stopH - 10).toFloat().reduced (3.0f, 0.0f);
         g.setColour (theme::panelLight);
-        g.fillRect (r);
+        g.fillRoundedRectangle (r, 4.0f);
         g.setColour (theme::text);
-        g.fillRect (juce::Rectangle<float> ((float) r.getX() + 8.0f, (float) r.getCentreY() - 4.0f, 8.0f, 8.0f));
-        g.setFont (font (12.0f));
-        g.drawText (juce::String::fromUTF8 ("Tout arrêter"), r.withTrimmedLeft (24), juce::Justification::centredLeft);
+        g.fillRoundedRectangle (juce::Rectangle<float> (r.getX() + 9.0f, r.getCentreY() - 4.0f, 8.0f, 8.0f), 1.0f);
+        g.setFont (font (12.0f, true));
+        g.drawText (juce::String::fromUTF8 ("Tout arrêter"), r.withTrimmedLeft (26).toNearestInt(), juce::Justification::centredLeft);
     }
 
-    // Séparation avec la console.
-    g.setColour (theme::line);
-    g.fillRect (0, bottom + stopH - 1, getWidth(), 1);
+    // Filet entre la grille et la console, comme sous l'en-tête des plugins.
+    g.setColour (theme::rule);
+    g.fillRect (10, bottom + stopH - 1, getWidth() - 20, 1);
 }
 
 //==============================================================================
@@ -847,13 +857,13 @@ void SessionView::mouseDoubleClick (const juce::MouseEvent& e)
     else if (h.kind == K::header)
     {
         const int t = h.track;
-        askText ("Nom de la piste", view.tracks[(size_t) t].name, [this, t] (const juce::String& name)
+        editInline (headerBounds (t), view.tracks[(size_t) t].name, [this, t] (const juce::String& name)
                  { engine.edit ([&] (Session& s) { if (t < s.song.numTracks()) s.song.tracks[(size_t) t].name = name; }); });
     }
     else if (h.kind == K::scene)
     {
         const int sc = h.scene;
-        askText (juce::String::fromUTF8 ("Nom de la scène"), view.scenes[(size_t) sc].name, [this, sc] (const juce::String& name)
+        editInline (sceneBounds (sc), view.scenes[(size_t) sc].name, [this, sc] (const juce::String& name)
                  { engine.edit ([&] (Session& s) { if (sc < s.song.numScenes()) s.song.scenes[(size_t) sc].name = name; }); });
     }
 }
@@ -961,8 +971,14 @@ void SessionView::renameSelected()
     if (! hasClipSelected())
         return;
     const int t = selTrack, sc = selScene;
-    askText ("Nom du clip", view.cell (t, sc).name, [this, t, sc] (const juce::String& name)
+    editInline (slotBounds (t, sc).withTrimmedLeft (20), view.cell (t, sc).name, [this, t, sc] (const juce::String& name)
              { engine.edit ([&] (Session& s) { if (auto c = s.song.clipAt (t, sc)) c->name = name; }); });
+}
+
+void SessionView::editSelected()
+{
+    if (hasClipSelected() && onEditClip)
+        onEditClip (selTrack, selScene);
 }
 
 void SessionView::insertTrack()
@@ -1081,7 +1097,7 @@ void SessionView::showTrackMenu (int track)
     m.showMenuAsync (juce::PopupMenu::Options(), [this, track] (int r)
     {
         if (r == rename)
-            askText ("Nom de la piste", view.tracks[(size_t) track].name, [this, track] (const juce::String& name)
+            editInline (headerBounds (track), view.tracks[(size_t) track].name, [this, track] (const juce::String& name)
                      { engine.edit ([&] (Session& s) { if (track < s.song.numTracks()) s.song.tracks[(size_t) track].name = name; }); });
         else if (r == insertBefore) engine.insertTrack (track);
         else if (r == insertAfter)  engine.insertTrack (track + 1);
@@ -1117,7 +1133,7 @@ void SessionView::showSceneMenu (int scene)
     {
         if (r == launch) engine.perform ([&] (Session& s) { s.launchScene (scene); });
         else if (r == rename)
-            askText (juce::String::fromUTF8 ("Nom de la scène"), view.scenes[(size_t) scene].name, [this, scene] (const juce::String& name)
+            editInline (sceneBounds (scene), view.scenes[(size_t) scene].name, [this, scene] (const juce::String& name)
                      { engine.edit ([&] (Session& s) { if (scene < s.song.numScenes()) s.song.scenes[(size_t) scene].name = name; }); });
         else if (r == insertBefore) engine.edit ([&] (Session& s) { s.insertScene (scene, { juce::String (s.song.numScenes() + 1) }); });
         else if (r == insertAfter)  engine.edit ([&] (Session& s) { s.insertScene (scene + 1, { juce::String (s.song.numScenes() + 1) }); });
@@ -1125,20 +1141,55 @@ void SessionView::showSceneMenu (int scene)
     });
 }
 
-void SessionView::askText (const juce::String& title, const juce::String& initial, std::function<void (const juce::String&)> done)
+// Renommer sur place : le champ apparaît sur la tête de piste, la scène ou le clip.
+void SessionView::editInline (juce::Rectangle<int> area, const juce::String& initial, std::function<void (const juce::String&)> done)
 {
-    auto* w = new juce::AlertWindow (title, {}, juce::MessageBoxIconType::NoIcon, this);
-    w->addTextEditor ("text", initial);
-    w->addButton ("OK", 1, juce::KeyPress (juce::KeyPress::returnKey));
-    w->addButton ("Annuler", 0, juce::KeyPress (juce::KeyPress::escapeKey));
-    if (auto* editor = w->getTextEditor ("text"))
-        editor->selectAll();
-    w->enterModalState (true, juce::ModalCallbackFunction::create ([w, done] (int result)
+    finishInlineEdit (false);
+    inlineEditor = std::make_unique<juce::TextEditor>();
+    auto& ed = *inlineEditor;
+    ed.setFont (theme::font (13.0f, juce::Font::bold));
+    ed.setColour (juce::TextEditor::backgroundColourId, juce::Colour (0xff0d0d0d));
+    ed.setColour (juce::TextEditor::outlineColourId, theme::accent);
+    ed.setColour (juce::TextEditor::focusedOutlineColourId, theme::accent);
+    ed.setColour (juce::TextEditor::textColourId, theme::text);
+    ed.setIndents (6, (area.getHeight() - 16) / 2);
+    ed.setText (initial, false);
+    ed.setBounds (area);
+    addAndMakeVisible (ed);
+    ed.selectAll();
+    ed.grabKeyboardFocus();
+    inlineDone = std::move (done);
+    ed.onReturnKey = [this] { finishInlineEdit (true); };
+    ed.onEscapeKey = [this] { finishInlineEdit (false); };
+    ed.onFocusLost = [this] { finishInlineEdit (true); };
+}
+
+void SessionView::finishInlineEdit (bool keep)
+{
+    if (inlineEditor == nullptr)
+        return;
+    const auto text = inlineEditor->getText().trim();
+    auto done = std::move (inlineDone);
+    inlineDone = nullptr;
+    // Le champ est détruit après le retour de son propre rappel.
+    juce::MessageManager::callAsync ([safe = juce::Component::SafePointer<SessionView> (this), editor = inlineEditor.release()]
     {
-        const auto text = w->getTextEditorContents ("text").trim();
-        if (result == 1 && text.isNotEmpty())
-            done (text);
-    }), true);
+        delete editor;
+        if (safe != nullptr)
+            safe->grabKeyboardFocus();
+    });
+    if (keep && text.isNotEmpty() && done)
+        done (text);
+}
+
+juce::Rectangle<int> SessionView::headerBounds (int track) const
+{
+    return { track * trackW - scrollX + 1, 1, trackW - 2, headerH - 2 };
+}
+
+juce::Rectangle<int> SessionView::sceneBounds (int scene) const
+{
+    return { gridRight() + 1, headerH + scene * slotH - scrollY + 1, sceneW - 2, slotH - 2 };
 }
 
 //==============================================================================
