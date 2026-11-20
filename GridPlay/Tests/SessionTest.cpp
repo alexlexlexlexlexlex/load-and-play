@@ -506,6 +506,36 @@ int main()
                "EQ, panoramique, retour audio, inserts et master se sauvegardent");
     }
 
+
+    //--------------------------------------------------------------------------
+    std::cout << "Réglages MIDI de la piste" << std::endl;
+    {
+        Runner r;
+        r.session.setClip (0, 0, fourNotes (60));
+        r.session.song.tracks[0].transpose = 12;
+        r.session.song.tracks[0].velocityShift = -30;
+        r.session.song.tracks[0].delayMs = 10.0;                 // 10 ms = 0,02 temps à 120 BPM
+        r.session.launchSlot (0, 0);
+        r.run (r.blocksUntil (1.5));
+        const auto ons = r.ons (0);
+        check (! ons.empty() && ons[0].pitch == 72 && ons[0].velocity == 70, "transposition +12 et vélocité -30");
+        check (ons.size() >= 2 && ons[1].sample == at (1.0) + 480, "retard de 10 ms : chaque note 480 échantillons plus tard");
+        int offs = 0;
+        for (const auto& e : r.events[0]) if (! e.on && e.pitch == 72) ++offs;
+        check (offs == 1, "la note relâchée est bien la note transposée");
+
+        // Clavier en direct : transposé lui aussi, et relâché correctement même si on change la transposition.
+        Runner k;
+        k.session.song.tracks[0].arm = true;
+        k.session.song.tracks[0].transpose = -5;
+        k.run (1, { { 0, juce::MidiMessage::noteOn (1, 64, (juce::uint8) 100) } });
+        k.session.song.tracks[0].transpose = 7;
+        k.run (1, { { 0, juce::MidiMessage::noteOff (1, 64) } });
+        bool onOk = false, offOk = false;
+        for (const auto& e : k.events[0]) { if (e.on && e.pitch == 59) onOk = true; if (! e.on && e.pitch == 59) offOk = true; }
+        check (onOk && offOk, "clavier transposé, et relâché sur la même note");
+    }
+
     //--------------------------------------------------------------------------
     std::cout << "APC mini" << std::endl;
     {

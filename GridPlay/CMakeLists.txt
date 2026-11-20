@@ -50,6 +50,7 @@ set(GRIDPLAY_SOURCES
     Source/SessionView.cpp
     Source/NoteEditor.cpp
     Source/ChannelEditor.cpp
+    Source/Hub.cpp
     Source/MainComponent.cpp)
 
 set(GRIDPLAY_DEFINITIONS

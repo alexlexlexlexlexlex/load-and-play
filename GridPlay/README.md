@@ -9,6 +9,29 @@ macOS (Apple Silicon et Intel), Windows et Linux (x64 et ARM64), comme les instr
 
 *Nom provisoire. Étapes 1 et 2 : la matrice de lancement et l'éditeur de notes.*
 
+## Le Hub
+
+Au démarrage, comme le Hub de Cubase : les **projets récents** (avec leur date, et une recherche),
+**Créer un projet**, **Sélectionner un fichier…**, et les réglages de départ : pilote et sortie
+audio en haut, **Audio / MIDI**, **Instruments et effets** (recherche des VST3, AU, LV2), le manuel
+et le site. Double-clic sur un projet pour l'ouvrir. La case « Ouvrir le Hub au démarrage » le
+désactive ; il reste dans **Fichier → Hub…**, et les récents dans **Fichier → Ouvrir un projet récent**.
+
+## Les menus
+
+| Menu | Contenu |
+|---|---|
+| Fichier | Hub, nouveau, ouvrir, projets récents, enregistrer (sous), importer un .mid dans la case, exporter le clip en .mid |
+| Édition | annuler / rétablir (dans la fenêtre au premier plan : grille, éditeur de notes ou réglages de voie), renommer, dupliquer, copier, coller, supprimer le clip |
+| Projet | ajouter une piste ou une scène, renommer ou supprimer la piste, supprimer la scène |
+| MIDI | éditeur de notes, armer la piste, drum map GM, quantification du lancement, longueur d'enregistrement |
+| Transport | lecture / stop, lancer la case ou la scène, tout arrêter, Ableton Link |
+| Studio | Audio / MIDI, instruments et effets, réglages de la voie ou du master, console détaillée |
+| Fenêtre, Aide | Hub, éditeur, fermer les fenêtres d'instruments ; mode d'emploi, site |
+
+Dans la grille, **Cmd Z / Cmd Maj Z** annule et rétablit les modifications (clips, notes
+enregistrées, noms, couleurs, déplacements).
+
 ## La grille
 
 - **Clic sur le triangle d'un clip** : il démarre au prochain temps fort (réglage
@@ -39,6 +62,14 @@ macOS (Apple Silicon et Intel), Windows et Linux (x64 et ARM64), comme les instr
     (sous Windows, passer par loopMIDI).
 - **M** (mute), **S** (solo, Cmd pour plusieurs), volume (gain de l'instrument, ou CC 7 sur un port MIDI).
 
+**Console détaillée**, comme l'inspecteur de Cubase : le bouton « ▴ Console détaillée » sous le
+master (ou F3) agrandit le bas de l'écran. Chaque piste y montre son panoramique, un **décalage**
+de ± 100 ms (en retard, ou en avance pour rattraper un synthé externe lent), le **routage**
+complet (entrée, canal, sortie, canal de sortie, retour audio) et la partie **MIDI** : changement
+de **programme** (envoyé au lancement et à chaque changement), drum map GM, **transposition**
+(± 48 demi-tons) et **vélocité** (± 127) appliquées en jouant, sans toucher aux notes des clips.
+Double-clic sur une valeur pour la remettre à zéro.
+
 **Voies et mixage** : chaque piste est une voie de console. Sa source est l'instrument virtuel,
 ou le **retour audio** d'un synthé externe (une entrée de la carte son, choisie sous la sortie MIDI :
 on traite alors son son sur la même piste qui le joue). Puis l'**égaliseur**, jusqu'à **8 inserts
@@ -55,7 +86,11 @@ volume). Le bouton **e** ouvre les réglages de la voie, comme dans Cubase :
   coupes à 24 dB/octave). On tire les points de la courbe
   (fréquence et gain), molette sur un point pour la largeur, double-clic pour remettre à 0 dB ;
   ou les potards sous la courbe. « EQ » le coupe, « Réinitialiser » le remet à plat.
-- **Fader**, panoramique et vu-mètre. Les vu-mètres sont aussi sous chaque piste de la console.
+- **Fader** gradué en dB comme sur une voie de Cubase, vu-mètre gradué avec sa crête (clic pour
+  la remettre à zéro), valeur du volume à taper, panoramique, M et S. Les vu-mètres sont aussi
+  sous chaque piste de la console.
+- En haut à droite : **← →** annuler / rétablir les réglages de la voie (aussi Cmd Z / Cmd Maj Z),
+  **↑ ↓** passer à la piste précédente ou suivante (aussi les flèches du clavier).
 
 Un second clic sur **e** referme la fenêtre.
 
@@ -160,6 +195,8 @@ rouge = enregistrement, rouge clignotant = enregistrement en attente.
 | Cmd E | éditer les notes du clip |
 | Cmd N / O / S / Maj S | nouveau, ouvrir, enregistrer, enregistrer sous |
 | Cmd , | réglages audio / MIDI |
+| Cmd Z / Cmd Maj Z | annuler, rétablir |
+| F3 | console détaillée / compacte |
 
 (Ctrl à la place de Cmd sous Windows et Linux.) Les morceaux s'enregistrent en `.gridplay`
 (XML lisible), avec l'état des instruments.
@@ -172,6 +209,8 @@ rouge = enregistrement, rouge clignotant = enregistrement en attente.
    - Fait : instruments virtuels et retours audio des synthés externes traités sur leur piste,
      inserts d'effets et égaliseur par piste et sur le master, panoramique, vu-mètres.
    - Fait : **Ableton Link** pour se synchroniser avec Serato DJ et les autres logiciels.
+   - Fait : Hub de démarrage, menus complets, annuler / rétablir dans la grille et les voies,
+     fader façon Cubase, console détaillée (routage, programme, transposition, vélocité, retard).
    - Abandonné (21 novembre 2026) : le mode DJ intégré. Les fonctions DJ seront plutôt confiées
      à un logiciel de DJ (Serato, ou Mixxx adapté), synchronisé par Link.
 
@@ -187,7 +226,8 @@ Outil de développement : `"Grid Play" --snapshot image.png morceau.gridplay` la
 première scène et enregistre une image de la fenêtre ; avec `GRIDPLAY_TEST_CLIP=piste,scène`,
 ouvre aussi l'éditeur sur ce clip (image `-editeur.png`) ; avec la variable
 `GRIDPLAY_TEST_PLUGIN=<chemin d'un .vst3>`, charge cet instrument sur la piste 1 et
-affiche la crête de sortie.
+affiche la crête de sortie. `GRIDPLAY_TEST_CHANNEL=piste` : réglages de voie (`-voie.png`) ;
+`GRIDPLAY_TEST_HUB=1` : le Hub (`-hub.png`) ; `GRIDPLAY_TEST_DETAILED=1` : console détaillée.
 
 ## Organisation
 
@@ -204,6 +244,7 @@ affiche la crête de sortie.
 | `build/_deps/link-src` | Ableton Link 3.1.5 (GPLv2+), téléchargé par CMake |
 | `Resources/Fonts/` | Police Source Sans 3 (Adobe, licence SIL OFL 1.1, voir `OFL.txt`), intégrée à l'appli |
 | `Source/ChannelEq.h`, `ChannelEditor.*` | L'égaliseur de voie (testé) et la fenêtre des réglages de voie |
+| `Source/Hub.*` | Le Hub de démarrage : projets récents, réglages audio, MIDI et VST |
 | `Source/MainComponent.*`, `Main.cpp` | Fenêtre, transport, menus, raccourcis, fichiers |
 
 Licence GNU AGPL v3.

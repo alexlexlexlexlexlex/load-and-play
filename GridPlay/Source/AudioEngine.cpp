@@ -297,6 +297,14 @@ void AudioEngine::audioDeviceIOCallbackWithContext (const float* const* inputCha
         auto& midi = trackMidi[(size_t) t];
         const auto& tr = song.tracks[(size_t) t];
 
+        // Programme de la piste : envoyé quand il change (ou quand la sortie change).
+        if (tr.program != out.lastProgram)
+        {
+            if (tr.program >= 0)
+                midi.addEvent (juce::MidiMessage::programChange (1, tr.program), 0);
+            out.lastProgram = tr.program;
+        }
+
         if (out.port != nullptr)
         {
             auto it = std::find_if (portBuffers.begin(), portBuffers.end(), [&] (const auto& p) { return p.first == out.port; });
@@ -594,6 +602,7 @@ void AudioEngine::setTrackPlugin (int track, const juce::PluginDescription& desc
                 oldChannel = out.channel;
                 out.plugin = std::move (instance);
                 out.port = nullptr;
+                out.lastProgram = -1;
                 auto& tr = session.song.tracks[(size_t) t];
                 tr.outputType = OutputType::plugin;
                 tr.pluginName = description.name;
@@ -631,6 +640,7 @@ void AudioEngine::setTrackMidiPort (int track, const juce::String& portName, int
         out.port = port;
         out.channel = juce::jlimit (1, 16, channel);
         out.lastVolumeCC = -1;
+        out.lastProgram = -1;
         if (port != nullptr && std::none_of (portBuffers.begin(), portBuffers.end(), [port] (const auto& p) { return p.first == port; }))
         {
             portBuffers.emplace_back (port, juce::MidiBuffer());

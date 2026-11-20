@@ -137,6 +137,7 @@ private:
         juce::MidiOutput* port = nullptr;
         int channel = 1;
         int lastVolumeCC = -1;
+        int lastProgram = -1;
         EqProcessor eq;
         std::vector<std::unique_ptr<juce::AudioPluginInstance>> inserts;   // alignés sur Track::inserts
         float peak = 0.0f;

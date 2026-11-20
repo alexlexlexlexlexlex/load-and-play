@@ -104,6 +104,7 @@ private:
 
         std::vector<ActiveNote> active;          // notes des clips en cours
         std::array<bool, 128> liveHeld {};       // notes jouées au clavier, en cours
+        std::array<int, 128> liveOut {};         // ... et la note envoyée (après transposition)
         bool wasMuted = false;
     };
 

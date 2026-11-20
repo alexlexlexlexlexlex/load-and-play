@@ -7,6 +7,7 @@
 #include "TransportControls.h"
 #include "NoteEditor.h"
 #include "ChannelEditor.h"
+#include "Hub.h"
 
 #include <juce_audio_utils/juce_audio_utils.h>
 
@@ -26,6 +27,7 @@ public:
     // Outil de développement : lance la scène 1, attend, enregistre une image de la fenêtre.
     void snapshot (const juce::File& png, std::function<void()> done);
     void openFile (const juce::File& file);
+    void showHubIfWanted();                    // au démarrage, si l'option est cochée
     juce::String getWindowTitle() const;
     std::function<void()> onTitleChanged;
 
@@ -42,7 +44,7 @@ public:
     // Menus
     juce::StringArray getMenuBarNames() override;
     juce::PopupMenu getMenuForIndex (int index, const juce::String& name) override;
-    void menuItemSelected (int, int) override {}
+    void menuItemSelected (int itemId, int menuIndex) override;
 
     juce::ApplicationCommandManager commands;
 
@@ -51,8 +53,13 @@ private:
     {
         newSong = 1, openSong, saveSong, saveSongAs,
         insertTrack, insertScene, deleteSelection, duplicate, copyClip, pasteClip, renameClip,
-        launchSelection, playStop, stopAllClips, audioSettings, scanPlugins, editClip
+        launchSelection, playStop, stopAllClips, audioSettings, scanPlugins, editClip,
+        undo, redo, deleteTrack, deleteScene, renameTrack, launchScene, armTrack, toggleDrumMap,
+        importMidi, exportClip, toggleLink, channelSettings, masterSettings, toggleDetailed,
+        openHub, closePluginWindows, showManual, showWebsite
     };
+    // Éléments de menu qui ne sont pas des commandes (sous-menus).
+    static constexpr int recentBase = 1000, clearRecent = 1999, quantizeBase = 2000, recordBase = 2100, quitItem = 2200;
 
     class PluginWindow;
 
@@ -74,6 +81,13 @@ private:
     void toggleWindow (std::unique_ptr<juce::DocumentWindow>& window, std::function<void()> open);
     void saveSettings();
     void updateTitle();
+    void newProject (std::function<void()> then);
+    void browseForProject();
+    void rememberRecent (const juce::File& file);
+    void showHub();
+    void closeHub();
+    void undoInActiveWindow (bool redo);
+    ChannelEditor* activeChannelEditor() const;
 
     juce::ApplicationProperties properties;
     theme::LookAndFeel lookAndFeel;
@@ -100,6 +114,8 @@ private:
     juce::OwnedArray<juce::DocumentWindow> channelWindows;
     NoteEditor* editor = nullptr;
     std::unique_ptr<juce::DocumentWindow> settingsWindow;
+    std::unique_ptr<juce::DocumentWindow> hubWindow;
+    juce::RecentlyOpenedFilesList recentFiles;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (MainComponent)
 };

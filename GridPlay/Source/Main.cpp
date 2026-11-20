@@ -28,6 +28,13 @@ public:
             return;
         }
         openFromCommandLine (commandLine);
+
+        // Le Hub (projets récents, réglages), sauf si un fichier a été ouvert au lancement.
+        juce::Timer::callAfterDelay (500, [this]
+        {
+            if (window != nullptr && ! snapshotMode)
+                window->content().showHubIfWanted();
+        });
     }
 
     void shutdown() override

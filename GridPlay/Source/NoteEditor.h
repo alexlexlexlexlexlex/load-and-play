@@ -40,6 +40,9 @@ public:
     static void drawToolIcon (juce::Graphics&, Tool, juce::Rectangle<float>, juce::Colour);
     static juce::String toolName (Tool);
 
+    void undo();     // aussi depuis le menu Édition
+    void redo();
+
     static constexpr int toolbarH = 48, infoH = 32, rulerH = 26, pianoW = 64, drumW = 150, velocityH = 92, gap = 6, barT = 10;
 
 private:
@@ -57,8 +60,6 @@ private:
     void pushUndo();
     void commit (bool undoable, const std::function<void()>& change);
     void sendToClip();
-    void undo();
-    void redo();
 
     // Lignes (une par hauteur au piano, une par son en mode batterie)
     void rebuildRows();

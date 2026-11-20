@@ -41,6 +41,9 @@ struct SessionSnapshot
         bool audioInputStereo = true;
         int inserts = 0;
         bool eqActive = false;
+        double delayMs = 0.0;
+        int transpose = 0, velocityShift = 0, program = -1;
+        bool drumMap = false;
     };
     struct SceneInfo { juce::String name; bool active = false; };
     struct CellInfo { SlotState state = SlotState::empty; juce::String name; juce::Colour colour; int notes = 0; };
@@ -75,6 +78,23 @@ public:
     void insertTrack();
     void insertScene();
     void selectCell (int track, int scene);
+
+    // Annuler / rétablir dans la grille : clips, noms et couleurs des pistes et des scènes.
+    void undo();
+    void redo();
+    bool canUndo() const { return ! undoStack.empty(); }
+    bool canRedo() const { return ! redoStack.empty(); }
+
+    // Pour les menus.
+    int getSelectedTrack() const { return selTrack; }
+    int getSelectedScene() const { return selScene; }
+    void armSelectedTrack();
+    void deleteSelectedTrack();
+    void deleteSelectedScene();
+    void renameSelectedTrack();
+    void launchSelectedScene();
+    void importMidiIntoSelected();
+    void exportSelectedClip();
     bool hasClipSelected() const;
 
     std::function<void (int track)> onOpenPlugin;
@@ -98,7 +118,12 @@ public:
     void fileDragExit (const juce::StringArray& files) override;
     void filesDropped (const juce::StringArray& files, int x, int y) override;
 
-    static constexpr int headerH = 26, slotH = 28, trackW = 128, sceneW = 140, stopH = 30, mixerH = 214, barT = 10;
+    static constexpr int headerH = 26, slotH = 28, trackW = 128, sceneW = 140, stopH = 30, compactMixerH = 214, detailedMixerH = 400, barT = 10;
+
+    // Console du bas : compacte, ou détaillée comme l'inspecteur de Cubase.
+    void setDetailed (bool detailed);
+    bool isDetailed() const { return detailed; }
+    std::function<void()> onLayoutChanged;
 
 private:
     class TrackStrip;
@@ -142,6 +167,8 @@ private:
     std::unique_ptr<MasterStrip> master;
 
     int selTrack = 0, selScene = 0;
+    bool detailed = false;
+    int mixerH = compactMixerH;
     std::uint64_t lastSignature = 0;
     bool dragging = false;
     int dragTrack = -1, dragScene = -1, dropTrack = -1, dropScene = -1;
@@ -150,6 +177,17 @@ private:
     ClipPtr clipboard;
     std::unique_ptr<juce::FileChooser> chooser;
     std::unique_ptr<juce::TextEditor> inlineEditor;
+
+    struct GridState
+    {
+        struct TrackLook { juce::String name; juce::Colour colour; std::vector<ClipPtr> slots; };
+        std::vector<TrackLook> tracks;
+        std::vector<juce::String> scenes;
+    };
+    GridState captureGrid() const;
+    bool restoreGrid (const GridState& state);
+    void rememberGrid();
+    std::vector<GridState> undoStack, redoStack;
     std::function<void (const juce::String&)> inlineDone;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SessionView)

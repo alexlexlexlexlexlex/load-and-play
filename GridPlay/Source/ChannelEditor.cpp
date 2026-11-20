@@ -206,6 +206,7 @@ public:
         power.setTooltip ("Activer / contourner l'effet (bypass)");
         power.onClick = [this]
         {
+            owner.remember();
             const int t = owner.target();
             owner.engine.edit ([&] (Session& session)
             {
@@ -294,7 +295,10 @@ public:
         repaint();
         const int from = (int) d.description;
         if (from != slot)
+        {
+            owner.rememberMove (from, slot);
             owner.engine.moveInsert (owner.target(), from, slot);
+        }
         owner.refresh();
     }
 
@@ -482,6 +486,7 @@ ChannelEditor::ChannelEditor (AudioEngine& e, int id) : engine (e), trackId (id)
     fader.setRange (0.0, 1.0);
     fader.setDoubleClickReturnValue (true, 0.85);
     fader.setTooltip ("Volume (double-clic : 0 dB)");
+    fader.onDragStart = [this] { remember(); };
     fader.onValueChange = [this]
     {
         const float v = (float) fader.getValue();
@@ -495,7 +500,11 @@ ChannelEditor::ChannelEditor (AudioEngine& e, int id) : engine (e), trackId (id)
     };
     addAndMakeVisible (fader);
 
-    styleKnob (pan);
+    // Panoramique en barre, comme sur une voie de Cubase (« C » au centre).
+    pan.setSliderStyle (juce::Slider::LinearBar);
+    pan.setColour (juce::Slider::trackColourId, theme::accent.withAlpha (0.45f));
+    pan.setColour (juce::Slider::backgroundColourId, juce::Colour (0xff0d0d0d));
+    pan.onDragStart = [this] { remember(); };
     pan.setRange (-1.0, 1.0, 0.01);
     pan.setDoubleClickReturnValue (true, 0.0);
     pan.textFromValueFunction = [] (double v)
@@ -514,13 +523,60 @@ ChannelEditor::ChannelEditor (AudioEngine& e, int id) : engine (e), trackId (id)
     pan.setVisible (trackId != masterId);
     addAndMakeVisible (pan);
 
-    faderValue.setJustificationType (juce::Justification::centred);
-    faderValue.setFont (theme::font (12.0f, juce::Font::bold));
-    faderValue.setColour (juce::Label::backgroundColourId, juce::Colour (0xff0d0d0d));
-    faderValue.setColour (juce::Label::outlineColourId, theme::rule);
-    addAndMakeVisible (faderValue);
+    for (auto* l : { &faderValue, &peakValue })
+    {
+        l->setJustificationType (juce::Justification::centred);
+        l->setFont (theme::font (12.0f, juce::Font::bold));
+        l->setColour (juce::Label::backgroundColourId, juce::Colour (0xff0d0d0d));
+        l->setColour (juce::Label::outlineColourId, theme::rule);
+        addAndMakeVisible (l);
+    }
+    faderValue.setEditable (false, true, false);
+    faderValue.setTooltip (juce::String::fromUTF8 ("Volume en dB (double-clic pour taper une valeur)"));
+    faderValue.onTextChange = [this]
+    {
+        remember();
+        const float db = faderValue.getText().upToFirstOccurrenceOf (" ", false, false).replaceCharacter (',', '.').getFloatValue();
+        fader.setValue (juce::jlimit (0.0, 1.0, (double) (0.85f * std::sqrt (juce::Decibels::decibelsToGain (db)))), juce::sendNotificationSync);
+    };
+    peakValue.setTooltip (juce::String::fromUTF8 ("Crête maximale (clic : remettre à zéro)"));
+    peakValue.addMouseListener (this, false);
 
-    setSize (930, 520);
+    // En-tête : annuler / rétablir, piste précédente / suivante (comme les flèches de Cubase).
+    undoButton.setButtonText (juce::String::fromUTF8 ("←"));
+    redoButton.setButtonText (juce::String::fromUTF8 ("→"));
+    prevButton.setButtonText (juce::String::fromUTF8 ("↑"));
+    nextButton.setButtonText (juce::String::fromUTF8 ("↓"));
+    undoButton.setTooltip ("Annuler (Cmd Z)");
+    redoButton.setTooltip (juce::String::fromUTF8 ("Rétablir (Cmd Maj Z)"));
+    prevButton.setTooltip (juce::String::fromUTF8 ("Piste précédente"));
+    nextButton.setTooltip ("Piste suivante");
+    undoButton.onClick = [this] { undo(); };
+    redoButton.onClick = [this] { redo(); };
+    prevButton.onClick = [this] { navigate (-1); };
+    nextButton.onClick = [this] { navigate (1); };
+    for (auto* b : { &undoButton, &redoButton, &prevButton, &nextButton })
+        addAndMakeVisible (b);
+
+    muteButton.setColour (juce::TextButton::buttonOnColourId, juce::Colour (0xffd8c84a));
+    soloButton.setColour (juce::TextButton::buttonOnColourId, juce::Colour (0xff5aa9e6));
+    muteButton.setTooltip ("Couper la voie");
+    soloButton.setTooltip ("Solo");
+    muteButton.onClick = [this]
+    {
+        const int t = target();
+        engine.edit ([&] (Session& s) { if (juce::isPositiveAndBelow (t, s.song.numTracks())) s.song.tracks[(size_t) t].mute = ! s.song.tracks[(size_t) t].mute; return 0; });
+    };
+    soloButton.onClick = [this]
+    {
+        const int t = target();
+        engine.edit ([&] (Session& s) { if (juce::isPositiveAndBelow (t, s.song.numTracks())) s.song.tracks[(size_t) t].solo = ! s.song.tracks[(size_t) t].solo; return 0; });
+    };
+    addAndMakeVisible (muteButton);
+    addAndMakeVisible (soloButton);
+    setWantsKeyboardFocus (true);
+
+    setSize (960, 560);
     refresh();
     startTimerHz (20);
 }
@@ -560,6 +616,7 @@ ChannelEq ChannelEditor::readEq() const
 
 void ChannelEditor::editEq (const std::function<void (ChannelEq&)>& change)
 {
+    remember();
     const int t = target();
     engine.edit ([&] (Session& s)
     {
@@ -598,6 +655,8 @@ void ChannelEditor::refresh()
         ChannelEq eq;
         std::vector<InsertSlot> inserts;
         float volume = 0.85f, pan = 0.0f;
+        bool mute = false, solo = false;
+        int index = -1, count = 0;
     };
     const auto info = engine.read ([t] (const Session& s)
     {
@@ -619,6 +678,10 @@ void ChannelEditor::refresh()
             i.eq = tr.eq;
             i.volume = tr.volume;
             i.pan = tr.pan;
+            i.mute = tr.mute;
+            i.solo = tr.solo;
+            i.index = t;
+            i.count = s.song.numTracks();
             for (const auto& slot : tr.inserts)
                 i.inserts.push_back ({ slot.name, {}, {}, slot.bypass });
         }
@@ -651,7 +714,17 @@ void ChannelEditor::refresh()
     if (! pan.isMouseButtonDown() && std::abs (pan.getValue() - info.pan) > 1.0e-4)
         pan.setValue (info.pan, juce::dontSendNotification);
     const auto db = volumeToDecibels (info.volume);
-    faderValue.setText (db <= -69.0f ? juce::String ("-inf") : juce::String (db, 1) + " dB", juce::dontSendNotification);
+    if (! faderValue.isBeingEdited())
+        faderValue.setText (db <= -69.0f ? juce::String ("-oo") : juce::String (db, 2), juce::dontSendNotification);
+    muteButton.setToggleState (info.mute, juce::dontSendNotification);
+    soloButton.setToggleState (info.solo, juce::dontSendNotification);
+    const bool isTrack = trackId != masterId;
+    for (auto* c : std::initializer_list<juce::Component*> { &muteButton, &soloButton, &pan })
+        c->setVisible (isTrack);
+    prevButton.setEnabled (isTrack && info.index > 0);
+    nextButton.setEnabled (isTrack && info.index >= 0 && info.index < info.count - 1);
+    undoButton.setEnabled (! undoStack.empty());
+    redoButton.setEnabled (! redoStack.empty());
 
     const auto meters = engine.getMeters();
     const float level = t == AudioEngine::masterTarget ? meters.back() : (juce::isPositiveAndBelow (t, (int) meters.size() - 1) ? meters[(size_t) t] : 0.0f);
@@ -660,6 +733,11 @@ void ChannelEditor::refresh()
         meter = level;
         repaint (meterArea);
     }
+    if (level > peakHold)
+        peakHold = level;
+    const float peakDb = juce::Decibels::gainToDecibels (peakHold, -100.0f);
+    peakValue.setText (peakDb <= -99.0f ? juce::String ("-oo") : juce::String (peakDb, 1), juce::dontSendNotification);
+    peakValue.setColour (juce::Label::textColourId, peakDb > -0.1f ? juce::Colour (0xffff4a3d) : theme::text);
 }
 
 void ChannelEditor::showInsertMenu (int slot, bool filled)
@@ -708,12 +786,157 @@ void ChannelEditor::showInsertMenu (int slot, bool filled)
             return;
         const int t = self->target();
         if (r == 2) { if (self->onScanPlugins) self->onScanPlugins(); }
-        else if (r == up) self->engine.moveInsert (t, slot, slot - 1);
-        else if (r == down) self->engine.moveInsert (t, slot, slot + 1);
+        else if (r == up) { self->rememberMove (slot, slot - 1); self->engine.moveInsert (t, slot, slot - 1); }
+        else if (r == down) { self->rememberMove (slot, slot + 1); self->engine.moveInsert (t, slot, slot + 1); }
         else if (r == remove) self->engine.removeInsert (t, slot);
         else if (r >= 100 && r - 100 < effects.size()) self->engine.addInsert (t, slot, effects.getReference (r - 100));
         self->refresh();
     });
+}
+
+//==============================================================================
+// Annuler / rétablir, flèches de piste
+ChannelEditor::Snapshot ChannelEditor::capture() const
+{
+    const int t = target();
+    return engine.read ([t] (const Session& s)
+    {
+        Snapshot snap;
+        const bool master = t == AudioEngine::masterTarget;
+        if (! master && ! juce::isPositiveAndBelow (t, s.song.numTracks()))
+            return snap;
+        snap.eq = master ? s.song.masterEq : s.song.tracks[(size_t) t].eq;
+        snap.volume = master ? s.song.masterVolume : s.song.tracks[(size_t) t].volume;
+        snap.pan = master ? 0.0f : s.song.tracks[(size_t) t].pan;
+        for (const auto& slot : master ? s.song.masterInserts : s.song.tracks[(size_t) t].inserts)
+            snap.bypass.push_back (slot.bypass);
+        return snap;
+    });
+}
+
+void ChannelEditor::restore (const Snapshot& snap)
+{
+    const int t = target();
+    engine.edit ([&] (Session& s)
+    {
+        const bool master = t == AudioEngine::masterTarget;
+        if (! master && ! juce::isPositiveAndBelow (t, s.song.numTracks()))
+            return 0;
+        (master ? s.song.masterEq : s.song.tracks[(size_t) t].eq) = snap.eq;
+        (master ? s.song.masterVolume : s.song.tracks[(size_t) t].volume) = snap.volume;
+        if (! master)
+            s.song.tracks[(size_t) t].pan = snap.pan;
+        auto& slots = master ? s.song.masterInserts : s.song.tracks[(size_t) t].inserts;
+        for (size_t i = 0; i < slots.size() && i < snap.bypass.size(); ++i)
+            slots[i].bypass = snap.bypass[i];
+        return 0;
+    });
+    refresh();
+}
+
+void ChannelEditor::remember()
+{
+    // Un geste continu (tirer un point, un fader) ne fait qu'une seule étape d'annulation.
+    const auto now = juce::Time::getMillisecondCounter();
+    if (now - lastEdit > 600 || undoStack.empty())
+    {
+        undoStack.push_back (capture());
+        if (undoStack.size() > 100)
+            undoStack.erase (undoStack.begin());
+        redoStack.clear();
+    }
+    lastEdit = now;
+}
+
+void ChannelEditor::rememberMove (int from, int to)
+{
+    Snapshot move;
+    move.moveFrom = from;
+    move.moveTo = to;
+    undoStack.push_back (move);
+    redoStack.clear();
+    lastEdit = 0;
+}
+
+void ChannelEditor::undo()
+{
+    if (undoStack.empty())
+        return;
+    auto entry = undoStack.back();
+    undoStack.pop_back();
+    if (entry.moveFrom >= 0)
+    {
+        engine.moveInsert (target(), entry.moveTo, entry.moveFrom);
+        redoStack.push_back (entry);
+    }
+    else
+    {
+        redoStack.push_back (capture());
+        restore (entry);
+    }
+    lastEdit = 0;
+    refresh();
+}
+
+void ChannelEditor::redo()
+{
+    if (redoStack.empty())
+        return;
+    auto entry = redoStack.back();
+    redoStack.pop_back();
+    if (entry.moveFrom >= 0)
+    {
+        engine.moveInsert (target(), entry.moveFrom, entry.moveTo);
+        undoStack.push_back (entry);
+    }
+    else
+    {
+        undoStack.push_back (capture());
+        restore (entry);
+    }
+    lastEdit = 0;
+    refresh();
+}
+
+void ChannelEditor::navigate (int direction)
+{
+    if (trackId == masterId)
+        return;
+    const int t = target();
+    const int id = engine.read ([t, direction] (const Session& s)
+    {
+        const int next = t + direction;
+        return juce::isPositiveAndBelow (next, s.song.numTracks()) ? s.song.tracks[(size_t) next].id : -1;
+    });
+    if (id < 0)
+        return;
+    trackId = id;
+    undoStack.clear();
+    redoStack.clear();
+    peakHold = 0.0f;
+    refresh();
+    repaint();
+    if (onTrackChanged)
+        onTrackChanged();
+}
+
+void ChannelEditor::mouseDown (const juce::MouseEvent& e)
+{
+    if (e.eventComponent == &peakValue)
+        peakHold = 0.0f;   // clic sur la crête : remise à zéro
+}
+
+bool ChannelEditor::keyPressed (const juce::KeyPress& key)
+{
+    const auto mods = key.getModifiers();
+    if ((mods.isCommandDown() || mods.isCtrlDown()) && (key.getKeyCode() == 'Z' || key.getTextCharacter() == 'z'))
+    {
+        if (mods.isShiftDown()) redo(); else undo();
+        return true;
+    }
+    if (key == juce::KeyPress::upKey)   { navigate (-1); return true; }
+    if (key == juce::KeyPress::downKey) { navigate (1); return true; }
+    return false;
 }
 
 //==============================================================================
@@ -729,7 +952,7 @@ void ChannelEditor::paint (juce::Graphics& g)
     g.setColour (theme::text);
     g.setFont (theme::font (24.0f).italicised());
     g.drawText (getTitle(), 18, 8, 400, 34, juce::Justification::centredLeft);
-    theme::sectionTitle (g, juce::String::fromUTF8 ("RÉGLAGES DE VOIE"), { getWidth() - 260, 8, 240, 34 }, juce::Justification::centredRight);
+    theme::sectionTitle (g, juce::String::fromUTF8 ("RÉGLAGES DE VOIE"), { getWidth() - 470, 8, 200, 34 }, juce::Justification::centredRight);
     g.setColour (theme::rule);
     g.fillRect (14, 51, getWidth() - 28, 1);
 
@@ -742,19 +965,40 @@ void ChannelEditor::paint (juce::Graphics& g)
     g.setColour (theme::textDim);
     g.setFont (theme::font (11.5f));
     g.drawFittedText (juce::String::fromUTF8 ("Le son traverse les effets de 1 à 8 : l'ordre compte. Glisser un effet pour le déplacer."),
-                      insertsArea.reduced (12, 0).removeFromBottom (40), juce::Justification::centredLeft, 2);
+                      insertsArea.reduced (12, 0).removeFromBottom (40), juce::Justification::centredLeft, 2, 1.0f);
     theme::sectionTitle (g, juce::String::fromUTF8 ("ÉGALISEUR"), eqArea.withHeight (28).reduced (12, 0));
     theme::sectionTitle (g, "VOIE", channelArea.withHeight (28).reduced (12, 0));
 
-    // Vu-mètre : vert, puis jaune et rouge près de 0 dB.
+    // Graduation du fader, comme sur une voie de Cubase (en dB sous 0).
+    g.setFont (theme::font (10.5f, juce::Font::bold));
+    for (float db : { 0.0f, -5.0f, -10.0f, -15.0f, -20.0f, -30.0f, -40.0f, -50.0f })
+    {
+        const double v = 0.85 * std::sqrt (juce::Decibels::decibelsToGain ((double) db));
+        const float y = (float) fader.getY() + (float) fader.getPositionOfValue (v);
+        g.setColour (theme::textDim);
+        g.drawText (juce::String ((int) std::abs (db)), scaleArea.getX(), (int) y - 6, scaleArea.getWidth() - 8, 12, juce::Justification::centredRight);
+        g.setColour (juce::Colour (0xff4a4640));
+        g.fillRect ((float) scaleArea.getRight() - 6.0f, y, 5.0f, 1.0f);
+    }
+    g.setColour (theme::textDim);
+    g.drawText ("oo", scaleArea.getX(), (int) (fader.getY() + fader.getPositionOfValue (0.0)) - 6, scaleArea.getWidth() - 8, 12, juce::Justification::centredRight);
+
+    // Vu-mètre gradué : vert, puis jaune et rouge près de 0 dB.
     const auto m = meterArea.toFloat();
     g.setColour (juce::Colour (0xff0b0b0b));
     g.fillRoundedRectangle (m, 2.0f);
-    const float db = juce::Decibels::gainToDecibels (meter, -60.0f);
-    const float level = juce::jlimit (0.0f, 1.0f, (db + 60.0f) / 66.0f);
+    const float level = juce::jlimit (0.0f, 1.0f, (juce::Decibels::gainToDecibels (meter, -60.0f) + 60.0f) / 66.0f);
     const auto filled = m.withTop (m.getBottom() - m.getHeight() * level).reduced (1.5f, 0.0f);
     g.setGradientFill (juce::ColourGradient (juce::Colour (0xffff4a3d), 0.0f, m.getY(), theme::play, 0.0f, m.getBottom(), false));
     g.fillRect (filled);
+    for (int db : { 0, 6, 12, 18, 24, 30, 40, 50, 60 })
+    {
+        const float y = m.getBottom() - m.getHeight() * (60.0f - (float) db) / 66.0f;
+        g.setColour (juce::Colour (0xff4a4640));
+        g.fillRect (m.getRight() + 2.0f, y, 4.0f, 1.0f);
+        g.setColour (theme::textDim);
+        g.drawText (juce::String (db), (int) m.getRight() + 7, (int) y - 6, 22, 12, juce::Justification::centredLeft);
+    }
 }
 
 void ChannelEditor::resized()
@@ -762,7 +1006,7 @@ void ChannelEditor::resized()
     auto r = getLocalBounds().withTrimmedTop (60).reduced (12, 0).withTrimmedBottom (12);
     insertsArea = r.removeFromLeft (240);
     r.removeFromLeft (10);
-    channelArea = r.removeFromRight (150);
+    channelArea = r.removeFromRight (176);
     r.removeFromRight (10);
     eqArea = r;
 
@@ -782,16 +1026,32 @@ void ChannelEditor::resized()
     for (auto* b : bands)
         b->setBounds (eqr.removeFromLeft (w).reduced (4, 0));
 
-    auto ch = channelArea.reduced (12, 0).withTrimmedTop (32).withTrimmedBottom (10);
-    if (trackId != masterId)
-    {
-        pan.setBounds (ch.removeFromTop (74).withSizeKeepingCentre (70, 74));
-        ch.removeFromTop (6);
-    }
-    faderValue.setBounds (ch.removeFromBottom (22));
-    ch.removeFromBottom (6);
-    meterArea = ch.removeFromRight (10);
-    ch.removeFromRight (8);
-    fader.setBounds (ch);
+    // En-tête : flèches annuler / rétablir et piste précédente / suivante.
+    auto head = juce::Rectangle<int> (getWidth() - 250, 12, 236, 28);
+    nextButton.setBounds (head.removeFromRight (34));
+    head.removeFromRight (2);
+    prevButton.setBounds (head.removeFromRight (34));
+    head.removeFromRight (12);
+    redoButton.setBounds (head.removeFromRight (34));
+    head.removeFromRight (2);
+    undoButton.setBounds (head.removeFromRight (34));
+
+    auto ch = channelArea.reduced (10, 0).withTrimmedTop (30).withTrimmedBottom (10);
+    auto ms = ch.removeFromTop (24);
+    muteButton.setBounds (ms.removeFromLeft (ms.getWidth() / 2 - 2));
+    ms.removeFromLeft (4);
+    soloButton.setBounds (ms);
+    ch.removeFromTop (6);
+    pan.setBounds (ch.removeFromTop (20));
+    ch.removeFromTop (10);
+    auto values = ch.removeFromBottom (22);
+    faderValue.setBounds (values.removeFromLeft (values.getWidth() / 2 - 2));
+    values.removeFromLeft (4);
+    peakValue.setBounds (values);
+    ch.removeFromBottom (8);
+    scaleArea = ch.removeFromLeft (30);
+    fader.setBounds (ch.removeFromLeft (40));
+    ch.removeFromLeft (10);
+    meterArea = ch.removeFromLeft (12);
 }
 } // namespace gridplay

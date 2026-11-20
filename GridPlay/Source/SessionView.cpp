@@ -208,6 +208,64 @@ public:
             owner.engine.edit ([&] (Session& s) { trackAt (s).pan = v; return 0; });
         };
         addAndMakeVisible (pan);
+
+        // --- Réglages fins (console détaillée), comme l'inspecteur de Cubase ---
+        auto bar = [this] (juce::Slider& sl, double lo, double hi, double step, const juce::String& tip)
+        {
+            sl.setSliderStyle (juce::Slider::LinearBar);
+            sl.setRange (lo, hi, step);
+            sl.setTooltip (tip);
+            sl.setColour (juce::Slider::trackColourId, theme::accent.withAlpha (0.45f));
+            sl.setColour (juce::Slider::backgroundColourId, juce::Colour (0xff0d0d0d));
+            addChildComponent (sl);
+        };
+        bar (panBar, -1.0, 1.0, 0.01, juce::String::fromUTF8 ("Panoramique (double-clic : au centre)"));
+        panBar.setDoubleClickReturnValue (true, 0.0);
+        panBar.textFromValueFunction = [] (double v)
+        {
+            if (std::abs (v) < 0.005) return juce::String ("C");
+            return (v < 0 ? "G " : "D ") + juce::String (juce::roundToInt (std::abs (v) * 100.0));
+        };
+        panBar.onValueChange = [this] { const float v = (float) panBar.getValue(); owner.engine.edit ([&] (Session& s) { trackAt (s).pan = v; return 0; }); };
+
+        bar (delay, -100.0, 100.0, 0.1, juce::String::fromUTF8 ("Retard de la piste en ms : négatif = en avance (pour caler un synthé lent ou un son qui traîne)"));
+        delay.setDoubleClickReturnValue (true, 0.0);
+        delay.textFromValueFunction = [] (double v) { return juce::String (v, 1) + " ms"; };
+        delay.onValueChange = [this] { const double v = delay.getValue(); owner.engine.edit ([&] (Session& s) { trackAt (s).delayMs = v; return 0; }); };
+
+        bar (transpose, -48.0, 48.0, 1.0, juce::String::fromUTF8 ("Transposition des notes jouées (clips et clavier), en demi-tons"));
+        transpose.setDoubleClickReturnValue (true, 0.0);
+        transpose.textFromValueFunction = [] (double v) { return juce::String::fromUTF8 ("Transp. ") + (v > 0 ? "+" : "") + juce::String ((int) v); };
+        transpose.onValueChange = [this] { const int v = (int) transpose.getValue(); owner.engine.edit ([&] (Session& s) { trackAt (s).transpose = v; return 0; }); };
+
+        bar (velocity, -127.0, 127.0, 1.0, juce::String::fromUTF8 ("Décalage de vélocité des notes jouées"));
+        velocity.setDoubleClickReturnValue (true, 0.0);
+        velocity.textFromValueFunction = [] (double v) { return juce::String::fromUTF8 ("Vél. ") + (v > 0 ? "+" : "") + juce::String ((int) v); };
+        velocity.onValueChange = [this] { const int v = (int) velocity.getValue(); owner.engine.edit ([&] (Session& s) { trackAt (s).velocityShift = v; return 0; }); };
+        for (auto* field : { &panBar, &delay, &transpose, &velocity })
+            field->updateText();   // le texte affiché suit les fonctions ci-dessus dès le départ
+
+        program.setTooltip (juce::String::fromUTF8 ("Programme (Program Change) envoyé à l'instrument ou au synthé"));
+        program.onFill = [] (LazyCombo& c)
+        {
+            c.clear (juce::dontSendNotification);
+            c.addItem (juce::String::fromUTF8 ("Aucun programme"), 1);
+            for (int i = 0; i < 128; ++i)
+                c.addItem ("Programme " + juce::String (i + 1), i + 2);
+        };
+        program.onChange = [this]
+        {
+            const int id = program.getSelectedId();
+            if (id > 0)
+                owner.engine.edit ([&] (Session& s) { trackAt (s).program = id - 2; return 0; });
+        };
+        addChildComponent (program);
+
+        drumMap.setClickingTogglesState (false);
+        drumMap.setColour (juce::TextButton::buttonOnColourId, theme::accent);
+        drumMap.setTooltip (juce::String::fromUTF8 ("L'éditeur de notes montre les sons de batterie General MIDI"));
+        drumMap.onClick = [this] { owner.engine.edit ([&] (Session& s) { trackAt (s).drumMap = ! trackAt (s).drumMap; return 0; }); };
+        addChildComponent (drumMap);
         arm.onClick = [this]
         {
             const bool exclusive = ! juce::ModifierKeys::currentModifiers.isCommandDown();
@@ -275,6 +333,17 @@ public:
                             : t.audioInputStereo ? juce::String::fromUTF8 ("Entrées ") + juce::String (t.audioInput + 1) + "-" + juce::String (t.audioInput + 2)
                                                  : juce::String::fromUTF8 ("Entrée ") + juce::String (t.audioInput + 1));
         channel.setToggleState (t.inserts > 0 || t.eqActive, juce::dontSendNotification);
+        auto setSlider = [] (juce::Slider& sl, double v)
+        {
+            if (! sl.isMouseButtonDown() && std::abs (sl.getValue() - v) > 1.0e-4)
+                sl.setValue (v, juce::dontSendNotification);
+        };
+        setSlider (panBar, t.pan);
+        setSlider (delay, t.delayMs);
+        setSlider (transpose, t.transpose);
+        setSlider (velocity, t.velocityShift);
+        setText (program, t.program < 0 ? juce::String::fromUTF8 ("Aucun programme") : "Programme " + juce::String (t.program + 1));
+        drumMap.setToggleState (t.drumMap, juce::dontSendNotification);
         if (std::abs (t.meter - shownMeter) > 1.0e-4f)
         {
             shownMeter = t.meter;
@@ -291,8 +360,19 @@ public:
         g.fillRoundedRectangle (r, 5.0f);
         g.setColour (info().colour);
         g.fillRoundedRectangle (r.withHeight (3.0f), 1.5f);
-        theme::sectionTitle (g, juce::String::fromUTF8 ("ENTRÉE"), { 7, 5, 80, 14 });
-        theme::sectionTitle (g, "SORTIE", { 7, 57, 80, 14 });
+        if (detailed)
+        {
+            g.setColour (theme::text);
+            g.setFont (theme::font (13.0f, juce::Font::bold));
+            g.drawText (info().name, 8, 6, getWidth() - 16, 18, juce::Justification::centredLeft, true);
+            theme::sectionTitle (g, "ROUTAGE", { 7, 128, 100, 14 });
+            theme::sectionTitle (g, "MIDI", { 7, 268, 100, 14 });
+        }
+        else
+        {
+            theme::sectionTitle (g, juce::String::fromUTF8 ("ENTRÉE"), { 7, 5, 80, 14 });
+            theme::sectionTitle (g, "SORTIE", { 7, 57, 80, 14 });
+        }
 
         // Vu-mètre horizontal sous le volume.
         const auto m = meterBounds().toFloat();
@@ -304,16 +384,48 @@ public:
         g.fillRoundedRectangle (m.withWidth (m.getWidth() * level), 1.5f);
     }
 
+    void setDetailed (bool d)
+    {
+        detailed = d;
+        for (auto* c : std::initializer_list<juce::Component*> { &panBar, &delay, &transpose, &velocity, &program, &drumMap })
+            c->setVisible (detailed);
+        pan.setVisible (! detailed);
+        resized();
+        repaint();
+    }
+
     void resized() override
     {
         const int w = getWidth() - 10;
+        const int bw = (w - 12) / 4;
+        if (detailed)
+        {
+            // Comme l'inspecteur de Cubase : boutons, volume, panoramique, retard, puis routage et MIDI.
+            arm.setBounds (5, 28, bw, 20);
+            mute.setBounds (5 + bw + 4, 28, bw, 20);
+            solo.setBounds (5 + 2 * (bw + 4), 28, bw, 20);
+            channel.setBounds (5 + 3 * (bw + 4), 28, bw, 20);
+            volume.setBounds (3, 54, w + 4, 20);
+            panBar.setBounds (5, 78, w, 18);
+            delay.setBounds (5, 100, w, 18);
+            input.setBounds (5, 144, w, 20);
+            inChannel.setBounds (5, 166, w, 18);
+            output.setBounds (5, 192, w, 20);
+            outChannel.setBounds (5, 214, w, 18);
+            edit.setBounds (5, 214, w, 18);
+            audioReturn.setBounds (5, 236, w, 18);
+            program.setBounds (5, 284, w, 20);
+            drumMap.setBounds (5, 308, w, 20);
+            transpose.setBounds (5, 334, w, 18);
+            velocity.setBounds (5, 356, w, 18);
+            return;
+        }
         input.setBounds (5, 19, w, 20);
         inChannel.setBounds (5, 41, w, 18);
         output.setBounds (5, 71, w, 20);
         outChannel.setBounds (5, 93, w, 18);
         edit.setBounds (5, 93, w, 18);
         audioReturn.setBounds (5, 115, w, 18);
-        const int bw = (w - 12) / 4;
         arm.setBounds (5, 140, bw, 20);
         mute.setBounds (5 + bw + 4, 140, bw, 20);
         solo.setBounds (5 + 2 * (bw + 4), 140, bw, 20);
@@ -326,7 +438,10 @@ public:
     int index = 0;
     LazyCombo input, inChannel, output, outChannel, audioReturn;
     juce::TextButton edit { "Ouvrir" }, arm { juce::String::fromUTF8 ("●") }, mute { "M" }, solo { "S" }, channel { "e" };
-    juce::Slider pan;
+    juce::Slider pan, panBar, delay, transpose, velocity;
+    LazyCombo program;
+    juce::TextButton drumMap { "Drum map GM" };
+    bool detailed = false;
     float shownMeter = 0.0f;
     juce::Slider volume;
     juce::StringArray inputNames, ports, inputs;
@@ -356,11 +471,15 @@ public:
             owner.engine.edit ([&] (Session& s) { s.song.masterVolume = v; });
         };
         volume.setTooltip (juce::String::fromUTF8 ("Volume général"));
+        details.setTooltip (juce::String::fromUTF8 ("Console détaillée : retard, routage, programme, transposition… (comme l'inspecteur de Cubase)"));
+        details.onClick = [this] { owner.setDetailed (! owner.isDetailed()); };
+        addAndMakeVisible (details);
         channel.setButtonText ("e");
         channel.setTooltip (juce::String::fromUTF8 ("Réglages du master : inserts d'effets et égaliseur"));
         channel.setColour (juce::TextButton::buttonOnColourId, theme::accent);
         channel.onClick = [this] { if (owner.onOpenChannel) owner.onOpenChannel (-1); };
         addAndMakeVisible (channel);
+        setDetailed (false);
     }
 
     void refresh()
@@ -399,12 +518,20 @@ public:
     void resized() override
     {
         channel.setBounds (getWidth() - 40, 10, 30, 22);
-        volume.setBounds (4, 172, getWidth() - 8, 22);
+        details.setBounds (8, getHeight() - 70, getWidth() - 16, 22);
+        volume.setBounds (4, getHeight() - 40, getWidth() - 8, 22);
+    }
+
+    void setDetailed (bool d)
+    {
+        details.setButtonText (d ? juce::String::fromUTF8 ("▾ Console compacte") : juce::String::fromUTF8 ("▴ Console détaillée"));
+        resized();
+        repaint();
     }
 
     SessionView& owner;
     juce::Slider volume;
-    juce::TextButton channel;
+    juce::TextButton channel, details;
     float shownMeter = 0.0f;
 };
 
@@ -470,6 +597,11 @@ void SessionView::takeSnapshot()
             ti.audioInputStereo = tr.audioInputStereo;
             ti.inserts = (int) tr.inserts.size();
             ti.eqActive = ! tr.eq.isNeutral();
+            ti.delayMs = tr.delayMs;
+            ti.transpose = tr.transpose;
+            ti.velocityShift = tr.velocityShift;
+            ti.program = tr.program;
+            ti.drumMap = tr.drumMap;
             for (int sc = 0; sc < song.numScenes(); ++sc)
             {
                 auto& ci = view.cells[(size_t) (t * song.numScenes() + sc)];
@@ -509,6 +641,7 @@ void SessionView::updateStrips()
     while (strips.size() < n)
     {
         auto* strip = strips.add (new TrackStrip (*this));
+        strip->setDetailed (detailed);
         stripHolder.addAndMakeVisible (strip);
     }
     for (int t = 0; t < n; ++t)
@@ -570,6 +703,21 @@ void SessionView::timerCallback()
     if (sig != lastSignature || view.playing)
         repaint (0, 0, getWidth(), getHeight() - mixerH - barT);
     lastSignature = sig;
+}
+
+void SessionView::setDetailed (bool d)
+{
+    if (detailed == d)
+        return;
+    detailed = d;
+    mixerH = detailed ? detailedMixerH : compactMixerH;
+    for (auto* strip : strips)
+        strip->setDetailed (detailed);
+    master->setDetailed (detailed);
+    resized();
+    repaint();
+    if (onLayoutChanged)
+        onLayoutChanged();
 }
 
 void SessionView::updateScrollBars()
@@ -940,6 +1088,7 @@ void SessionView::mouseUp (const juce::MouseEvent&)
     {
         const int ft = dragTrack, fs = dragScene, tt = dropTrack, ts = dropScene;
         const bool copy = dragCopy;
+        rememberGrid();
         engine.edit ([&] (Session& s) { s.moveClip (ft, fs, tt, ts, copy); });
         selectCell (tt, ts);
     }
@@ -964,13 +1113,13 @@ void SessionView::mouseDoubleClick (const juce::MouseEvent& e)
     {
         const int t = h.track;
         editInline (headerBounds (t), view.tracks[(size_t) t].name, [this, t] (const juce::String& name)
-                 { engine.edit ([&] (Session& s) { if (t < s.song.numTracks()) s.song.tracks[(size_t) t].name = name; }); });
+                 { rememberGrid(); engine.edit ([&] (Session& s) { if (t < s.song.numTracks()) s.song.tracks[(size_t) t].name = name; }); });
     }
     else if (h.kind == K::scene)
     {
         const int sc = h.scene;
         editInline (sceneBounds (sc), view.scenes[(size_t) sc].name, [this, sc] (const juce::String& name)
-                 { engine.edit ([&] (Session& s) { if (sc < s.song.numScenes()) s.song.scenes[(size_t) sc].name = name; }); });
+                 { rememberGrid(); engine.edit ([&] (Session& s) { if (sc < s.song.numScenes()) s.song.scenes[(size_t) sc].name = name; }); });
     }
 }
 
@@ -1018,6 +1167,148 @@ void SessionView::ensureVisible (int track, int scene)
 }
 
 //==============================================================================
+// Annuler / rétablir (grille)
+SessionView::GridState SessionView::captureGrid() const
+{
+    return engine.read ([] (const Session& s)
+    {
+        GridState g;
+        for (const auto& t : s.song.tracks)
+        {
+            GridState::TrackLook look { t.name, t.colour, {} };
+            for (const auto& clip : t.slots)
+                look.slots.push_back (clip != nullptr ? clip->copy() : nullptr);
+            g.tracks.push_back (std::move (look));
+        }
+        for (const auto& sc : s.song.scenes)
+            g.scenes.push_back (sc.name);
+        return g;
+    });
+}
+
+bool SessionView::restoreGrid (const GridState& state)
+{
+    return engine.edit ([&] (Session& s)
+    {
+        // Les pistes et scènes ajoutées ou supprimées entre-temps ne s'annulent pas.
+        if ((int) state.tracks.size() != s.song.numTracks() || (int) state.scenes.size() != s.song.numScenes())
+            return false;
+        for (int t = 0; t < s.song.numTracks(); ++t)
+        {
+            const auto& look = state.tracks[(size_t) t];
+            s.song.tracks[(size_t) t].name = look.name;
+            s.song.tracks[(size_t) t].colour = look.colour;
+            for (int sc = 0; sc < s.song.numScenes(); ++sc)
+            {
+                const auto& clip = look.slots[(size_t) sc];
+                s.setClip (t, sc, clip != nullptr ? clip->copy() : nullptr);
+            }
+        }
+        for (int sc = 0; sc < s.song.numScenes(); ++sc)
+            s.song.scenes[(size_t) sc].name = state.scenes[(size_t) sc];
+        return true;
+    });
+}
+
+void SessionView::rememberGrid()
+{
+    undoStack.push_back (captureGrid());
+    if (undoStack.size() > 50)
+        undoStack.erase (undoStack.begin());
+    redoStack.clear();
+}
+
+void SessionView::undo()
+{
+    while (! undoStack.empty())
+    {
+        auto state = std::move (undoStack.back());
+        undoStack.pop_back();
+        auto current = captureGrid();
+        if (restoreGrid (state))
+        {
+            redoStack.push_back (std::move (current));
+            break;
+        }
+    }
+    repaint();
+}
+
+void SessionView::redo()
+{
+    if (redoStack.empty())
+        return;
+    auto state = std::move (redoStack.back());
+    redoStack.pop_back();
+    auto current = captureGrid();
+    if (restoreGrid (state))
+        undoStack.push_back (std::move (current));
+    repaint();
+}
+
+//==============================================================================
+// Commandes des menus
+void SessionView::armSelectedTrack()
+{
+    const int t = selTrack;
+    engine.edit ([&] (Session& s)
+    {
+        if (! juce::isPositiveAndBelow (t, s.song.numTracks())) return;
+        const bool now = ! s.song.tracks[(size_t) t].arm;
+        for (auto& tr : s.song.tracks) tr.arm = false;
+        s.song.tracks[(size_t) t].arm = now;
+    });
+}
+
+void SessionView::deleteSelectedTrack()
+{
+    if (view.tracks.size() > 1)
+        engine.removeTrack (selTrack);
+}
+
+void SessionView::deleteSelectedScene()
+{
+    const int sc = selScene;
+    if (view.scenes.size() > 1)
+        engine.edit ([&] (Session& s) { s.removeScene (sc); });
+}
+
+void SessionView::renameSelectedTrack()
+{
+    const int t = selTrack;
+    if (juce::isPositiveAndBelow (t, (int) view.tracks.size()))
+        editInline (headerBounds (t), view.tracks[(size_t) t].name, [this, t] (const juce::String& name)
+                    { rememberGrid(); engine.edit ([&] (Session& s) { if (t < s.song.numTracks()) s.song.tracks[(size_t) t].name = name; }); });
+}
+
+void SessionView::launchSelectedScene()
+{
+    const int sc = selScene;
+    engine.perform ([&] (Session& s) { s.launchScene (sc); });
+}
+
+void SessionView::importMidiIntoSelected()
+{
+    const int t = selTrack, sc = selScene;
+    chooser = std::make_unique<juce::FileChooser> ("Importer un fichier MIDI", juce::File(), "*.mid;*.midi");
+    chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectMultipleItems,
+                          [this, t, sc] (const juce::FileChooser& fc)
+                          {
+                              juce::StringArray paths;
+                              for (const auto& f : fc.getResults())
+                                  paths.add (f.getFullPathName());
+                              if (! paths.isEmpty())
+                                  importMidiFiles (paths, t, sc);
+                          });
+}
+
+void SessionView::exportSelectedClip()
+{
+    if (hasClipSelected())
+        exportClip (selTrack, selScene);
+}
+
+//==============================================================================
 // Commandes
 bool SessionView::hasClipSelected() const
 {
@@ -1034,11 +1325,13 @@ void SessionView::launchSelected()
 void SessionView::deleteSelected()
 {
     const int t = selTrack, sc = selScene;
+    rememberGrid();
     engine.edit ([&] (Session& s) { s.setClip (t, sc, nullptr); });
 }
 
 void SessionView::duplicateSelected()
 {
+    rememberGrid();
     // Comme Ableton : copie le clip dans la case libre suivante de la piste (en ajoutant une scène s'il le faut).
     const int t = selTrack, sc = selScene;
     int target = -1;
@@ -1069,6 +1362,7 @@ void SessionView::pasteSelected()
         return;
     const int t = selTrack, sc = selScene;
     auto clip = clipboard->copy();
+    rememberGrid();
     engine.edit ([&] (Session& s) { s.setClip (t, sc, clip); });
 }
 
@@ -1078,7 +1372,7 @@ void SessionView::renameSelected()
         return;
     const int t = selTrack, sc = selScene;
     editInline (slotBounds (t, sc).withTrimmedLeft (20), view.cell (t, sc).name, [this, t, sc] (const juce::String& name)
-             { engine.edit ([&] (Session& s) { if (auto c = s.song.clipAt (t, sc)) c->name = name; }); });
+             { rememberGrid(); engine.edit ([&] (Session& s) { if (auto c = s.song.clipAt (t, sc)) c->name = name; }); });
 }
 
 void SessionView::editSelected()
@@ -1102,6 +1396,7 @@ void SessionView::insertScene()
 
 void SessionView::createEmptyClip (int track, int scene, int bars)
 {
+    rememberGrid();
     engine.edit ([&] (Session& s)
     {
         auto clip = std::make_shared<Clip>();
@@ -1179,6 +1474,7 @@ void SessionView::showSlotMenu (int track, int scene)
                 if (r >= colourBase && r < colourBase + (int) palette().size())
                 {
                     const auto colour = palette()[(size_t) (r - colourBase)];
+                    rememberGrid();
                     engine.edit ([&] (Session& s) { if (auto c = s.song.clipAt (track, scene)) c->colour = colour; });
                 }
                 break;
@@ -1204,7 +1500,7 @@ void SessionView::showTrackMenu (int track)
     {
         if (r == rename)
             editInline (headerBounds (track), view.tracks[(size_t) track].name, [this, track] (const juce::String& name)
-                     { engine.edit ([&] (Session& s) { if (track < s.song.numTracks()) s.song.tracks[(size_t) track].name = name; }); });
+                     { rememberGrid(); engine.edit ([&] (Session& s) { if (track < s.song.numTracks()) s.song.tracks[(size_t) track].name = name; }); });
         else if (r == insertBefore) engine.insertTrack (track);
         else if (r == insertAfter)  engine.insertTrack (track + 1);
         else if (r == remove)
@@ -1220,6 +1516,7 @@ void SessionView::showTrackMenu (int track)
         else if (r >= colourBase && r < colourBase + (int) palette().size())
         {
             const auto colour = palette()[(size_t) (r - colourBase)];
+            rememberGrid();
             engine.edit ([&] (Session& s) { if (track < s.song.numTracks()) s.song.tracks[(size_t) track].colour = colour; });
         }
     });
@@ -1240,7 +1537,7 @@ void SessionView::showSceneMenu (int scene)
         if (r == launch) engine.perform ([&] (Session& s) { s.launchScene (scene); });
         else if (r == rename)
             editInline (sceneBounds (scene), view.scenes[(size_t) scene].name, [this, scene] (const juce::String& name)
-                     { engine.edit ([&] (Session& s) { if (scene < s.song.numScenes()) s.song.scenes[(size_t) scene].name = name; }); });
+                     { rememberGrid(); engine.edit ([&] (Session& s) { if (scene < s.song.numScenes()) s.song.scenes[(size_t) scene].name = name; }); });
         else if (r == insertBefore) engine.edit ([&] (Session& s) { s.insertScene (scene, { juce::String (s.song.numScenes() + 1) }); });
         else if (r == insertAfter)  engine.edit ([&] (Session& s) { s.insertScene (scene + 1, { juce::String (s.song.numScenes() + 1) }); });
         else if (r == remove)       engine.edit ([&] (Session& s) { s.removeScene (scene); });
@@ -1334,6 +1631,7 @@ void SessionView::filesDropped (const juce::StringArray& files, int x, int y)
 
 void SessionView::importMidiFiles (const juce::StringArray& files, int track, int scene)
 {
+    rememberGrid();
     // Plusieurs fichiers : un par case, en descendant (des scènes s'ajoutent s'il le faut).
     int s = scene;
     for (const auto& path : files)

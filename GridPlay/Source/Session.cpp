@@ -403,7 +403,7 @@ juce::MidiBuffer Session::takeAllNotesOff (int track)
         out.addEvent (noteOff (a.pitch), 0);
     for (int p = 0; p < 128; ++p)
         if (rt.liveHeld[(size_t) p])
-            out.addEvent (noteOff (p), 0);
+            out.addEvent (noteOff (rt.liveOut[(size_t) p]), 0);
     out.addEvent (juce::MidiMessage::allNotesOff (1), 0);
     forgetActiveNotes (track);
     return out;
@@ -526,12 +526,18 @@ void Session::playRange (int track, double from, double to, double blockStart, d
     if (! muted && rt.playingSlot >= 0)
         if (auto clip = song.clipAt (track, rt.playingSlot))
         {
+            const auto& tr = song.tracks[(size_t) track];
+            const double delay = tr.delayMs * 0.001 * song.tempo / 60.0;   // ms -> temps
             const double length = clip->length;
             for (const auto& n : clip->notes)
             {
                 if (n.start >= length || n.muted)
                     continue;
-                const double first = rt.clipStart + n.start;
+                const int pitch = n.pitch + tr.transpose;
+                if (! juce::isPositiveAndBelow (pitch, 128))
+                    continue;
+                const auto velocity = (juce::uint8) juce::jlimit (1, 127, n.velocity + tr.velocityShift);
+                const double first = rt.clipStart + n.start + delay;
                 double k = from > first ? std::ceil ((from - first) / length - epsilon) : 0.0;
                 for (double at = first + k * length; at < to - epsilon; at += length)
                 {
@@ -540,16 +546,16 @@ void Session::playRange (int track, double from, double to, double blockStart, d
                     const int sample = sampleFor (at);
                     for (size_t i = 0; i < rt.active.size();)   // même note encore tenue : on la coupe d'abord
                     {
-                        if (rt.active[i].pitch == n.pitch)
+                        if (rt.active[i].pitch == pitch)
                         {
-                            out.addEvent (noteOff (n.pitch), sample);
+                            out.addEvent (noteOff (pitch), sample);
                             rt.active.erase (rt.active.begin() + (std::ptrdiff_t) i);
                         }
                         else
                             ++i;
                     }
-                    out.addEvent (juce::MidiMessage::noteOn (1, n.pitch, (juce::uint8) n.velocity), sample);
-                    rt.active.push_back ({ n.pitch, at + juce::jlimit (1.0e-4, length, n.length) });
+                    out.addEvent (juce::MidiMessage::noteOn (1, pitch, velocity), sample);
+                    rt.active.push_back ({ pitch, at + juce::jlimit (1.0e-4, length, n.length) });
                 }
             }
         }
@@ -596,7 +602,7 @@ void Session::process (int numSamples, const std::vector<LiveEvent>& live, std::
             for (int p = 0; p < 128; ++p)
                 if (rt.liveHeld[(size_t) p])
                 {
-                    out.addEvent (noteOff (p), 0);
+                    out.addEvent (noteOff (rt.liveOut[(size_t) p]), 0);
                     rt.liveHeld[(size_t) p] = false;
                 }
         }
@@ -653,10 +659,14 @@ void Session::process (int numSamples, const std::vector<LiveEvent>& live, std::
                 if (muted)
                     continue;
                 const int p = m.getNoteNumber();
+                const int played = p + tr.transpose;
+                if (! juce::isPositiveAndBelow (played, 128))
+                    continue;
                 if (rt.liveHeld[(size_t) p])
-                    out.addEvent (noteOff (p), 0);
-                out.addEvent (juce::MidiMessage::noteOn (1, p, m.getVelocity()), 0);
+                    out.addEvent (noteOff (rt.liveOut[(size_t) p]), 0);
+                out.addEvent (juce::MidiMessage::noteOn (1, played, (juce::uint8) juce::jlimit (1, 127, (int) m.getVelocity() + tr.velocityShift)), 0);
                 rt.liveHeld[(size_t) p] = true;
+                rt.liveOut[(size_t) p] = played;
                 if (rt.recording)
                 {
                     rt.heldStart[(size_t) p] = juce::jmax (0.0, b0 - rt.recordStart);
@@ -668,7 +678,7 @@ void Session::process (int numSamples, const std::vector<LiveEvent>& live, std::
                 const int p = m.getNoteNumber();
                 if (rt.liveHeld[(size_t) p])
                 {
-                    out.addEvent (noteOff (p), 0);
+                    out.addEvent (noteOff (rt.liveOut[(size_t) p]), 0);
                     rt.liveHeld[(size_t) p] = false;
                 }
                 if (rt.recording && rt.heldStart[(size_t) p] >= 0.0)

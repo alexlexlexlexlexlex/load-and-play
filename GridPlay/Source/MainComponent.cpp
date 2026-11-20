@@ -8,6 +8,8 @@ namespace
     const char* quantizeNames[] = { "Aucune", "1/16", "1/8", "1/4", "1/2", "1 mesure", "2 mesures", "4 mesures" };
     const int recordValues[] = { 0, 1, 2, 4, 8 };
     const char* recordNames[] = { "Libre", "1 mesure", "2 mesures", "4 mesures", "8 mesures" };
+    const char* manualUrl = "https://github.com/alexlexlexlexlexlex/load-and-play/tree/main/GridPlay#readme";
+    const char* websiteUrl = "https://alexlexlexlexlexlex.github.io/load-and-play/";
 
     juce::PropertiesFile::Options settingsOptions()
     {
@@ -58,6 +60,8 @@ MainComponent::MainComponent() : session (engine)
     if (auto xml = settings->getXmlValue ("knownPlugins"))
         engine.knownPlugins.recreateFromXml (*xml);
     engine.knownPlugins.addChangeListener (this);
+    recentFiles.setMaxNumberOfItems (12);
+    recentFiles.restoreFromString (settings->getValue ("recentFiles"));
     auto audioState = settings->getXmlValue ("audioState");
     engine.initialise (audioState.get());
 
@@ -165,6 +169,7 @@ MainComponent::~MainComponent()
     closeEditor();
     scannerWindow.reset();
     settingsWindow.reset();
+    hubWindow.reset();
     apc.reset();
     juce::LookAndFeel::setDefaultLookAndFeel (nullptr);
 }
@@ -299,6 +304,7 @@ bool MainComponent::writeTo (const juce::File& file)
     currentFile = file;
     savedChangeCount = engine.getChangeCount();
     properties.getUserSettings()->setValue ("lastFile", file.getFullPathName());
+    rememberRecent (file);
     updateTitle();
     return true;
 }
@@ -367,7 +373,93 @@ void MainComponent::openFile (const juce::File& file)
         currentFile = file;
         savedChangeCount = engine.getChangeCount();
         session.selectCell (0, 0);
+        rememberRecent (file);
+        closeHub();
         updateTitle();
+    });
+}
+
+void MainComponent::rememberRecent (const juce::File& file)
+{
+    recentFiles.addFile (file);
+    auto* settings = properties.getUserSettings();
+    settings->setValue ("recentFiles", recentFiles.toString());
+    settings->saveIfNeeded();
+    juce::RecentlyOpenedFilesList::registerRecentFileNatively (file);   // Dock, liste de raccourcis Windows
+    menuItemsChanged();
+}
+
+void MainComponent::newProject (std::function<void()> then)
+{
+    askToSave ([this, then]
+    {
+        engine.setSong (makeDefaultSong());
+        currentFile = juce::File();
+        savedChangeCount = engine.getChangeCount();
+        session.selectCell (0, 0);
+        updateTitle();
+        if (then)
+            then();
+    });
+}
+
+void MainComponent::browseForProject()
+{
+    auto start = currentFile.existsAsFile() ? currentFile.getParentDirectory()
+                                            : juce::File::getSpecialLocation (juce::File::userDocumentsDirectory);
+    chooser = std::make_unique<juce::FileChooser> ("Ouvrir un morceau", start, "*.gridplay");
+    chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
+                          [this] (const juce::FileChooser& fc) { if (fc.getResult().existsAsFile()) openFile (fc.getResult()); });
+}
+
+//==============================================================================
+// Le Hub
+void MainComponent::showHubIfWanted()
+{
+    if (properties.getUserSettings()->getBoolValue ("showHub", true) && ! currentFile.existsAsFile())
+        showHub();
+}
+
+void MainComponent::showHub()
+{
+    if (hubWindow != nullptr)
+    {
+        hubWindow->toFront (true);
+        return;
+    }
+    struct HubWindow : public juce::DocumentWindow
+    {
+        HubWindow (MainComponent& o) : juce::DocumentWindow ("Grid Play Hub", theme::background, closeButton), owner (o) {}
+        void closeButtonPressed() override { owner.closeHub(); }
+        MainComponent& owner;
+    };
+    auto window = std::make_unique<HubWindow> (*this);
+    auto* hub = new Hub (engine.deviceManager, recentFiles, *properties.getUserSettings());
+    hub->onCreate = [this] { newProject ([this] { closeHub(); }); };
+    hub->onBrowse = [this] { browseForProject(); };
+    hub->onOpen = [this] (const juce::File& f) { openFile (f); };
+    hub->onAudioSettings = [this] { showAudioSettings(); };
+    hub->onScanPlugins = [this] { showScanner(); };
+    window->setContentOwned (hub, true);
+    window->setUsingNativeTitleBar (true);
+    window->centreWithSize (window->getWidth(), window->getHeight());
+    window->setVisible (true);
+    window->addKeyListener (commands.getKeyMappings());
+    hubWindow = std::move (window);
+}
+
+void MainComponent::closeHub()
+{
+    // Toujours après coup : on peut être appelé depuis un bouton du Hub.
+    if (hubWindow == nullptr)
+        return;
+    juce::MessageManager::callAsync ([safe = juce::Component::SafePointer<MainComponent> (this), window = hubWindow.get()]
+    {
+        if (safe != nullptr && safe->hubWindow.get() == window)
+        {
+            safe->saveSettings();
+            safe->hubWindow.reset();
+        }
     });
 }
 
@@ -421,6 +513,16 @@ void MainComponent::snapshot (const juce::File& png, std::function<void()> done)
         openChannel (channelTrack.getIntValue());
     }
 
+    // GRIDPLAY_TEST_DETAILED=1 : console détaillée ; GRIDPLAY_TEST_HUB=1 : le Hub (image « -hub.png »).
+    if (juce::SystemStats::getEnvironmentVariable ("GRIDPLAY_TEST_DETAILED", {}).isNotEmpty())
+        session.setDetailed (true);
+    if (juce::SystemStats::getEnvironmentVariable ("GRIDPLAY_TEST_HUB", {}).isNotEmpty())
+    {
+        rememberRecent (png.getSiblingFile ("demo2.gridplay"));
+        rememberRecent (png.getSiblingFile ("demo3.gridplay"));
+        showHub();
+    }
+
     // GRIDPLAY_TEST_CLIP=piste,scène : ouvre l'éditeur de notes sur ce clip et en fait aussi une image.
     const auto editTarget = juce::StringArray::fromTokens (juce::SystemStats::getEnvironmentVariable ("GRIDPLAY_TEST_CLIP", {}), ",", {});
     if (editTarget.size() == 2)
@@ -460,6 +562,15 @@ void MainComponent::snapshot (const juce::File& png, std::function<void()> done)
                 file.deleteFile();
                 juce::FileOutputStream channelOut (file);
                 juce::PNGImageFormat().writeImageToStream (channelImage, channelOut);
+            }
+        if (hubWindow != nullptr)
+            if (auto* content = hubWindow->getContentComponent())
+            {
+                auto hubImage = content->createComponentSnapshot (content->getLocalBounds(), true, 2.0f);
+                const auto file = png.getSiblingFile (png.getFileNameWithoutExtension() + "-hub.png");
+                file.deleteFile();
+                juce::FileOutputStream hubOut (file);
+                juce::PNGImageFormat().writeImageToStream (hubImage, hubOut);
             }
         auto image = createComponentSnapshot (getLocalBounds(), true, 2.0f);
         png.deleteFile();
@@ -559,6 +670,7 @@ void MainComponent::openChannel (int track)
     content->onOpenInsert = [this] (int target, int slot) { openInsertWindow (target, slot); };
     content->onScanPlugins = [this] { showScanner(); };
     content->onGone = [this, window] { juce::MessageManager::callAsync ([this, window] { channelWindows.removeObject (window); }); };
+    content->onTrackChanged = [window, content] { window->setName (juce::String::fromUTF8 ("Réglages de voie — ") + content->getTitle()); };
     window->setContentOwned (content, true);
     window->setName (juce::String::fromUTF8 ("Réglages de voie — ") + (id == ChannelEditor::masterId ? juce::String ("Master") : session.getSnapshot().tracks[(size_t) track].name));
     window->setUsingNativeTitleBar (true);
@@ -671,74 +783,167 @@ void MainComponent::toggleWindow (std::unique_ptr<juce::DocumentWindow>& window,
 
 //==============================================================================
 // Commandes, raccourcis (proches de ceux d'Ableton Live) et menus
+// Le menu Édition > Annuler s'adresse à la fenêtre au premier plan : éditeur de notes,
+// réglages d'une voie, ou la grille.
+ChannelEditor* MainComponent::activeChannelEditor() const
+{
+    auto* active = juce::TopLevelWindow::getActiveTopLevelWindow();
+    for (auto* w : channelWindows)
+        if (w == active)
+            return dynamic_cast<ChannelEditor*> (w->getContentComponent());
+    return nullptr;
+}
+
+void MainComponent::undoInActiveWindow (bool again)
+{
+    if (editor != nullptr && editorWindow != nullptr && editorWindow.get() == juce::TopLevelWindow::getActiveTopLevelWindow())
+    {
+        if (again) editor->redo(); else editor->undo();
+    }
+    else if (auto* channel = activeChannelEditor())
+    {
+        if (again) channel->redo(); else channel->undo();
+    }
+    else
+    {
+        if (again) session.redo(); else session.undo();
+    }
+}
+
 void MainComponent::getAllCommands (juce::Array<juce::CommandID>& c)
 {
     c.addArray ({ newSong, openSong, saveSong, saveSongAs, insertTrack, insertScene, deleteSelection, duplicate,
-                  copyClip, pasteClip, renameClip, launchSelection, playStop, stopAllClips, audioSettings, scanPlugins, editClip });
+                  copyClip, pasteClip, renameClip, launchSelection, playStop, stopAllClips, audioSettings, scanPlugins, editClip,
+                  undo, redo, deleteTrack, deleteScene, renameTrack, launchScene, armTrack, toggleDrumMap,
+                  importMidi, exportClip, toggleLink, channelSettings, masterSettings, toggleDetailed,
+                  openHub, closePluginWindows, showManual, showWebsite });
 }
 
 void MainComponent::getCommandInfo (juce::CommandID id, juce::ApplicationCommandInfo& info)
 {
     const auto cmd = juce::ModifierKeys::commandModifier;
     const auto shift = juce::ModifierKeys::shiftModifier;
+    const auto u = [] (const char* text) { return juce::String::fromUTF8 (text); };
+    const auto& snap = session.getSnapshot();
+    const int sel = session.getSelectedTrack();
+    const bool hasTrack = juce::isPositiveAndBelow (sel, (int) snap.tracks.size());
+    const bool clip = session.hasClipSelected();
+    const bool otherWindow = (editorWindow != nullptr && editorWindow.get() == juce::TopLevelWindow::getActiveTopLevelWindow())
+                          || activeChannelEditor() != nullptr;
     switch (id)
     {
-        case newSong:         info.setInfo ("Nouveau morceau", {}, "Fichier", 0); info.addDefaultKeypress ('n', cmd); break;
+        // Fichier
+        case openHub:         info.setInfo ("Hub...", u ("Projets récents et réglages de départ"), "Fichier", 0); break;
+        case newSong:         info.setInfo ("Nouveau projet", {}, "Fichier", 0); info.addDefaultKeypress ('n', cmd); break;
         case openSong:        info.setInfo ("Ouvrir...", {}, "Fichier", 0); info.addDefaultKeypress ('o', cmd); break;
         case saveSong:        info.setInfo ("Enregistrer", {}, "Fichier", 0); info.addDefaultKeypress ('s', cmd); break;
         case saveSongAs:      info.setInfo ("Enregistrer sous...", {}, "Fichier", 0); info.addDefaultKeypress ('s', cmd | shift); break;
-        case insertTrack:     info.setInfo (juce::String::fromUTF8 ("Insérer une piste MIDI"), {}, "Edition", 0); info.addDefaultKeypress ('t', cmd | shift); break;
-        case insertScene:     info.setInfo (juce::String::fromUTF8 ("Insérer une scène"), {}, "Edition", 0); info.addDefaultKeypress ('i', cmd); break;
-        case deleteSelection: info.setInfo ("Supprimer le clip", {}, "Edition", 0); info.setActive (session.hasClipSelected()); break;
-        case duplicate:       info.setInfo ("Dupliquer le clip", {}, "Edition", 0); info.addDefaultKeypress ('d', cmd); info.setActive (session.hasClipSelected()); break;
-        case copyClip:        info.setInfo ("Copier le clip", {}, "Edition", 0); info.addDefaultKeypress ('c', cmd); info.setActive (session.hasClipSelected()); break;
-        case pasteClip:       info.setInfo ("Coller le clip", {}, "Edition", 0); info.addDefaultKeypress ('v', cmd); break;
-        case renameClip:      info.setInfo ("Renommer le clip", {}, "Edition", 0); info.addDefaultKeypress ('r', cmd); info.setActive (session.hasClipSelected()); break;
-        case launchSelection: info.setInfo (juce::String::fromUTF8 ("Lancer la case sélectionnée"), {}, "Transport", 0); break;
+        case importMidi:      info.setInfo (u ("Importer un fichier MIDI dans la case..."), {}, "Fichier", 0); break;
+        case exportClip:      info.setInfo ("Exporter le clip en fichier MIDI...", {}, "Fichier", 0); info.setActive (clip); break;
+
+        // Édition
+        case undo:            info.setInfo ("Annuler", {}, u ("Édition"), 0); info.addDefaultKeypress ('z', cmd);
+                              info.setActive (otherWindow || session.canUndo()); break;
+        case redo:            info.setInfo (u ("Rétablir"), {}, u ("Édition"), 0); info.addDefaultKeypress ('z', cmd | shift);
+                              info.setActive (otherWindow || session.canRedo()); break;
+        case renameClip:      info.setInfo ("Renommer le clip", {}, u ("Édition"), 0); info.addDefaultKeypress ('r', cmd); info.setActive (clip); break;
+        case duplicate:       info.setInfo ("Dupliquer le clip", {}, u ("Édition"), 0); info.addDefaultKeypress ('d', cmd); info.setActive (clip); break;
+        case copyClip:        info.setInfo ("Copier le clip", {}, u ("Édition"), 0); info.addDefaultKeypress ('c', cmd); info.setActive (clip); break;
+        case pasteClip:       info.setInfo ("Coller le clip", {}, u ("Édition"), 0); info.addDefaultKeypress ('v', cmd); break;
+        case deleteSelection: info.setInfo ("Supprimer le clip", {}, u ("Édition"), 0); info.setActive (clip); break;
+
+        // Projet
+        case insertTrack:     info.setInfo (u ("Ajouter une piste MIDI"), {}, "Projet", 0); info.addDefaultKeypress ('t', cmd | shift); break;
+        case insertScene:     info.setInfo (u ("Ajouter une scène"), {}, "Projet", 0); info.addDefaultKeypress ('i', cmd); break;
+        case renameTrack:     info.setInfo ("Renommer la piste", {}, "Projet", 0); info.setActive (hasTrack); break;
+        case deleteTrack:     info.setInfo ("Supprimer la piste", {}, "Projet", 0); info.setActive (snap.tracks.size() > 1); break;
+        case deleteScene:     info.setInfo (u ("Supprimer la scène"), {}, "Projet", 0); info.setActive (snap.scenes.size() > 1); break;
+
+        // MIDI
+        case editClip:        info.setInfo (u ("Éditeur de notes"), {}, "MIDI", 0); info.addDefaultKeypress ('e', cmd); info.setActive (clip); break;
+        case armTrack:        info.setInfo ("Armer la piste pour l'enregistrement", {}, "MIDI", 0);
+                              info.setActive (hasTrack); info.setTicked (hasTrack && snap.tracks[(size_t) sel].arm); break;
+        case toggleDrumMap:   info.setInfo ("Drum map General MIDI", {}, "MIDI", 0);
+                              info.setActive (hasTrack); info.setTicked (hasTrack && snap.tracks[(size_t) sel].drumMap); break;
+
+        // Transport
         case playStop:        info.setInfo ("Lecture / Stop", {}, "Transport", 0); info.addDefaultKeypress (juce::KeyPress::spaceKey, 0); break;
-        case stopAllClips:    info.setInfo (juce::String::fromUTF8 ("Arrêter tous les clips"), {}, "Transport", 0); break;
-        case audioSettings:   info.setInfo ("Audio / MIDI...", {}, "Options", 0); info.addDefaultKeypress (',', cmd); break;
-        case editClip:        info.setInfo (juce::String::fromUTF8 ("Éditer les notes du clip"), {}, "Edition", 0); info.addDefaultKeypress ('e', cmd); info.setActive (session.hasClipSelected()); break;
-        case scanPlugins:     info.setInfo ("Instruments virtuels...", {}, "Options", 0); break;
+        case launchSelection: info.setInfo (u ("Lancer la case sélectionnée"), {}, "Transport", 0); break;
+        case launchScene:     info.setInfo (u ("Lancer la scène sélectionnée"), {}, "Transport", 0); break;
+        case stopAllClips:    info.setInfo (u ("Arrêter tous les clips"), {}, "Transport", 0); break;
+        case toggleLink:      info.setInfo ("Ableton Link", u ("Synchroniser tempo et mesure"), "Transport", 0); info.setTicked (engine.isLinkEnabled()); break;
+
+        // Studio
+        case audioSettings:   info.setInfo ("Audio / MIDI...", {}, "Studio", 0); info.addDefaultKeypress (',', cmd); break;
+        case scanPlugins:     info.setInfo ("Instruments et effets (VST)...", {}, "Studio", 0); break;
+        case channelSettings: info.setInfo (u ("Réglages de la voie sélectionnée..."), {}, "Studio", 0); info.setActive (hasTrack); break;
+        case masterSettings:  info.setInfo (u ("Réglages du master..."), {}, "Studio", 0); break;
+        case toggleDetailed:  info.setInfo (u ("Console détaillée"), {}, "Studio", 0); info.addDefaultKeypress (juce::KeyPress::F3Key, 0);
+                              info.setTicked (session.isDetailed()); break;
+
+        // Fenêtre, aide
+        case closePluginWindows: info.setInfo (u ("Fermer les fenêtres des instruments et effets"), {}, u ("Fenêtre"), 0);
+                                 info.setActive (! pluginWindows.isEmpty()); break;
+        case showManual:      info.setInfo ("Mode d'emploi de Grid Play", {}, "Aide", 0); break;
+        case showWebsite:     info.setInfo ("Site Load & Play", {}, "Aide", 0); break;
         default: break;
     }
 }
 
 bool MainComponent::perform (const InvocationInfo& info)
 {
+    const int sel = session.getSelectedTrack();
     switch (info.commandID)
     {
-        case newSong:
-            askToSave ([this]
-            {
-                engine.setSong (makeDefaultSong());
-                currentFile = juce::File();
-                savedChangeCount = engine.getChangeCount();
-                session.selectCell (0, 0);
-            });
-            break;
-        case openSong:
-            chooser = std::make_unique<juce::FileChooser> ("Ouvrir un morceau", currentFile.getParentDirectory(), "*.gridplay");
-            chooser->launchAsync (juce::FileBrowserComponent::openMode | juce::FileBrowserComponent::canSelectFiles,
-                                  [this] (const juce::FileChooser& fc) { if (fc.getResult().existsAsFile()) openFile (fc.getResult()); });
-            break;
+        case openHub:         showHub(); break;
+        case newSong:         newProject ({}); break;
+        case openSong:        browseForProject(); break;
         case saveSong:        save ({}); break;
         case saveSongAs:      saveAs ({}); break;
-        case insertTrack:     session.insertTrack(); break;
-        case insertScene:     session.insertScene(); break;
+        case importMidi:      session.importMidiIntoSelected(); break;
+        case exportClip:      session.exportSelectedClip(); break;
+
+        case undo:            undoInActiveWindow (false); break;
+        case redo:            undoInActiveWindow (true); break;
         case deleteSelection: session.deleteSelected(); break;
         case duplicate:       session.duplicateSelected(); break;
         case copyClip:        session.copySelected(); break;
         case pasteClip:       session.pasteSelected(); break;
         case renameClip:      session.renameSelected(); break;
-        case launchSelection: session.launchSelected(); break;
+
+        case insertTrack:     session.insertTrack(); break;
+        case insertScene:     session.insertScene(); break;
+        case renameTrack:     session.renameSelectedTrack(); break;
+        case deleteTrack:     session.deleteSelectedTrack(); break;
+        case deleteScene:     session.deleteSelectedScene(); break;
+
+        case editClip:        session.editSelected(); break;
+        case armTrack:        session.armSelectedTrack(); break;
+        case toggleDrumMap:
+            engine.edit ([sel] (Session& s)
+            {
+                if (juce::isPositiveAndBelow (sel, s.song.numTracks()))
+                    s.song.tracks[(size_t) sel].drumMap = ! s.song.tracks[(size_t) sel].drumMap;
+            });
+            break;
+
         case playStop:
             engine.perform ([] (Session& s) { if (s.isPlaying()) s.stop(); else s.play(); });
             break;
+        case launchSelection: session.launchSelected(); break;
+        case launchScene:     session.launchSelectedScene(); break;
         case stopAllClips:    engine.perform ([] (Session& s) { s.stopAllClips(); }); break;
+        case toggleLink:      linkButton.onClick(); break;
+
         case audioSettings:   showAudioSettings(); break;
         case scanPlugins:     showScanner(); break;
-        case editClip:        session.editSelected(); break;
+        case channelSettings: openChannel (sel); break;
+        case masterSettings:  openChannel (-1); break;
+        case toggleDetailed:  session.setDetailed (! session.isDetailed()); break;
+
+        case closePluginWindows: pluginWindows.clear(); break;
+        case showManual:      juce::URL (manualUrl).launchInDefaultBrowser(); break;
+        case showWebsite:     juce::URL (websiteUrl).launchInDefaultBrowser(); break;
         default: return false;
     }
     return true;
@@ -746,44 +951,83 @@ bool MainComponent::perform (const InvocationInfo& info)
 
 juce::StringArray MainComponent::getMenuBarNames()
 {
-    return { "Fichier", juce::String::fromUTF8 ("Édition"), "Transport", "Options" };
+    return { "Fichier", juce::String::fromUTF8 ("Édition"), "Projet", "MIDI", "Transport", "Studio", juce::String::fromUTF8 ("Fenêtre"), "Aide" };
 }
 
 juce::PopupMenu MainComponent::getMenuForIndex (int index, const juce::String&)
 {
     juce::PopupMenu m;
+    const auto add = [&] (std::initializer_list<int> ids)
+    {
+        for (auto id : ids)
+            if (id == 0) m.addSeparator();
+            else m.addCommandItem (&commands, id);
+    };
     switch (index)
     {
         case 0:
-            m.addCommandItem (&commands, newSong);
-            m.addCommandItem (&commands, openSong);
+        {
+            add ({ openHub, 0, newSong, openSong });
+            juce::PopupMenu recent;
+            recentFiles.createPopupMenuItems (recent, recentBase, true, true);
+            if (recent.getNumItems() > 0)
+            {
+                recent.addSeparator();
+                recent.addItem (clearRecent, "Effacer la liste");
+            }
+            m.addSubMenu (juce::String::fromUTF8 ("Ouvrir un projet récent"), recent, recent.getNumItems() > 0);
+            add ({ 0, saveSong, saveSongAs, 0, importMidi, exportClip });
+           #if ! JUCE_MAC
             m.addSeparator();
-            m.addCommandItem (&commands, saveSong);
-            m.addCommandItem (&commands, saveSongAs);
+            m.addItem (quitItem, "Quitter");
+           #endif
             break;
-        case 1:
-            m.addCommandItem (&commands, insertTrack);
-            m.addCommandItem (&commands, insertScene);
-            m.addSeparator();
-            m.addCommandItem (&commands, editClip);
-            m.addCommandItem (&commands, renameClip);
-            m.addCommandItem (&commands, duplicate);
-            m.addCommandItem (&commands, copyClip);
-            m.addCommandItem (&commands, pasteClip);
-            m.addCommandItem (&commands, deleteSelection);
-            break;
-        case 2:
-            m.addCommandItem (&commands, playStop);
-            m.addCommandItem (&commands, launchSelection);
-            m.addCommandItem (&commands, stopAllClips);
-            break;
+        }
+        case 1: add ({ undo, redo, 0, renameClip, duplicate, copyClip, pasteClip, deleteSelection }); break;
+        case 2: add ({ insertTrack, insertScene, 0, renameTrack, deleteTrack, deleteScene }); break;
         case 3:
-            m.addCommandItem (&commands, audioSettings);
-            m.addCommandItem (&commands, scanPlugins);
+        {
+            add ({ editClip, 0, armTrack, toggleDrumMap, 0 });
+            const auto current = engine.read ([] (const Session& s) { return std::make_pair (s.song.quantize, s.song.recordBars); });
+            juce::PopupMenu q, r;
+            for (int i = 0; i < 8; ++i)
+                q.addItem (quantizeBase + i, juce::String::fromUTF8 (quantizeNames[i]), true, std::abs (quantizeValues[i] - current.first) < 1.0e-6);
+            for (int i = 0; i < 5; ++i)
+                r.addItem (recordBase + i, juce::String::fromUTF8 (recordNames[i]), true, recordValues[i] == current.second);
+            m.addSubMenu ("Quantification du lancement", q);
+            m.addSubMenu ("Longueur d'enregistrement", r);
             break;
-        default:
-            break;
+        }
+        case 4: add ({ playStop, 0, launchSelection, launchScene, stopAllClips, 0, toggleLink }); break;
+        case 5: add ({ audioSettings, scanPlugins, 0, channelSettings, masterSettings, 0, toggleDetailed }); break;
+        case 6: add ({ openHub, editClip, 0, closePluginWindows }); break;
+        case 7: add ({ showManual, showWebsite }); break;
+        default: break;
     }
     return m;
+}
+
+void MainComponent::menuItemSelected (int itemId, int)
+{
+    if (itemId == clearRecent)
+    {
+        recentFiles.clear();
+        properties.getUserSettings()->setValue ("recentFiles", recentFiles.toString());
+        menuItemsChanged();
+    }
+    else if (itemId >= recentBase && itemId < recentBase + recentFiles.getNumFiles())
+        openFile (recentFiles.getFile (itemId - recentBase));
+    else if (itemId >= quantizeBase && itemId < quantizeBase + 8)
+    {
+        const double q = quantizeValues[itemId - quantizeBase];
+        engine.edit ([q] (Session& s) { s.song.quantize = q; });
+    }
+    else if (itemId >= recordBase && itemId < recordBase + 5)
+    {
+        const int bars = recordValues[itemId - recordBase];
+        engine.edit ([bars] (Session& s) { s.song.recordBars = bars; });
+    }
+    else if (itemId == quitItem)
+        juce::JUCEApplication::getInstance()->systemRequestedQuit();
 }
 } // namespace gridplay

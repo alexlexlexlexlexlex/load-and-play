@@ -121,6 +121,13 @@ struct Track
     ChannelEq eq;
     std::vector<InsertSlot> inserts;
     bool drumMap = false;                 // l'éditeur montre les sons de batterie (drum map GM)
+
+    // Réglages MIDI de la piste (comme l'inspecteur de Cubase) : retard en ms (négatif = en avance),
+    // transposition en demi-tons, décalage de vélocité, programme envoyé à la sortie (-1 = aucun).
+    double delayMs = 0.0;
+    int transpose = 0;
+    int velocityShift = 0;
+    int program = -1;
     bool mute = false, solo = false, arm = false;
 
     std::vector<ClipPtr> slots;           // une case par scène, nullptr = vide
@@ -315,6 +322,10 @@ inline std::unique_ptr<juce::XmlElement> songToXml (const Song& song)
         e->setAttribute ("solo", t.solo);
         e->setAttribute ("arm", t.arm);
         e->setAttribute ("drumMap", t.drumMap);
+        e->setAttribute ("delayMs", t.delayMs);
+        e->setAttribute ("transpose", t.transpose);
+        e->setAttribute ("velocityShift", t.velocityShift);
+        e->setAttribute ("program", t.program);
         e->setAttribute ("pan", (double) t.pan);
         e->setAttribute ("audioInput", t.audioInput);
         e->setAttribute ("audioInputStereo", t.audioInputStereo);
@@ -377,6 +388,10 @@ inline bool songFromXml (const juce::XmlElement& xml, Song& song)
             t.solo = e->getBoolAttribute ("solo");
             t.arm = e->getBoolAttribute ("arm");
             t.drumMap = e->getBoolAttribute ("drumMap");
+            t.delayMs = juce::jlimit (-100.0, 100.0, e->getDoubleAttribute ("delayMs"));
+            t.transpose = juce::jlimit (-48, 48, e->getIntAttribute ("transpose"));
+            t.velocityShift = juce::jlimit (-127, 127, e->getIntAttribute ("velocityShift"));
+            t.program = juce::jlimit (-1, 127, e->getIntAttribute ("program", -1));
             t.pan = (float) juce::jlimit (-1.0, 1.0, e->getDoubleAttribute ("pan"));
             t.audioInput = e->getIntAttribute ("audioInput", -1);
             t.audioInputStereo = e->getBoolAttribute ("audioInputStereo", true);

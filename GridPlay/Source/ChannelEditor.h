@@ -22,6 +22,16 @@ public:
     std::function<void (int target, int slot)> onOpenInsert;   // ouvrir la fenêtre d'un effet
     std::function<void()> onScanPlugins;
     std::function<void()> onGone;                              // la piste a été supprimée
+    std::function<void()> onTrackChanged;                      // flèches : autre piste
+
+    // Annuler / rétablir les réglages de cette voie (égaliseur, volume, panoramique, inserts).
+    void undo();
+    void redo();
+    void remember();                          // avant une modification (les gestes continus comptent pour un)
+    void rememberMove (int from, int to);     // un effet change de case
+    void navigate (int direction);            // piste précédente / suivante
+    bool keyPressed (const juce::KeyPress&) override;
+    void mouseDown (const juce::MouseEvent&) override;
 
     void paint (juce::Graphics&) override;
     void resized() override;
@@ -40,7 +50,7 @@ private:
     void showInsertMenu (int slot, bool filled);
 
     AudioEngine& engine;
-    const int trackId;
+    int trackId;
     juce::String name;
     juce::Colour colour;
     ChannelEq currentEq;
@@ -50,9 +60,23 @@ private:
     juce::OwnedArray<InsertRow> rows;
     juce::OwnedArray<BandControls> bands;
     juce::TextButton eqBypass { "EQ" }, eqReset;
+    struct Snapshot
+    {
+        ChannelEq eq;
+        float volume = 0.85f, pan = 0.0f;
+        std::vector<bool> bypass;
+        int moveFrom = -1, moveTo = -1;   // un déplacement d'effet, au lieu d'un état
+    };
+    Snapshot capture() const;
+    void restore (const Snapshot&);
+    std::vector<Snapshot> undoStack, redoStack;
+    juce::uint32 lastEdit = 0;
+
     juce::Slider fader, pan;
-    juce::Label faderValue;
-    juce::Rectangle<int> insertsArea, eqArea, channelArea, meterArea;
+    juce::Label faderValue, peakValue;
+    juce::TextButton undoButton, redoButton, prevButton, nextButton, muteButton { "M" }, soloButton { "S" };
+    float peakHold = 0.0f;
+    juce::Rectangle<int> insertsArea, eqArea, channelArea, meterArea, scaleArea;
     juce::TooltipWindow tooltips { this, 450 };
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (ChannelEditor)
