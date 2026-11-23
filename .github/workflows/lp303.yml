@@ -1,0 +1,78 @@
+# Compile LP-303 (basse acide et séquenceur 16 pas) pour macOS, Windows et Linux (x64 et
+# ARM64 / Raspberry Pi), et lance les tests du son et du séquenceur.
+# Les zips sont rangés dans l'onglet Actions. L'ajout aux Releases et au site viendra
+# quand LP-303 rejoindra le workflow « Plugins ».
+
+name: LP-303
+
+on:
+  push:
+    branches: [main]
+    paths: ["LP303/**", ".github/workflows/lp303.yml"]
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - { name: macOS, os: macos-latest, formats: "AU VST3 CLAP LV2 Standalone" }
+          - { name: Windows, os: windows-2022, formats: "VST3 CLAP LV2 Standalone" }
+          - { name: Linux-x64, os: ubuntu-22.04, formats: "VST3 CLAP LV2 Standalone" }
+          - { name: Linux-ARM64, os: ubuntu-22.04-arm, formats: "VST3 CLAP LV2 Standalone" }
+
+    name: LP-303 ${{ matrix.platform.name }}
+    runs-on: ${{ matrix.platform.os }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: LP303
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Dépendances Linux
+        if: runner.os == 'Linux'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build libasound2-dev libjack-jackd2-dev libfreetype6-dev \
+            libfontconfig1-dev libx11-dev libxcomposite-dev libxcursor-dev libxext-dev \
+            libxinerama-dev libxrandr-dev libxrender-dev libgl1-mesa-dev
+
+      - name: Configuration
+        run: |
+          if [ "$RUNNER_OS" = "Windows" ]; then
+            cmake -S . -B build -DLP303_INSTALL_PLUGINS=OFF
+          else
+            cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DLP303_INSTALL_PLUGINS=OFF
+          fi
+
+      - name: Compilation
+        run: |
+          targets="RenderTest"
+          for format in ${{ matrix.platform.formats }}; do
+            targets="$targets LP303_$format"
+          done
+          cmake --build build --config Release --parallel --target $targets
+
+      - name: Tests du son et du séquenceur
+        run: |
+          test=$(find build/RenderTest_artefacts -type f \( -name RenderTest -o -name RenderTest.exe \) | head -1)
+          "$test" demo.wav
+
+      - name: Préparation du zip
+        run: |
+          folder="LP-303-1.0.0-${{ matrix.platform.name }}"
+          mkdir -p "$folder"
+          cp -R build/LP303_artefacts/Release/* "$folder/"
+          rm -rf "$folder/JuceLibraryCode" "$folder"/*.a "$folder"/*.lib
+          cp LICENSE README.md demo.wav "$folder/"
+          cmake -E tar cf "$folder.zip" --format=zip "$folder"
+          echo "ZIP=LP303/$folder.zip" >> "$GITHUB_ENV"
+          echo "FOLDER=$folder" >> "$GITHUB_ENV"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.FOLDER }}
+          path: ${{ env.ZIP }}

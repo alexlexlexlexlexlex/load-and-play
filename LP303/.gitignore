@@ -1,0 +1,5 @@
+build/
+JUCE/
+clap-juce-extensions/
+demo.wav
+.DS_Store
