@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Fabrique les manuels PDF des quatre plugins (français et anglais) dans « Site web/docs ».
+"""Fabrique les manuels PDF des plugins (français et anglais) dans « Site web/docs ».
 
 Le texte vient du site lui-même (description, branchement, installation, caractéristiques,
 « De plus près » dans assets/js/products.js) et la liste des réglages de params.json,
@@ -48,6 +48,19 @@ PRODUCTS = {
             [r"Overdrive .*", r"Chorus .*", r"Delay .*"],
             [],
             [r"Arp.*"],
+        ],
+    },
+    "lp303": {
+        "name": "LP-303", "file": "LP-303", "page": "lp-303.html", "card": "lp-303", "kind": "synth",
+        "groups": [
+            [],
+            [r"Waveform", r"Tuning"],
+            [r"Cutoff", r"Resonance", r"Env Mod", r"Decay"],
+            [r"Accent", r"Slide Time"],
+            [r"Drive", r"Volume"],
+            [r"Sequencer On", r"Pattern", r"Swing", r"Tempo.*", r"Transpose"],
+            [],
+            [],
         ],
     },
     "duckhunt": {

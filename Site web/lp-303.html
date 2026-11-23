@@ -1,0 +1,232 @@
+<!doctype html>
+<html lang="fr" data-ui-lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>LP-303 — Load & Play</title>
+  <meta name="description" content="LP-303 : basse acide gratuite dans l'esprit de la TB-303, avec séquenceur 16 pas intégré. AU, VST3, CLAP, LV2 et application autonome pour Mac, Windows et Linux.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Permanent+Marker&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <script src="assets/js/config.js"></script>
+  <script src="assets/js/site.js"></script>
+  <script type="module" src="assets/js/try.js"></script>
+  <script src="assets/js/products.js" defer></script>
+  <script src="assets/js/closer.js" defer></script>
+</head>
+<body class="inner">
+  <a class="float-back" href="index.html" aria-label="Accueil / Home">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>
+    <span class="label"><span lang="fr">Accueil</span><span lang="en">Home</span></span>
+  </a>
+  <header class="site-header">
+    <div class="left">
+      <a class="box-link" data-mail href="#">Contact</a>
+      <a class="box-link" data-github href="#" target="_blank" rel="noopener">GitHub</a>
+    </div>
+    <a class="logo" href="index.html">Load &amp; Play</a>
+    <div class="right">
+      <div class="lang-switch" role="group" aria-label="Langue / Language">
+        <button type="button" data-lang="fr" aria-pressed="true">FR</button>
+        <button type="button" data-lang="en" aria-pressed="false">EN</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="page">
+    <h1>LP-303</h1>
+    <div class="intro">
+      <div>
+        <p class="lead" lang="fr">Basse acide gratuite et open source, dans l'esprit de la TB-303 : un oscillateur, le filtre à diodes qui couine, l'accent et le slide qui font les lignes acid, et un séquenceur de 16 pas intégré, calé sur votre logiciel. Repliez le séquenceur pour la jouer au clavier ou depuis vos pistes MIDI.</p>
+        <p class="lead" lang="en">A free, open-source acid bass in the spirit of the TB-303: one oscillator, the squelching diode filter, the accent and slide that make acid lines, and a built-in 16-step sequencer locked to your host. Fold the sequencer away to play it from a keyboard or your MIDI tracks.</p>
+      </div>
+      <div class="page-actions">
+        <a class="btn dark pdf" href="docs/LP-303-manuel.pdf" lang="fr" target="_blank" rel="noopener">Manuel d'utilisation</a>
+        <a class="btn dark pdf" href="docs/LP-303-manual.pdf" lang="en" target="_blank" rel="noopener">User manual</a>
+      </div>
+    </div>
+
+    <ul class="toc">
+      <li><a class="btn dark" href="#de-plus-pres"><span lang="fr">De plus près</span><span lang="en">A closer look</span></a></li>
+      <li><a class="btn dark" href="#description">Description</a></li>
+      <li><a class="btn dark" href="#essayer"><span lang="fr">Essayer maintenant</span><span lang="en">Try it now</span></a></li>
+      <li><a class="btn dark" href="#brancher"><span lang="fr">Dans votre logiciel</span><span lang="en">In your DAW</span></a></li>
+      <li><a class="btn dark" href="#caracteristiques"><span lang="fr">Caractéristiques</span><span lang="en">Specifications</span></a></li>
+      <li><a class="btn dark" href="#telechargements"><span lang="fr">Téléchargements</span><span lang="en">Downloads</span></a></li>
+      <li><a class="btn dark" href="#code"><span lang="fr">Code source</span><span lang="en">Source code</span></a></li>
+    </ul>
+
+    <section class="closer" id="de-plus-pres" data-closer="lp303">
+      <h2><span lang="fr">De plus près</span><span lang="en">A closer look</span></h2>
+    </section>
+
+    <h2 id="description">Description</h2>
+    <div lang="fr">
+      <p>LP-303 tient en une voix, comme la boîte argentée qui a inventé l'acid house : un oscillateur, un filtre résonant, un ampli, et tout le caractère dans la façon de jouer. Une note liée glisse vers la suivante, une note accentuée claque et fait « wow », et le séquenceur intégré enchaîne les deux sur seize pas.</p>
+      <h3>Le son</h3>
+      <ul>
+        <li><b>Oscillateur</b> : dents de scie ou carré légèrement penché, tables d'onde à bande limitée (aucun repliement), accord sur ±12 demi-tons.</li>
+        <li><b>Filtre</b> : passe-bas à diodes 4 pôles, dont la pente sonne comme un 3 pôles, saturé entre chaque étage et calculé en suréchantillonnage x4. Résonance jusqu'au bord du sifflement, sans jamais décrocher.</li>
+        <li><b>Accent</b> : plus de volume, plus de mordant, décroissance du filtre la plus courte, et un coup de cutoff qui s'accumule d'un accent à l'autre, plus marqué quand la résonance monte.</li>
+        <li><b>Slide</b> : glissement de hauteur entre deux notes liées, sans redéclencher les enveloppes, de 20 à 500 ms.</li>
+        <li><b>Drive</b> : saturation douce et asymétrique en option, à volume constant.</li>
+      </ul>
+      <h3>Le séquenceur</h3>
+      <ul>
+        <li><b>8 motifs de 16 pas</b>, chacun avec sa longueur (1 à 16 pas). Pour chaque pas : note, octave haut ou bas, accent, slide, ou silence.</li>
+        <li>Une grille façon piano-roll : on clique, on glisse pour peindre, on voit les slides relier les notes.</li>
+        <li>Calé sur le tempo et la position de votre logiciel : les boucles, les sauts et les départs en milieu de mesure restent en place. Swing jusqu'à 75 %.</li>
+        <li>Pendant la lecture, une touche transpose le motif. CLEAR, RANDOM (un motif acide au hasard), COPY et PASTE.</li>
+        <li>HIDE SEQ replie le séquenceur quand vous jouez LP-303 en MIDI : la fenêtre ne garde que le son et le clavier.</li>
+      </ul>
+      <h3>Et aussi</h3>
+      <ul>
+        <li>Jeu au clavier naturel : legato = slide, vélocité de 100 ou plus = accent.</li>
+        <li>Lecteur de fichier MIDI : glissez un .mid sur la fenêtre pour l'écouter.</li>
+        <li>10 sons d'usine et 8 motifs d'usine écrits pour LP-303.</li>
+      </ul>
+    </div>
+    <div lang="en">
+      <p>LP-303 is a single voice, like the silver box that invented acid house: one oscillator, one resonant filter, one amp, and all the character in the way you play it. A tied note glides into the next, an accented note snaps and goes "wow", and the built-in sequencer strings both together over sixteen steps.</p>
+      <h3>The sound</h3>
+      <ul>
+        <li><b>Oscillator</b>: sawtooth or slightly tilted square, band-limited wavetables (no aliasing), ±12 semitone tuning.</li>
+        <li><b>Filter</b>: 4-pole diode low-pass whose slope sounds like a 3-pole, saturating between stages and computed with 4x oversampling. Resonance right up to the edge of whistling, without ever breaking up.</li>
+        <li><b>Accent</b>: more level, more bite, the shortest filter decay, and a cutoff kick that builds up from one accent to the next, stronger as resonance rises.</li>
+        <li><b>Slide</b>: pitch glide between two tied notes, without retriggering the envelopes, from 20 to 500 ms.</li>
+        <li><b>Drive</b>: optional soft, asymmetric saturation at constant level.</li>
+      </ul>
+      <h3>The sequencer</h3>
+      <ul>
+        <li><b>8 patterns of 16 steps</b>, each with its own length (1 to 16 steps). For every step: note, octave up or down, accent, slide, or rest.</li>
+        <li>A piano-roll style grid: click, drag to paint, and see the slides linking the notes.</li>
+        <li>Locked to your host's tempo and position: loops, jumps and mid-bar starts stay in place. Swing up to 75 %.</li>
+        <li>While playing, a key transposes the pattern. CLEAR, RANDOM (a random acid pattern), COPY and PASTE.</li>
+        <li>HIDE SEQ folds the sequencer away when you play LP-303 over MIDI: the window keeps only the sound and the keyboard.</li>
+      </ul>
+      <h3>And also</h3>
+      <ul>
+        <li>Natural keyboard playing: legato = slide, velocity of 100 or more = accent.</li>
+        <li>MIDI file player: drop a .mid onto the window to hear it.</li>
+        <li>10 factory sounds and 8 factory patterns written for LP-303.</li>
+      </ul>
+    </div>
+
+    <h2 id="essayer"><span lang="fr">Essayer maintenant</span><span lang="en">Try it now</span></h2>
+    <p lang="fr">Lancez le séquenceur avec RUN et retouchez le motif dans la grille, ou jouez avec le clavier de l'écran, celui de l'ordinateur ou un clavier MIDI (Chrome, Edge, Firefox).</p>
+    <p lang="en">Start the sequencer with RUN and edit the pattern in the grid, or play with the on-screen keyboard, your computer keyboard or a MIDI keyboard (Chrome, Edge, Firefox).</p>
+    <div class="try-panel inline" id="try-lp303" data-instrument="lp303"></div>
+
+    <h2 id="brancher"><span lang="fr">Dans votre logiciel</span><span lang="en">In your DAW</span></h2>
+    <div lang="fr">
+      <p>Ajoutez LP-303 sur une piste d'instrument. Deux façons de le jouer :</p>
+      <ul>
+        <li><b>Avec son séquenceur</b> : allumez RUN, puis lancez la lecture du projet. Le motif suit le tempo et la position du logiciel ; les boucles et les retours au début le remettent en place. Une piste MIDI qui envoie des notes pendant la lecture transpose le motif (do 3 = sans transposition, comme dans Cubase).</li>
+        <li><b>En MIDI</b> : laissez RUN éteint et cliquez sur HIDE SEQ. Écrivez vos lignes dans l'éditeur de notes de votre logiciel : faites chevaucher deux notes pour un slide, montez la vélocité à 100 ou plus pour un accent.</li>
+      </ul>
+      <p>Les motifs, le choix du motif et l'état du séquenceur (affiché ou replié) sont sauvegardés avec le projet. TUNE, CUTOFF, RESONANCE, ENV MOD, DECAY, ACCENT… tous les réglages s'automatisent.</p>
+    </div>
+    <div lang="en">
+      <p>Add LP-303 to an instrument track. Two ways to play it:</p>
+      <ul>
+        <li><b>With its sequencer</b>: switch RUN on, then start playback. The pattern follows the host's tempo and position; loops and jumps back to the start put it back in place. A MIDI track sending notes during playback transposes the pattern (C3 in Cubase's naming = no transposition).</li>
+        <li><b>Over MIDI</b>: leave RUN off and click HIDE SEQ. Write your lines in your host's note editor: overlap two notes for a slide, raise the velocity to 100 or more for an accent.</li>
+      </ul>
+      <p>The patterns, the selected pattern and the sequencer state (shown or folded) are saved with the project. TUNE, CUTOFF, RESONANCE, ENV MOD, DECAY, ACCENT… every control can be automated.</p>
+    </div>
+
+    <h2 id="caracteristiques"><span lang="fr">Caractéristiques</span><span lang="en">Specifications</span></h2>
+    <table class="specs">
+      <tr><th>Version</th><td>1.0.0</td></tr>
+      <tr><th><span lang="fr">Prix</span><span lang="en">Price</span></th><td><span lang="fr">Gratuit</span><span lang="en">Free</span></td></tr>
+      <tr><th><span lang="fr">Licence</span><span lang="en">License</span></th><td>GNU AGPL v3 (open source)</td></tr>
+      <tr><th>Type</th><td><span lang="fr">Basse acide monophonique avec séquenceur 16 pas</span><span lang="en">Monophonic acid bass with 16-step sequencer</span></td></tr>
+      <tr><th>Formats</th><td><span lang="fr">AU, VST3, CLAP, LV2, application autonome</span><span lang="en">AU, VST3, CLAP, LV2, standalone application</span></td></tr>
+      <tr><th>macOS</th><td><span lang="fr">10.13 ou plus récent, Apple Silicon et Intel</span><span lang="en">10.13 or later, Apple Silicon and Intel</span></td></tr>
+      <tr><th>Windows</th><td><span lang="fr">10 / 11, 64 bits (VST3, CLAP, LV2, autonome)</span><span lang="en">10 / 11, 64-bit (VST3, CLAP, LV2, standalone)</span></td></tr>
+      <tr><th>Linux</th><td><span lang="fr">x86-64 et ARM64, dont Raspberry Pi 4/5</span><span lang="en">x86-64 and ARM64, including Raspberry Pi 4/5</span></td></tr>
+      <tr><th><span lang="fr">Traitement</span><span lang="en">Processing</span></th><td><span lang="fr">Suréchantillonnage x4, toutes fréquences d'échantillonnage</span><span lang="en">4x oversampling, any sample rate</span></td></tr>
+      <tr><th><span lang="fr">Latence</span><span lang="en">Latency</span></th><td><span lang="fr">6 échantillons</span><span lang="en">6 samples</span></td></tr>
+      <tr><th><span lang="fr">Charge processeur</span><span lang="en">CPU load</span></th><td><span lang="fr">≈ 1 % d'un cœur (Mac Apple Silicon, 48 kHz)</span><span lang="en">≈ 1 % of one core (Apple Silicon Mac, 48 kHz)</span></td></tr>
+      <tr><th><span lang="fr">Paramètres automatisables</span><span lang="en">Automatable parameters</span></th><td>15</td></tr>
+      <tr><th><span lang="fr">Séquenceur</span><span lang="en">Sequencer</span></th><td><span lang="fr">8 motifs de 16 pas, calés sur le tempo et la lecture de l'hôte, swing</span><span lang="en">8 patterns of 16 steps, locked to host tempo and playback, swing</span></td></tr>
+      <tr><th>MIDI</th><td><span lang="fr">Notes et vélocité (≥ 100 = accent), legato = slide, pitch bend, fichiers .mid glissés sur la fenêtre</span><span lang="en">Notes and velocity (≥ 100 = accent), legato = slide, pitch bend, .mid files dropped onto the window</span></td></tr>
+    </table>
+
+    <h2 id="telechargements"><span lang="fr">Téléchargements</span><span lang="en">Downloads</span></h2>
+    <div class="downloads">
+      <div class="dl">
+        <h3><span lang="fr">Manuel</span><span lang="en">Manual</span></h3>
+        <p lang="fr">Tous les réglages, l'installation et les sons d'usine. PDF, aussi inclus dans chaque zip.</p>
+        <p lang="en">Every control, installation and factory sounds. PDF, also included in every zip.</p>
+        <a class="btn dark" href="docs/LP-303-manuel.pdf" lang="fr" target="_blank" rel="noopener">PDF</a>
+        <a class="btn dark" href="docs/LP-303-manual.pdf" lang="en" target="_blank" rel="noopener">PDF</a>
+      </div>
+      <div class="dl">
+        <h3>macOS</h3>
+        <p lang="fr">AU, VST3, CLAP, LV2 et application. Apple Silicon + Intel.</p>
+        <p lang="en">AU, VST3, CLAP, LV2 and app. Apple Silicon + Intel.</p>
+        <a class="btn dark" data-asset="LP-303-{lp303}-macOS.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+      <div class="dl">
+        <h3>Windows</h3>
+        <p lang="fr">VST3, CLAP, LV2 et application. 64 bits.</p>
+        <p lang="en">VST3, CLAP, LV2 and app. 64-bit.</p>
+        <a class="btn dark" data-asset="LP-303-{lp303}-Windows.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+      <div class="dl">
+        <h3>Linux</h3>
+        <p lang="fr">VST3, CLAP, LV2 et application. x86-64.</p>
+        <p lang="en">VST3, CLAP, LV2 and app. x86-64.</p>
+        <a class="btn dark" data-asset="LP-303-{lp303}-Linux-x64.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+      <div class="dl">
+        <h3>Raspberry Pi</h3>
+        <p lang="fr">Linux ARM64 (Pi 4 / Pi 5, système 64 bits).</p>
+        <p lang="en">Linux ARM64 (Pi 4 / Pi 5, 64-bit OS).</p>
+        <a class="btn dark" data-asset="LP-303-{lp303}-Linux-ARM64.zip"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+      </div>
+    </div>
+
+    <h3><span lang="fr">Installation</span><span lang="en">Installation</span></h3>
+    <div lang="fr">
+      <ul>
+        <li><b>macOS</b> : copiez <code>LP-303.component</code>, <code>.vst3</code>, <code>.clap</code>, <code>.lv2</code> dans <code>~/Bibliothèque/Audio/Plug-Ins/</code> (dossiers Components, VST3, CLAP, LV2) et glissez <code>LP-303.app</code> dans Applications. Le logiciel n'est pas signé par Apple : au premier lancement, clic droit → Ouvrir.</li>
+        <li><b>Windows</b> : copiez <code>LP-303.vst3</code> dans <code>C:\Program Files\Common Files\VST3</code> et <code>LP-303.clap</code> dans <code>C:\Program Files\Common Files\CLAP</code>. Si SmartScreen s'affiche : Informations complémentaires → Exécuter quand même.</li>
+        <li><b>Linux</b> : copiez les plugins dans <code>~/.vst3</code>, <code>~/.clap</code> et <code>~/.lv2</code>.</li>
+      </ul>
+      <p>Relancez ensuite votre logiciel de musique : LP-303 apparaît sous « Load &amp; Play ».</p>
+    </div>
+    <div lang="en">
+      <ul>
+        <li><b>macOS</b>: copy <code>LP-303.component</code>, <code>.vst3</code>, <code>.clap</code>, <code>.lv2</code> into <code>~/Library/Audio/Plug-Ins/</code> (Components, VST3, CLAP, LV2 folders) and drag <code>LP-303.app</code> to Applications. The software is not signed with Apple: on first launch, right-click → Open.</li>
+        <li><b>Windows</b>: copy <code>LP-303.vst3</code> to <code>C:\Program Files\Common Files\VST3</code> and <code>LP-303.clap</code> to <code>C:\Program Files\Common Files\CLAP</code>. If SmartScreen shows up: More info → Run anyway.</li>
+        <li><b>Linux</b>: copy the plugins to <code>~/.vst3</code>, <code>~/.clap</code> and <code>~/.lv2</code>.</li>
+      </ul>
+      <p>Then restart your music software: LP-303 shows up under "Load &amp; Play".</p>
+    </div>
+
+    <h2 id="code"><span lang="fr">Code source</span><span lang="en">Source code</span></h2>
+    <div class="downloads">
+      <div class="dl">
+        <span class="tag">open source</span>
+        <h3><span lang="fr">Code source</span><span lang="en">Source code</span></h3>
+        <p lang="fr">Tout le code C++ (JUCE), les tests (filtre, slide, accent, séquenceur) et la compilation automatique Mac / Windows / Linux.</p>
+        <p lang="en">All the C++ code (JUCE), the tests (filter, slide, accent, sequencer) and the automatic Mac / Windows / Linux build.</p>
+        <a class="btn dark" data-asset="LP-303-{lp303}-source.zip">.zip</a>
+        <a class="btn dark" data-repo="LP303">GitHub</a>
+      </div>
+    </div>
+
+    <p class="note" lang="fr">TB-303 est une marque de Roland Corporation, citée uniquement pour décrire l'inspiration sonore. Load &amp; Play n'est ni affilié à Roland, ni approuvé par Roland.</p>
+    <p class="note" lang="en">TB-303 is a trademark of Roland Corporation, mentioned only to describe the sonic inspiration. Load &amp; Play is not affiliated with or endorsed by Roland.</p>
+  </main>
+
+  <footer class="site-footer">
+    <a class="law" href="what-about-the-law.html">what about the law?</a>
+    <small>Load &amp; Play — <span lang="fr">instruments gratuits et open source</span><span lang="en">free and open-source instruments</span></small>
+    <a class="footer-github" data-github href="#" target="_blank" rel="noopener">GitHub</a>
+  </footer>
+</body>
+</html>

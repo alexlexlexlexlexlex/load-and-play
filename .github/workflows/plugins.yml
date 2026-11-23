@@ -1,4 +1,4 @@
-# Compile LP-60, Model Play, Duck Hunt et Chop Chop pour macOS, Windows et Linux (x64 et ARM64 / Raspberry Pi).
+# Compile LP-60, Model Play, LP-303, Duck Hunt et Chop Chop pour macOS, Windows et Linux (x64 et ARM64 / Raspberry Pi).
 # - À chaque envoi : vérifie que tout compile et que le son est bon (fichiers dans l'onglet Actions).
 # - Sur une étiquette de version (v1.0.0, v1.1.0…) : ajoute les zips à la Release du même nom,
 #   avec les noms qu'attendent les boutons de téléchargement du site.
@@ -10,7 +10,7 @@ on:
   push:
     branches: [main]
     tags: ["v*"]
-    paths: ["LP60/**", "MiniMoog/**", "DuckHunt/**", "ChopChop/**", "Site web/docs/**", ".github/workflows/plugins.yml"]
+    paths: ["LP60/**", "MiniMoog/**", "LP303/**", "DuckHunt/**", "ChopChop/**", "Site web/docs/**", ".github/workflows/plugins.yml"]
   workflow_dispatch:
     inputs:
       release:
@@ -29,6 +29,7 @@ jobs:
         synth:
           - { name: LP-60, dir: LP60, target: LP60, option: LP60_INSTALL_PLUGINS, test: "demo.wav", reference: "", skip: "" }
           - { name: Model-Play, dir: MiniMoog, target: ModelD, option: MODELD_INSTALL_PLUGINS, test: "demo.wav", reference: "Tests/reference.f32", skip: "" }
+          - { name: LP-303, dir: LP303, target: LP303, option: LP303_INSTALL_PLUGINS, test: "demo.wav", reference: "", skip: "" }
           # Duck Hunt est un effet : pas d'application autonome.
           - { name: Duck-Hunt, dir: DuckHunt, target: DuckHunt, option: DUCKHUNT_INSTALL_PLUGINS, test: "", reference: "", skip: "Standalone" }
           - { name: Chop-Chop, dir: ChopChop, target: ChopChop, option: CHOPCHOP_INSTALL_PLUGINS, test: "", reference: "", skip: "Standalone" }
@@ -114,19 +115,24 @@ jobs:
           gh release view "$RELEASE" >/dev/null 2>&1 || gh release create "$RELEASE" --title "$RELEASE" --notes "" || true
           gh release upload "$RELEASE" "$ZIP" --clobber
 
+  # Zips du code source : sur une étiquette, ou quand on complète une Release à la main.
   sources:
-    if: github.ref_type == 'tag'
+    if: github.ref_type == 'tag' || inputs.release != ''
     runs-on: ubuntu-22.04
+    env:
+      RELEASE: ${{ github.ref_type == 'tag' && github.ref_name || inputs.release }}
     steps:
       - uses: actions/checkout@v4
       - name: Zips du code source
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          version="${GITHUB_REF_NAME#v}"
+          version="${RELEASE#v}"
           git archive --format=zip --prefix="LP-60-$version-source/" -o "LP-60-$version-source.zip" HEAD:LP60
           git archive --format=zip --prefix="Model-Play-$version-source/" -o "Model-Play-$version-source.zip" HEAD:MiniMoog
+          git archive --format=zip --prefix="LP-303-$version-source/" -o "LP-303-$version-source.zip" HEAD:LP303
           git archive --format=zip --prefix="Duck-Hunt-$version-source/" -o "Duck-Hunt-$version-source.zip" HEAD:DuckHunt
           git archive --format=zip --prefix="Chop-Chop-$version-source/" -o "Chop-Chop-$version-source.zip" HEAD:ChopChop
-          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --title "$GITHUB_REF_NAME" --notes "" || true
-          gh release upload "$GITHUB_REF_NAME" LP-60-$version-source.zip Model-Play-$version-source.zip Duck-Hunt-$version-source.zip Chop-Chop-$version-source.zip --clobber
+          gh release view "$RELEASE" >/dev/null 2>&1 || gh release create "$RELEASE" --title "$RELEASE" --notes "" || true
+          gh release upload "$RELEASE" LP-60-$version-source.zip Model-Play-$version-source.zip LP-303-$version-source.zip \
+            Duck-Hunt-$version-source.zip Chop-Chop-$version-source.zip --clobber

@@ -154,6 +154,7 @@ void LP303Processor::prepareToPlay (double sampleRate, int samplesPerBlock)
     engine.setParams (readParams());
     engine.prepare (sampleRate, samplesPerBlock);
     sequencer.prepare (sampleRate);
+    midiPlayer.prepare (sampleRate);
     forEngine.ensureSize (2048);
     setLatencySamples (engine.getLatencySamples());
     keyboardState.reset();
@@ -193,6 +194,9 @@ void LP303Processor::processBlock (juce::AudioBuffer<float>& buffer, juce::MidiB
     juce::ScopedNoDenormals noDenormals;
 
     const int numSamples = buffer.getNumSamples();
+
+    // Le fichier MIDI joue comme le clavier (ses notes s'allument à l'écran).
+    midiPlayer.process (midi, numSamples);
     keyboardState.processNextMidiBuffer (midi, 0, numSamples, true);
 
     // Tempo et position de l'hôte ; sans hôte (application autonome), une
@@ -303,6 +307,7 @@ void LP303Processor::getStateInformation (juce::MemoryBlock& destData)
 {
     auto state = apvts.copyState();
     state.setProperty ("program", currentProgram, nullptr);
+    state.setProperty ("seqShown", sequencerShown.load(), nullptr);
 
     state.removeChild (state.getChildWithName ("PATTERNS"), nullptr);
     juce::ValueTree bank ("PATTERNS");
@@ -322,6 +327,7 @@ void LP303Processor::setStateInformation (const void* data, int sizeInBytes)
 
     const auto state = juce::ValueTree::fromXml (*xml);
     currentProgram = state.getProperty ("program", 0);
+    sequencerShown = (bool) state.getProperty ("seqShown", true);
 
     const auto bank = state.getChildWithName ("PATTERNS");
     for (int p = 0; p < lp303::numPatterns; ++p)

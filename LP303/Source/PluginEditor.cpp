@@ -587,7 +587,8 @@ LP303Editor::LP303Editor (LP303Processor& p)
     : AudioProcessorEditor (p),
       processorRef (p),
       grid (p),
-      keyboard (p.keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard)
+      keyboard (p.keyboardState, juce::MidiKeyboardComponent::horizontalKeyboard),
+      playerPanel (p.midiPlayer, Colours::accent, Colours::text)
 {
     setLookAndFeel (&lookAndFeel);
     addAndMakeVisible (panel);
@@ -636,6 +637,7 @@ LP303Editor::LP303Editor (LP303Processor& p)
     {
         auto& k = addKnob (seqKnobs[i][0], seqKnobs[i][1], false);
         k.slider.setBounds (left + i * (seqColumnWidth / 3), knobY + 14, seqColumnWidth / 3, 84);
+        seqComponents.push_back (&k.slider);
     }
 
     const int buttonsY = seqTop + 266;
@@ -665,6 +667,15 @@ LP303Editor::LP303Editor (LP303Processor& p)
 
     panel.addAndMakeVisible (grid);
     grid.setBounds (gridLeft, seqTop + 14, designWidth - left - gridLeft, seqHeight - 22);
+
+    for (auto* c : std::initializer_list<juce::Component*> { &runButton, patternChoice.get(), &lengthDown, &lengthUp, &clearButton,
+                                                             &randomButton, &copyButton, &pasteButton, &grid })
+        seqComponents.push_back (c);
+
+    // Replier le séquenceur : pratique quand LP-303 est joué en MIDI depuis le logiciel.
+    seqButton.setBounds (designWidth / 2 + 202, 21, 100, 30);
+    seqButton.onClick = [this] { showSequencer (! seqShown); };
+    panel.addAndMakeVisible (seqButton);
 
     //--------------------------------------------------------------------------
     // Presets, dans l'en-tête.
@@ -698,19 +709,21 @@ LP303Editor::LP303Editor (LP303Processor& p)
     keyboard.setAvailableRange (24, 84);
     keyboard.setColour (juce::MidiKeyboardComponent::keyDownOverlayColourId, Colours::accent.withAlpha (0.7f));
     panel.addAndMakeVisible (keyboard);
-    keyboard.setBounds (woodWidth, keyboardTop, designWidth - 2 * woodWidth, keyboardHeight);
-    keyboard.setKeyWidth ((float) (designWidth - 2 * woodWidth) / 36.0f);
+
+    // Lecteur MIDI : invisible tant qu'aucun fichier n'est glissé sur la fenêtre.
+    playerPanel.onClose = [this] { playerPanel.setVisible (false); layoutBottom(); };
+    playerPanel.setVisible (processorRef.midiPlayer.isLoaded());
+    playerPanel.refresh();
+    panel.addChildComponent (playerPanel);
 
     // Fenêtre redimensionnable, proportions gardées ; plus petite si l'écran l'exige.
     setResizable (true, true);
-    setResizeLimits (designWidth / 2, designHeight / 2, designWidth * 2, designHeight * 2);
-    getConstrainer()->setFixedAspectRatio ((double) designWidth / (double) designHeight);
-
     float scale = 1.0f;
     if (auto* display = juce::Desktop::getInstance().getDisplays().getPrimaryDisplay())
         scale = juce::jmin (1.0f, 0.92f * (float) display->userArea.getWidth() / (float) designWidth,
                             0.88f * (float) display->userArea.getHeight() / (float) designHeight);
     setSize (juce::roundToInt ((float) designWidth * scale), juce::roundToInt ((float) designHeight * scale));
+    showSequencer (processorRef.sequencerShown.load());
 
     timerCallback();
     startTimerHz (30);
@@ -756,6 +769,45 @@ void LP303Editor::editPattern (const std::function<void (lp303::PatternBank&, in
     panel.repaint (left, seqTop + 110, seqColumnWidth, 40);
 }
 
+int LP303Editor::panelHeight() const
+{
+    return seqShown ? designHeight : keyboardY() + keyboardHeight;
+}
+
+int LP303Editor::keyboardY() const
+{
+    return seqShown ? keyboardTop : seqTop + 3;
+}
+
+void LP303Editor::showSequencer (bool shown)
+{
+    seqShown = shown;
+    processorRef.sequencerShown = shown;
+    for (auto* c : seqComponents)
+        c->setVisible (shown);
+    seqButton.setButtonText (shown ? "HIDE SEQ" : "SHOW SEQ");
+
+    const int height = panelHeight();
+    panel.setSize (designWidth, height);
+    layoutBottom();
+
+    // La fenêtre garde sa largeur et change de hauteur.
+    const float scale = getWidth() > 0 ? (float) getWidth() / (float) designWidth : 1.0f;
+    getConstrainer()->setFixedAspectRatio ((double) designWidth / (double) height);
+    setResizeLimits (designWidth / 2, height / 2, designWidth * 2, height * 2);
+    setSize (juce::roundToInt ((float) designWidth * scale), juce::roundToInt ((float) height * scale));
+    panel.repaint();
+}
+
+void LP303Editor::layoutBottom()
+{
+    auto bottom = juce::Rectangle<int> (woodWidth, keyboardY(), designWidth - 2 * woodWidth, keyboardHeight);
+    if (playerPanel.isVisible())
+        playerPanel.setBounds (bottom.removeFromLeft (200).reduced (6, 6));
+    keyboard.setBounds (bottom);
+    keyboard.setKeyWidth ((float) bottom.getWidth() / 36.0f);
+}
+
 void LP303Editor::resized()
 {
     const float scale = (float) getWidth() / (float) designWidth;
@@ -775,6 +827,11 @@ void LP303Editor::timerCallback()
 
     const bool running = processorRef.isSequencerRunning();
     const int active = processorRef.getActivePattern();
+
+    // Séquenceur replié mais en marche : le bouton s'allume pour le rappeler.
+    const auto seqColour = ! seqShown && running ? Colours::accent.darker (0.2f) : juce::Colour (0xff2b2b2b);
+    if (seqButton.findColour (juce::TextButton::buttonColourId) != seqColour)
+        seqButton.setColour (juce::TextButton::buttonColourId, seqColour);
     grid.setPlayingStep (running && active == pattern ? processorRef.getPlayingStep() : -1);
     patternChoice->setPlaying (running ? active : -1);
 
@@ -875,6 +932,9 @@ void LP303Editor::paintPanel (juce::Graphics& g)
                         juce::Justification::centred);
     g.drawText ("WAVEFORM", soundCell (1).withHeight (14), juce::Justification::centred);
 
+    if (! seqShown)
+        return;
+
     // Colonne du séquenceur.
     g.setColour (Colours::text);
     g.setFont (juce::FontOptions (12.5f, juce::Font::bold).withKerningFactor (0.15f));
@@ -905,7 +965,7 @@ void LP303Editor::paintPanel (juce::Graphics& g)
 
     // Filet sous le séquenceur, au-dessus du clavier.
     g.setColour (juce::Colour (0xff3a3a3a));
-    g.drawHorizontalLine (keyboardTop - 4, (float) left, (float) (designWidth - left));
+    g.drawHorizontalLine (keyboardY() - 4, (float) left, (float) (designWidth - left));
 }
 
 // En-tête sur l'alu : marque encadrée à gauche, presets au centre, nom du
@@ -942,4 +1002,54 @@ void LP303Editor::paintHeader (juce::Graphics& g)
 
     g.setColour (juce::Colours::black.withAlpha (0.25f));
     g.drawHorizontalLine (headerHeight, (float) header.getX(), (float) header.getRight());
+}
+
+//==============================================================================
+bool LP303Editor::isInterestedInFileDrag (const juce::StringArray& files)
+{
+    for (const auto& f : files)
+        if (f.endsWithIgnoreCase (".mid") || f.endsWithIgnoreCase (".midi") || f.endsWithIgnoreCase (".smf"))
+            return true;
+    return false;
+}
+
+void LP303Editor::filesDropped (const juce::StringArray& files, int, int)
+{
+    dragOver = false;
+    repaint();
+
+    for (const auto& f : files)
+    {
+        if (! isInterestedInFileDrag ({ f }))
+            continue;
+
+        if (processorRef.midiPlayer.load (juce::File (f)))
+        {
+            playerPanel.refresh();
+            playerPanel.setVisible (true);
+            layoutBottom();
+        }
+        else
+        {
+            juce::AlertWindow::showMessageBoxAsync (juce::MessageBoxIconType::WarningIcon, "LP-303",
+                juce::String::fromUTF8 ("Ce fichier ne contient pas de notes MIDI lisibles."));
+        }
+        return;
+    }
+}
+
+void LP303Editor::paintOverChildren (juce::Graphics& g)
+{
+    if (! dragOver)
+        return;
+
+    // Pendant le glisser : la fenêtre s'encadre et invite à déposer.
+    const auto area = getLocalBounds().toFloat().reduced (3.0f);
+    g.setColour (juce::Colours::black.withAlpha (0.45f));
+    g.fillRect (area);
+    g.setColour (Colours::accent);
+    g.drawRoundedRectangle (area, 8.0f, 3.0f);
+    g.setFont (juce::FontOptions (20.0f, juce::Font::bold));
+    g.drawText (juce::String::fromUTF8 ("D\xc3\xa9posez le fichier MIDI pour le jouer"), area.toNearestInt(),
+                juce::Justification::centred);
 }

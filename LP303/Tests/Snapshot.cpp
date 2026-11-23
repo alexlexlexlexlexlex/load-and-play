@@ -1,5 +1,6 @@
 // Outil de développement : enregistre une image PNG de l'interface du plugin,
-// sans DAW ni écran. Utilisation : Snapshot <sortie.png> [n° de preset]
+// sans DAW ni écran. Utilisation : Snapshot <sortie.png> [n° de preset] [compact]
+// (compact : séquenceur replié).
 // Snapshot --selftest vérifie les presets, la sauvegarde des motifs et le
 // séquenceur sur l'horloge interne (application autonome).
 
@@ -56,20 +57,58 @@ namespace
             runBlock ({});
         check (runBlock ({}) < 1.0e-4f, "arret : silence");
 
+        // Fichier MIDI glissé sur la fenêtre : il joue le synthé comme le clavier.
+        {
+            juce::MidiMessageSequence track;
+            track.addEvent (juce::MidiMessage::noteOn (1, 48, (juce::uint8) 100), 0.0);
+            track.addEvent (juce::MidiMessage::noteOff (1, 48), 480.0);
+            juce::MidiFile file;
+            file.setTicksPerQuarterNote (480);
+            file.addTrack (track);
+            const auto temp = juce::File::createTempFile (".mid");
+            {
+                juce::FileOutputStream out (temp);
+                file.writeTo (out);
+            }
+            const bool loaded = processor.midiPlayer.load (temp);
+            processor.midiPlayer.setPlaying (true);
+            float level = 0.0f;
+            for (int i = 0; i < 48000 / 2 / 256; ++i)
+                level = juce::jmax (level, runBlock ({}));
+            processor.midiPlayer.setPlaying (false);
+            for (int i = 0; i < 40; ++i)
+                runBlock ({});
+            temp.deleteFile();
+            check (loaded && level > 0.01f && runBlock ({}) < 1.0e-4f, "fichier MIDI : il joue, puis se tait a la pause");
+        }
+
         // Sauvegarde et relecture, motifs compris.
         lp303::Step st;
         st.note = 11;
         st.accent = true;
         processor.patterns.set (5, 7, st);
         processor.patterns.setLength (5, 9);
+        processor.sequencerShown = false;
         juce::MemoryBlock state;
         processor.getStateInformation (state);
 
         LP303Processor other;
         other.setStateInformation (state.getData(), (int) state.getSize());
         check (other.patterns.get (5, 7) == st && other.patterns.getLength (5) == 9
-                   && other.apvts.getRawParameterValue ("drive")->load() > 5.5f,
-               "projet sauvegarde puis rouvert : reglages et motifs identiques");
+                   && other.apvts.getRawParameterValue ("drive")->load() > 5.5f && ! other.sequencerShown.load(),
+               "projet sauvegarde puis rouvert : reglages, motifs et sequenceur replie identiques");
+
+        // Interface : replier le séquenceur réduit la hauteur, le rouvrir la rend.
+        {
+            std::unique_ptr<juce::AudioProcessorEditor> editor (processor.createEditor());
+            auto* lp = dynamic_cast<LP303Editor*> (editor.get());
+            const int tall = editor->getHeight(), wide = editor->getWidth();
+            lp->showSequencer (true);
+            const int tallAgain = editor->getHeight();
+            lp->showSequencer (false);
+            check (tall < tallAgain && editor->getWidth() == wide && editor->getHeight() == tall,
+                   "sequenceur replie : fenetre plus basse, meme largeur");
+        }
 
         return ok ? 0 : 1;
     }
@@ -88,6 +127,8 @@ int main (int argc, char* argv[])
     LP303Processor processor;
     if (argc >= 3)
         processor.setCurrentProgram (juce::String (argv[2]).getIntValue());
+    if (argc >= 4 && juce::String (argv[3]) == "compact")
+        processor.sequencerShown = false;
 
     std::unique_ptr<juce::AudioProcessorEditor> editor (processor.createEditor());
     if (auto* constrainer = editor->getConstrainer())

@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Load & Play — instruments et effets gratuits</title>
-  <meta name="description" content="LP-60, Model Play, Duck Hunt et Chop Chop : synthés et effets gratuits et open source, à essayer maintenant et à télécharger pour Mac, Windows et Linux.">
+  <meta name="description" content="LP-60, Model Play, LP-303, Duck Hunt et Chop Chop : synthés et effets gratuits et open source, à essayer maintenant et à télécharger pour Mac, Windows et Linux.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&family=Permanent+Marker&display=swap" rel="stylesheet">
@@ -86,9 +86,36 @@
           <div class="try-panel" id="try-modelplay" data-instrument="modelplay" hidden></div>
         </article>
 
+        <!-- LP-303 : la basse acide, image à gauche -->
+        <article class="instrument" id="lp-303">
+          <div class="card image-left">
+            <a class="device" href="lp-303.html" aria-label="LP-303">
+              <div class="device-tilt">
+                <img src="assets/img/lp-303.jpg" width="2360" height="1296" alt="Interface de LP-303">
+                <span class="device-edge"></span>
+              </div>
+            </a>
+            <div class="copy">
+              <h2>LP-303</h2>
+              <p class="tagline" lang="fr">Ça couine, ça glisse, ça claque.</p>
+              <p class="tagline" lang="en">It squelches, it slides, it snaps.</p>
+              <p class="brief" lang="fr">Basse acide dans l'esprit de la TB-303 : filtre à diodes, accent et slide, et un séquenceur de 16 pas intégré, calé sur votre logiciel. Se replie pour jouer en MIDI.</p>
+              <p class="brief" lang="en">An acid bass in the spirit of the TB-303: diode filter, accent and slide, and a built-in 16-step sequencer locked to your host. Folds away to play over MIDI.</p>
+              <div class="actions">
+                <a class="btn solid" href="lp-303.html#telechargements"><span lang="fr">Télécharger</span><span lang="en">Download</span></a>
+                <a class="btn" href="lp-303.html">Documentation</a>
+              </div>
+            </div>
+          </div>
+          <button class="try-toggle" type="button" data-try="try-lp303" aria-expanded="false">
+            <span class="chev">∨</span> click to try <span class="chev">∨</span>
+          </button>
+          <div class="try-panel" id="try-lp303" data-instrument="lp303" hidden></div>
+        </article>
+
         <!-- Duck Hunt : même carte, synthé remplacé par l'effet -->
         <article class="instrument" id="duck-hunt">
-          <div class="card image-left tall">
+          <div class="card image-right tall">
             <a class="device" href="duck-hunt.html" aria-label="Duck Hunt">
               <div class="device-tilt">
                 <img src="assets/img/duck-hunt.jpg" width="1840" height="1232" alt="Interface de Duck Hunt">
@@ -111,7 +138,7 @@
 
         <!-- Chop Chop -->
         <article class="instrument" id="chop-chop">
-          <div class="card image-right compact">
+          <div class="card image-left compact">
             <a class="device" href="chop-chop.html" aria-label="Chop Chop">
               <div class="device-tilt">
                 <img src="assets/img/chop-chop.jpg" width="2080" height="1140" alt="Interface de Chop Chop">

@@ -284,10 +284,14 @@ namespace
         std::cout << "Accent" << std::endl;
 
         constexpr double rate = 48000.0;
+
+        // Fréquence redéclarée dans la lambda : MSVC refuse d'y lire une
+        // constante de la fonction sans la capturer.
         auto play = [] (int velocity, float& maxCutoff, float& envAt150)
         {
+            constexpr double noteRate = 48000.0;
             lp303::AcidEngine engine;
-            engine.prepare (rate, 512);
+            engine.prepare (noteRate, 512);
             lp303::Params p;
             p.cutoff = 3.0f;
             p.resonance = 6.0f;
@@ -297,11 +301,11 @@ namespace
             engine.setParams (p);
             maxCutoff = 0.0f;
             envAt150 = -1.0f;
-            return render (engine, { { 0, on (36, velocity) } }, (int) (0.3 * rate),
+            return render (engine, { { 0, on (36, velocity) } }, (int) (0.3 * noteRate),
                            [&] (int pos)
                            {
                                maxCutoff = juce::jmax (maxCutoff, engine.getCutoffHz());
-                               if (pos >= (int) (0.15 * rate) && envAt150 < 0.0f)
+                               if (pos >= (int) (0.15 * noteRate) && envAt150 < 0.0f)
                                    envAt150 = engine.getFilterEnvelope();
                            });
         };

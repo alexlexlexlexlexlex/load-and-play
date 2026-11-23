@@ -21,13 +21,13 @@ séquenceur joue 8 motifs de 16 pas, calés sur le tempo et la lecture de l'hôt
 
 Sur Mac, les binaires sont universels (Apple Silicon + Intel), à partir de macOS 10.13.
 Windows et Linux (x64 et ARM64) se compilent avec le même code, automatiquement sur GitHub
-(`../.github/workflows/lp303.yml`) ou à la main avec CMake.
+(`../.github/workflows/plugins.yml`, avec les autres plugins Load & Play) ou à la main avec CMake.
 
 ## Compiler
 
 Il faut CMake 3.22 ou plus récent, Ninja et un compilateur C++17 (Command Line Tools
 d'Apple sur Mac, Visual Studio 2022 sous Windows, GCC ou Clang sous Linux avec les paquets
-listés dans le workflow). En local, `JUCE` et `clap-juce-extensions` sont des liens vers
+listés dans `../.github/workflows/plugins.yml`). En local, `JUCE` et `clap-juce-extensions` sont des liens vers
 ceux de `../MiniMoog/` ; sinon CMake les télécharge aux mêmes versions.
 
 ```bash
@@ -50,7 +50,7 @@ auval -v aumu L303 LdPl                                     # validation Apple d
 
 Avec `-DLP303_SNAPSHOT=ON`, l'outil `Snapshot` enregistre une capture de l'interface
 (`Snapshot interface.png 1`) et vérifie le plugin entier (`Snapshot --selftest` : presets,
-séquenceur sur l'horloge interne, transposition au clavier, sauvegarde des motifs).
+séquenceur sur l'horloge interne, transposition au clavier, lecteur de fichier MIDI, sauvegarde des motifs, séquenceur replié). `Snapshot compact.png 1 compact` capture la fenêtre séquenceur replié.
 
 ## Organisation
 
@@ -59,6 +59,7 @@ séquenceur sur l'horloge interne, transposition au clavier, sauvegarde des moti
 | `Source/AcidEngine.h` | Le son : tables d'onde, filtre à diodes, enveloppes, accent, slide, saturation. |
 | `Source/Sequencer.h` | Les motifs (sans verrou entre l'interface et l'audio) et le séquenceur calé sur l'hôte. |
 | `Source/Presets.h` | Sons d'usine, motifs d'usine, motif au hasard. |
+| `Source/MidiFilePlayer.h` | Lecteur de fichier MIDI glissé sur la fenêtre (repris de LP-60 et Model Play). |
 | `Source/PluginProcessor.*` | Paramètres, MIDI, tempo et lecture de l'hôte ou horloge interne, sauvegarde. |
 | `Source/PluginEditor.*` | Façade : panneau d'alu pour le son, grille du séquenceur, clavier. |
 | `Tests/RenderTest.cpp` | Contrôles automatiques et rendu d'une démo. |
@@ -94,6 +95,8 @@ séquenceur sur l'horloge interne, transposition au clavier, sauvegarde des moti
 - Une vélocité de **100 ou plus** donne un **accent**.
 - Priorité à la dernière note ; en relâchant, on revient en glissant à la note encore tenue.
 - La molette de pitch bend couvre ±2 demi-tons.
+- Glissez un fichier .mid sur la fenêtre : un petit lecteur apparaît (lecture, retour au début, boucle,
+  tempo) et LP-303 joue le fichier comme au clavier.
 
 ## Le séquenceur
 
@@ -113,7 +116,10 @@ séquenceur sur l'horloge interne, transposition au clavier, sauvegarde des moti
 - Pendant la lecture, une touche du clavier **transpose** le motif (do 3 = pas de
   transposition) ; le réglage **TRANSPOSE** la garde en mémoire.
 - **CLEAR**, **RANDOM** (motif acide au hasard), **COPY** / **PASTE** d'un motif à l'autre.
-- Les motifs sont sauvegardés avec le projet.
+- **HIDE SEQ** (en haut, à droite des presets) replie le séquenceur quand LP-303 est joué en MIDI depuis
+  le logiciel : la fenêtre ne garde que le son et le clavier. **SHOW SEQ** le fait revenir ; replié mais en
+  marche, le bouton s'allume en orange.
+- Les motifs, et l'état du séquenceur (affiché ou replié), sont sauvegardés avec le projet.
 
 ## Presets et motifs d'usine
 

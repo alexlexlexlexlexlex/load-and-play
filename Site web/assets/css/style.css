@@ -821,6 +821,106 @@ a.disabled { opacity: 0.4; cursor: default; pointer-events: none; }
 .seq-playhead { position: absolute; top: 0; bottom: 0; background: rgba(232, 134, 44, 0.25); pointer-events: none; }
 .seq-hint { margin: 0; font-size: 13px; color: #666; }
 
+/* ---------- Façade LP-303 (alu brossé, séquenceur dans la façade) ---------- */
+.style-acid .face {
+  color: #1e1e1e;
+  background:
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.06) 0 1px, rgba(0, 0, 0, 0.035) 1px 2px),
+    linear-gradient(#dcdcd8, #b4b4af);
+  border-left: 14px solid #5a3418;
+  border-right: 14px solid #5a3418;
+  padding: 12px 16px 14px;
+}
+.style-acid .face-body { min-width: max-content; }
+.style-acid .face-top { display: grid; grid-template-columns: auto 1fr auto auto; align-items: center; gap: 16px; padding-bottom: 8px; border-bottom: 1px solid rgba(0, 0, 0, 0.2); }
+.style-acid .brand-box { border-color: #1e1e1e; color: #1e1e1e; }
+.style-acid .face-logo { color: #1e1e1e; background: none; -webkit-text-fill-color: #1e1e1e; border-bottom: 3px solid #e8862c; padding-bottom: 2px; }
+.style-acid .sections { display: flex; gap: 0; }
+.style-acid .section { padding: 0 12px; border-left: 1px solid rgba(0, 0, 0, 0.18); }
+.style-acid .section:first-child { border-left: none; padding-left: 0; }
+.style-acid .section-title { color: #1e1e1e; font-size: 12px; letter-spacing: 0.12em; margin-bottom: 4px; text-align: center; }
+.style-acid .controls { display: flex; gap: 4px; }
+.style-acid .ctl { width: 72px; gap: 1px; }
+.style-acid .ctl-label { color: #1e1e1e; }
+.style-acid .ctl-value { font-size: 12px; color: #2a2a2a; }
+.style-acid .knob { width: 46px; height: 46px; background: radial-gradient(circle at 40% 32%, #4a4a4a, #0d0d0d 70%); box-shadow: 0 0 0 2px #050505, 2px 4px 6px rgba(0, 0, 0, 0.35); }
+.style-acid .knob .scale { background: repeating-conic-gradient(from -136deg, #55534f 0 2deg, transparent 2deg 27deg); }
+.style-acid .knob .pointer::after { height: 40%; top: 3px; width: 3px; margin-left: -1.5px; }
+.style-acid .knob .dome { display: none; }
+.style-acid .ctl-choice { align-content: center; }
+.style-acid .choice { gap: 6px; }
+.style-acid .choice button { grid-template-columns: 8px auto; grid-template-rows: auto; padding: 6px 9px; background: #2a2a29; border: 1px solid #000; border-radius: 3px; }
+.style-acid .choice .led { grid-row: 1; width: 7px; height: 7px; }
+.style-acid .choice .sq { display: none; }
+.style-acid .choice .nm { grid-row: 1; color: #f0ede4; font-size: 10px; }
+.style-acid .keys-wrap { height: 100px; margin-top: 2px; }
+.style-acid .wheels { background: #141414; border: 1px solid #2e2e2e; }
+
+.acid-seq {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 14px;
+  background: #161616;
+  color: #f0ede4;
+  border-top: 3px solid #e8862c;
+  margin: 2px -16px 0;
+  padding: 12px 16px;
+}
+.acid-side { display: grid; gap: 8px; align-content: start; }
+.acid-title { font: 700 12.5px var(--text); letter-spacing: 0.15em; }
+.acid-label { font: 700 9.5px var(--text); color: #a39e94; letter-spacing: 0.06em; }
+.acid-run {
+  font: 700 14px var(--text); letter-spacing: 0.08em; color: #f0ede4;
+  background: linear-gradient(#4a4a48, #2a2a29); border: 1px solid #000; border-radius: 4px; padding: 10px; cursor: pointer;
+}
+.acid-run:hover { filter: brightness(1.15); }
+.acid-patterns { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; }
+.acid-patterns button {
+  position: relative; font: 700 12px var(--text); color: #f0ede4; background: #262626;
+  border: 1px solid #000; border-radius: 3px; padding: 6px 0 6px 10px; cursor: pointer;
+}
+.acid-patterns button::before { content: ""; position: absolute; left: 7px; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: #4a1512; }
+.acid-patterns button.on::before { background: #ff3326; box-shadow: 0 0 5px #ff3326; }
+.acid-patterns button.pending::before { background: #e8862c; }
+.acid-name { font: 11px var(--text); color: #a39e94; }
+.acid-row { display: flex; gap: 6px; align-items: center; }
+.acid-tempo { width: 56px; font: 13px var(--text); padding: 4px 6px; border-radius: 4px; border: 1px solid #4a4a4a; background: #070707; color: #ff3326; }
+.acid-swing { width: 64px; accent-color: #e8862c; }
+.acid-transpose { font: 700 12px var(--text); color: #ff3326; background: #070707; border: 1px solid #4a4a4a; border-radius: 3px; padding: 4px 8px; cursor: pointer; justify-self: start; }
+.acid-tool { flex: 1; font: 700 11px var(--text); color: #f0ede4; background: #2b2b2b; border: 1px solid #4a4a4a; border-radius: 3px; padding: 6px; cursor: pointer; }
+.acid-tool:hover { background: #3a3a3a; }
+.acid-main { display: grid; gap: 6px; min-width: 620px; }
+.acid-grid {
+  display: grid;
+  grid-template-columns: 52px repeat(16, minmax(30px, 1fr));
+  grid-template-rows: 20px repeat(13, 12px) repeat(4, 19px);
+  background: #0c0c0c;
+  border-radius: 4px;
+  touch-action: none;
+  user-select: none;
+  cursor: pointer;
+}
+.acid-grid > * { min-width: 0; }
+.acid-rowlabel { grid-column: 1; font: 700 9.5px/12px var(--text); color: #a39e94; text-align: right; padding-right: 8px; }
+.acid-rowlabel.sharp { color: #7d7970; }
+.acid-rowlabel.opt { line-height: 19px; }
+.acid-rowlabel.opt:first-of-type, .acid-grid .acid-opt.up { margin-top: 0; }
+.acid-head { font: 700 11px/20px var(--text); color: #a39e94; text-align: center; position: relative; }
+.acid-head:nth-child(4n+3) { color: #f0ede4; }
+.acid-head.now::before { content: ""; position: absolute; left: 6px; top: 7px; width: 6px; height: 6px; border-radius: 50%; background: #ff3326; }
+.acid-head.out, .acid-cell.out, .acid-opt.out { opacity: 0.35; }
+.acid-cell { background: #1d1d1c; border-bottom: 1px solid #0c0c0c; border-left: 1px solid #262626; font: 7px/11px var(--text); color: #000; text-align: center; }
+.acid-cell.sharp { background: #131313; }
+.acid-cell.beat { border-left-color: #4a4a4a; }
+.acid-cell.on { background: #e8862c; border-radius: 2px; box-shadow: inset 0 0 0 1px #0c0c0c; }
+.acid-cell.on.accent { background: #ff5a36; }
+.acid-cell.now, .acid-opt.now { filter: brightness(1.45); }
+.acid-opt { margin: 3px 4px; background: #2a2a2a; border: 1px solid #383838; border-radius: 3px; }
+.acid-opt.on.up, .acid-opt.on.down { background: #e9dfc2; border-color: #e9dfc2; }
+.acid-opt.on.accent { background: #ff3326; border-color: #ff3326; }
+.acid-opt.on.slide { background: #e8862c; border-color: #e8862c; }
+.acid-hint { margin: 0; font: 11px var(--text); color: #8c877d; text-align: right; }
+
 /* ---------- Petits écrans ---------- */
 @media (max-width: 720px) {
   .site-header { grid-template-columns: 1fr 1fr; }

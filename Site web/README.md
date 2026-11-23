@@ -1,7 +1,7 @@
 # Site Load & Play
 
 Site statique (HTML, CSS, JavaScript, sans outil de construction) qui présente
-le LP-60, Model Play, Duck Hunt et Chop Chop, avec les deux synthés jouables
+le LP-60, Model Play, LP-303, Duck Hunt et Chop Chop, avec les trois synthés jouables
 dans le navigateur et le manuel PDF de chaque plugin (`docs/`).
 
 En ligne : https://alexlexlexlexlexlex.github.io/load-and-play/
@@ -61,7 +61,7 @@ Les boutons visent toujours la **dernière** Release
 | `LP-60-<version>-Linux-ARM64.zip` | idem pour Raspberry Pi et autres ARM 64 bits |
 | `LP-60-<version>-source.zip` | le dossier `LP60/` |
 | `LP-60-kit-mesures-JU-06A.zip` | enregistrements du JU-06A, fichiers MIDI, rendus et rapport de comparaison |
-| `Model-Play-<version>-…` | les mêmes, pour Model Play (sans kit de mesures) |
+| `Model-Play-<version>-…`, `LP-303-<version>-…` | les mêmes, pour Model Play et LP-303 (sans kit de mesures) |
 | `Duck-Hunt-<version>-…`, `Chop-Chop-<version>-…` | les mêmes pour les deux effets (AU, VST3, CLAP, LV2, sans appli autonome) |
 
 Chaque zip contient aussi le manuel PDF en français et en anglais.
@@ -82,7 +82,7 @@ Chaque zip contient aussi le manuel PDF en français et en anglais.
   (`manual/params.json`). Il faut Node.js et les Command Line Tools d'Apple (le PDF est
   imprimé par le moteur web de macOS, sans navigateur à installer) :
   ```bash
-  python3 tools/manual/build.py            # les quatre, ou : build.py duckhunt
+  python3 tools/manual/build.py            # tous, ou : build.py lp303
   ```
   Après un changement de réglages dans un plugin, refaire `params.json` avec
   `manual/paramdump/` (petit hôte JUCE qui lit les réglages d'un VST3 installé).

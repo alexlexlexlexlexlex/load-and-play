@@ -1367,6 +1367,145 @@
   ],
   "presets": []
  },
+ "lp303": {
+  "params": [
+   {
+    "name": "Waveform",
+    "min": "Saw",
+    "max": "Square",
+    "def": "Saw",
+    "steps": 2,
+    "choices": [
+     "Saw",
+     "Square"
+    ]
+   },
+   {
+    "name": "Tuning",
+    "min": "-12.00 st",
+    "max": "12.00 st",
+    "def": "0.00 st",
+    "steps": 2147483647
+   },
+   {
+    "name": "Cutoff",
+    "min": "60 Hz",
+    "max": "7.68 kHz",
+    "def": "328 Hz",
+    "steps": 2147483647
+   },
+   {
+    "name": "Resonance",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "7.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Env Mod",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "6.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Decay",
+    "min": "200 ms",
+    "max": "2.50 s",
+    "def": "549 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "Accent",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "6.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Slide Time",
+    "min": "20 ms",
+    "max": "500 ms",
+    "def": "80 ms",
+    "steps": 2147483647
+   },
+   {
+    "name": "Drive",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "0.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Volume",
+    "min": "0.0",
+    "max": "10.0",
+    "def": "7.0",
+    "steps": 2147483647
+   },
+   {
+    "name": "Sequencer On",
+    "min": "Off",
+    "max": "On",
+    "def": "Off",
+    "steps": 2,
+    "choices": [
+     "Off",
+     "On"
+    ]
+   },
+   {
+    "name": "Pattern",
+    "min": "1",
+    "max": "8",
+    "def": "1",
+    "steps": 8,
+    "choices": [
+     "1",
+     "2",
+     "3",
+     "4",
+     "5",
+     "6",
+     "7",
+     "8"
+    ]
+   },
+   {
+    "name": "Transpose",
+    "min": "-12 st",
+    "max": "+12 st",
+    "def": "0 st",
+    "steps": 2147483647
+   },
+   {
+    "name": "Swing",
+    "min": "50 %",
+    "max": "75 %",
+    "def": "50 %",
+    "steps": 2147483647
+   },
+   {
+    "name": "Tempo (without host)",
+    "min": "40 BPM",
+    "max": "240 BPM",
+    "def": "120 BPM",
+    "steps": 2147483647
+   }
+  ],
+  "presets": [
+   "Init",
+   "Classic Squelch",
+   "Rubber Square",
+   "Deep Sub",
+   "Screamer",
+   "Distorted Acid",
+   "Wah Tone",
+   "Plucky",
+   "Long Slide",
+   "Acid Lead"
+  ]
+ },
  "duckhunt": {
   "params": [
    {

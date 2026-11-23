@@ -91,6 +91,7 @@ private:
 
 //==============================================================================
 class LP303Editor final : public juce::AudioProcessorEditor,
+                          public juce::FileDragAndDropTarget,
                           private juce::Timer
 {
 public:
@@ -98,6 +99,17 @@ public:
     ~LP303Editor() override;
 
     void resized() override;
+    void paintOverChildren (juce::Graphics&) override;
+
+    // Glisser un fichier MIDI sur la fenêtre ouvre le lecteur.
+    bool isInterestedInFileDrag (const juce::StringArray& files) override;
+    void fileDragEnter (const juce::StringArray&, int, int) override { dragOver = true; repaint(); }
+    void fileDragExit (const juce::StringArray&) override              { dragOver = false; repaint(); }
+    void filesDropped (const juce::StringArray& files, int, int) override;
+
+    // Séquenceur affiché, ou replié : la fenêtre ne garde que le son et le clavier.
+    void showSequencer (bool shown);
+    bool isSequencerShown() const noexcept { return seqShown; }
 
 private:
     // Le panneau est dessiné à taille fixe puis mis à l'échelle de la fenêtre.
@@ -122,6 +134,9 @@ private:
     void refreshPresetBox();
     int editedPattern() const;
     void editPattern (const std::function<void (lp303::PatternBank&, int)>& change);
+    int panelHeight() const;
+    int keyboardY() const;
+    void layoutBottom();
 
     LP303Processor& processorRef;
     PanelLookAndFeel lookAndFeel;
@@ -139,6 +154,10 @@ private:
     juce::ComboBox presetBox;
     juce::TextButton previousPreset { "<" }, nextPreset { ">" };
     juce::MidiKeyboardComponent keyboard;
+    MidiPlayerPanel playerPanel;
+    juce::TextButton seqButton;
+    std::vector<juce::Component*> seqComponents;     // tout ce qui disparaît quand le séquenceur est replié
+    bool seqShown = true, dragOver = false;
 
     juce::String clipboard;
     juce::uint64 gridHash = 0;

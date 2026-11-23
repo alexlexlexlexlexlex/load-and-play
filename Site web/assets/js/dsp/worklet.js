@@ -1,14 +1,17 @@
-// Processeur audio du navigateur : fait tourner le moteur du LP-60 ou de
-// Model Play dans le fil audio, avec des événements calés à l'échantillon.
+// Processeur audio du navigateur : fait tourner le moteur du LP-60, de Model
+// Play ou de LP-303 dans le fil audio, avec des événements calés à l'échantillon.
 
 import { LP60 } from "./lp60.js";
 import { ModelPlay } from "./modelplay.js";
+import { LP303 } from "./lp303.js";
+
+const ENGINES = { lp60: LP60, modelplay: ModelPlay, lp303: LP303 };
 
 class SynthProcessor extends AudioWorkletProcessor {
   constructor (options) {
     super ();
     const synth = options.processorOptions.synth;
-    this.engine = synth === "lp60" ? new LP60 (sampleRate) : new ModelPlay (sampleRate);
+    this.engine = new (ENGINES[synth] || ModelPlay) (sampleRate);
     this.queue = [];            // événements datés { frame, apply }
     this.port.onmessage = e => this.receive (e.data);
     this.port.postMessage ({ type: "values", values: { ...this.engine.values } });

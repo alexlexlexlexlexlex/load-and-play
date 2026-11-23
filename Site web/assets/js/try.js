@@ -3,10 +3,13 @@
 
 import { PARAMS as LP60_PARAMS, PRESETS as LP60_PRESETS, cutoffHz, attackSeconds, envSeconds, lfoHz } from "./dsp/lp60.js";
 import { PARAMS as MODELPLAY_PARAMS } from "./dsp/modelplay.js";
+import { PARAMS as LP303_PARAMS, PRESETS as LP303_PRESETS, PATTERNS as LP303_PATTERNS, BASE_NOTE as LP303_BASE,
+         factoryPattern, randomPattern, cutoffHz as acidCutoffHz, decaySeconds } from "./dsp/lp303.js";
 
 const DEFAULTS = {
   lp60: Object.fromEntries (LP60_PARAMS.map (p => [p.id, p.def])),
   modelplay: Object.fromEntries (MODELPLAY_PARAMS.map (p => [p.id, p.def])),
+  lp303: Object.fromEntries (LP303_PARAMS.map (p => [p.id, p.def])),
 };
 
 const en = () => document.documentElement.dataset.uiLang === "en";
@@ -148,6 +151,26 @@ const SPECS = {
     performance: [],
     presets: null,
   },
+
+  lp303: {
+    style: "acid",
+    sections: [
+      { title: "VCO", rows: [[
+        { id: "tune", label: "TUNE", type: "knob", min: -12, max: 12, show: semitones },
+        { id: "wave", label: "WAVEFORM", type: "choice", choices: ["SAW", "SQUARE"] } ]] },
+      { title: "FILTER", rows: [[
+        { id: "cutoff", label: "CUTOFF", type: "knob", min: 0, max: 10, show: v => fmtHz (acidCutoffHz (v)) },
+        { id: "resonance", label: "RESONANCE", type: "knob", min: 0, max: 10 },
+        { id: "envMod", label: "ENV MOD", type: "knob", min: 0, max: 10 },
+        { id: "decay", label: "DECAY", type: "knob", min: 0, max: 10, show: v => fmtTime (decaySeconds (v)) } ]] },
+      { title: "ACCENT", rows: [[ { id: "accent", label: "AMOUNT", type: "knob", min: 0, max: 10 } ]] },
+      { title: "SLIDE", rows: [[ { id: "slide", label: "TIME", type: "knob", min: 0.02, max: 0.5, curve: "log", show: fmtTime } ]] },
+      { title: "DRIVE", rows: [[ { id: "drive", label: "AMOUNT", type: "knob", min: 0, max: 10 } ]] },
+      { title: "OUTPUT", rows: [[ { id: "volume", label: "VOLUME", type: "knob", min: 0, max: 10 } ]] },
+    ],
+    performance: [],
+    presets: LP303_PRESETS.map (p => p[0]),
+  },
 };
 
 // Un bouton à crans parcourt ses choix comme un sélecteur rotatif.
@@ -231,8 +254,8 @@ class TryPanel {
     power.addEventListener ("click", () => this.start ());
     this.power = power;
 
-    if (this.synth === "lp60") {
-      body.append (el ("div", "face-grille"));
+    if (this.synth === "lp60" || this.synth === "lp303") {
+      if (this.synth === "lp60") body.append (el ("div", "face-grille"));
       const presets = el ("div", "preset-box");
       const select = el ("select", "preset");
       select.setAttribute ("aria-label", "Presets");
@@ -251,7 +274,8 @@ class TryPanel {
         return b;
       };
       presets.append (step ("‹", -1), select, step ("›", 1));
-      top.append (el ("span", "brand-box", "LOAD & PLAY"), presets, power, el ("span", "face-logo", "LP-60"));
+      top.append (el ("span", "brand-box", "LOAD & PLAY"), presets, power,
+                  el ("span", "face-logo", this.synth === "lp60" ? "LP-60" : "LP-303"));
     } else {
       top.append (el ("span", "face-name", "Model Play"), el ("span", "face-sub", "ANALOG-STYLE SYNTHESIZER"),
                   power, el ("span", "brand", "LOAD & PLAY"));
@@ -279,7 +303,8 @@ class TryPanel {
       s.append (rows);
       sections.append (s);
     }
-    body.append (sections, this.keyboard ());
+    if (this.synth === "lp303") body.append (sections, this.acidSequencer (), this.keyboard ());
+    else body.append (sections, this.keyboard ());
     p.append (face);
 
     // Si la façade dépasse un peu, on la réduit pour qu'elle tienne ; trop
@@ -296,8 +321,8 @@ class TryPanel {
     }).observe (face);
     p.append (this.keyHint);
 
-    // Séquenceur
-    p.append (this.sequencer ());
+    // Séquenceur (celui de LP-303 est dans la façade, comme sur le plugin)
+    if (this.synth !== "lp303") p.append (this.sequencer ());
 
     this.applyValues (DEFAULTS[this.synth]);
     this.refreshTexts ();
@@ -317,7 +342,19 @@ class TryPanel {
     }
     if (this.keyHint)
       this.keyHint.textContent = t ("Clavier de l'ordinateur : rangée Q/A S D F… (blanches) et Z/W E T Y U (noires) · ← → octave",
-                                    "Computer keyboard: A S D F… row (white) and W E T Y U (black) · ← → octave");
+                                    "Computer keyboard: A S D F… row (white) and W E T Y U (black) · ← → octave")
+        + (this.synth === "lp303"
+           ? t (" · Maj = accent, notes liées = slide · pendant la lecture, une touche transpose le motif (do 4 = sans transposition)",
+                " · Shift = accent, tied notes = slide · while playing, a key transposes the pattern (C4 = no transposition)")
+           : "");
+    if (this.acid) {
+      const a = this.acid;
+      a.play.textContent = a.playing ? "■ STOP" : "▶ RUN";
+      a.random.textContent = "RANDOM";
+      a.clear.textContent = "CLEAR";
+      a.hint.textContent = t ("Clic : note (re-clic : silence) · glisser pour peindre · clic sur un numéro : longueur du motif",
+                              "Click: note (click again: rest) · drag to paint · click a step number: pattern length");
+    }
   }
 
   //----------------------------------------------------------------------------
@@ -449,11 +486,19 @@ class TryPanel {
 
   noteOn (note, velocity = 1, time = 0) {
     if (! this.node) { this.start ().then (() => this.noteOn (note, velocity)); return; }
+    // LP-303 en lecture : les touches transposent le motif au lieu de jouer.
+    if (! time && this.acid?.playing) {
+      this.acid.transpose = Math.max (-12, Math.min (12, note - 60));
+      this.acid.showTranspose ();
+      this.lightKey (note, true);
+      return;
+    }
     this.send ({ type: "note", on: true, note, velocity, time });
     if (! time) this.lightKey (note, true);
   }
 
   noteOff (note, time = 0) {
+    if (! time && this.acid?.playing) { this.lightKey (note, false); return; }
     this.send ({ type: "note", on: false, note, time });
     if (! time) this.lightKey (note, false);
   }
@@ -483,8 +528,11 @@ class TryPanel {
     const wrap = el ("div", "keys-wrap");
     const keys = el ("div", "keys");
     this.keyEls = new Map ();
-    this.octave = 4;
-    const first = 36, last = 84;
+    const bass = this.synth === "lp303";
+    this.octave = bass ? 3 : 4;
+    const first = bass ? 24 : 36, last = bass ? 72 : 84;
+    // LP-303 : vélocité normale, accent avec Maj (le seuil d'accent est à 100).
+    const velocity = e => (bass ? (e?.shiftKey ? 1 : 0.7) : 1);
     let pointerNote = null;
     for (let n = first; n <= last; ++n) {
       const black = [1, 3, 6, 8, 10].includes (n % 12);
@@ -499,7 +547,7 @@ class TryPanel {
       if (! k) return;
       keys.setPointerCapture (e.pointerId);
       pointerNote = Number (k.dataset.note);
-      this.noteOn (pointerNote);
+      this.noteOn (pointerNote, velocity (e));
     });
     keys.addEventListener ("pointermove", e => {
       if (pointerNote === null) return;
@@ -507,7 +555,7 @@ class TryPanel {
       if (k && Number (k.dataset.note) !== pointerNote) {
         this.noteOff (pointerNote);
         pointerNote = Number (k.dataset.note);
-        this.noteOn (pointerNote);
+        this.noteOn (pointerNote, velocity (e));
       }
     });
     const release = () => { if (pointerNote !== null) { this.noteOff (pointerNote); pointerNote = null; } };
@@ -527,6 +575,7 @@ class TryPanel {
       wheels.append (box);
     }
 
+    if (bass) wheels.lastChild.remove ();          // pas de molette de modulation sur LP-303
     if (this.spec.performance.length) {
       const perf = el ("div", "performance");
       for (const c of this.spec.performance) perf.append (this.widget (c));
@@ -548,7 +597,7 @@ class TryPanel {
       if (! (e.code in map)) return;
       const note = 12 * (this.octave + 1) + map[e.code] - 12;
       down.set (e.code, note);
-      this.noteOn (note);
+      this.noteOn (note, velocity (e));
       e.preventDefault ();
     });
     window.addEventListener ("keyup", e => {
@@ -564,6 +613,7 @@ class TryPanel {
   // Bloc refermé : on coupe le séquenceur et les notes en cours.
   close () {
     if (this.seq?.playing) this.seq.stop ();
+    if (this.acid?.playing) this.acid.stop ();
     this.send ({ type: "allOff" });
     this.keyEls?.forEach (k => k.classList.remove ("down"));
   }
@@ -700,6 +750,236 @@ class TryPanel {
     seq.stop = stop;
     draw ();
     return block;
+  }
+
+  //----------------------------------------------------------------------------
+  // Séquenceur de LP-303 : 8 motifs de 16 pas, comme dans le plugin.
+  acidSequencer () {
+    const a = this.acid = {
+      patterns: LP303_PATTERNS.map ((_, i) => factoryPattern (i)),
+      current: 0, requested: 0, playing: false, transpose: 0, tempo: 125, swing: 0,
+    };
+    const NAMES = ["C", "C#", "D", "D#", "E", "F", "F#", "G", "G#", "A", "A#", "B", "C'"];
+    const TOGGLES = [["OCT +", "up"], ["OCT −", "down"], ["ACCENT", "accent"], ["SLIDE", "slide"]];
+    const black = n => [1, 3, 6, 8, 10].includes (n);
+
+    const box = el ("div", "acid-seq");
+    const side = el ("div", "acid-side");
+    side.append (el ("div", "acid-title", "SEQUENCER"));
+    a.play = el ("button", "acid-run"); a.play.type = "button";
+    a.random = el ("button", "acid-tool"); a.random.type = "button";
+    a.clear = el ("button", "acid-tool"); a.clear.type = "button";
+
+    const patternRow = el ("div", "acid-patterns");
+    const patternButtons = a.patterns.map ((pat, i) => {
+      const b = el ("button", "", String (i + 1));
+      b.type = "button";
+      b.title = pat.name;
+      b.addEventListener ("click", () => { a.requested = i; if (! a.playing) a.current = i; refresh (); });
+      patternRow.append (b);
+      return b;
+    });
+    const patternName = el ("div", "acid-name");
+
+    const tempo = el ("input", "acid-tempo");
+    tempo.type = "number"; tempo.min = 60; tempo.max = 200; tempo.value = a.tempo;
+    tempo.setAttribute ("aria-label", "Tempo");
+    tempo.addEventListener ("change", () => { a.tempo = Math.min (200, Math.max (60, Number (tempo.value) || 125)); tempo.value = a.tempo; });
+    const swing = el ("input", "acid-swing");
+    swing.type = "range"; swing.min = 0; swing.max = 1; swing.step = 0.05; swing.value = 0;
+    swing.setAttribute ("aria-label", "Swing");
+    swing.addEventListener ("input", () => (a.swing = Number (swing.value)));
+    const transpose = el ("div", "acid-transpose");
+    a.showTranspose = () => { transpose.textContent = `TRANSP ${a.transpose > 0 ? "+" : ""}${a.transpose}`; };
+    transpose.title = "Clic : 0 / Click: 0";
+    transpose.addEventListener ("click", () => { a.transpose = 0; a.showTranspose (); });
+
+    const tempoRow = el ("div", "acid-row");
+    tempoRow.append (el ("span", "acid-label", "TEMPO"), tempo, el ("span", "acid-label", "SWING"), swing);
+    const tools = el ("div", "acid-row");
+    tools.append (a.random, a.clear);
+    side.append (a.play, el ("div", "acid-label", "PATTERN"), patternRow, patternName, tempoRow, transpose, tools);
+
+    // Grille : en-tête (numéros), 13 notes, 4 rangées d'options.
+    const grid = el ("div", "acid-grid");
+    const cells = [];
+    const rowLabel = (text, row, cls = "") => {
+      const l = el ("div", `acid-rowlabel ${cls}`, text);
+      l.style.gridRow = row; grid.append (l);
+    };
+    grid.append (Object.assign (el ("div", "acid-corner"), { style: "grid-row: 1" }));
+    for (let n = 12; n >= 0; --n) rowLabel (NAMES[n], 2 + 12 - n, black (n) ? "sharp" : "");
+    TOGGLES.forEach (([name], i) => rowLabel (name, 15 + i, "opt"));
+    const heads = [];
+    for (let s = 0; s < 16; ++s) {
+      const head = el ("div", "acid-head", String (s + 1));
+      head.style.gridColumn = s + 2; head.style.gridRow = 1;
+      head.dataset.step = s; head.dataset.kind = "head";
+      grid.append (head); heads.push (head);
+      const column = [];
+      for (let n = 12; n >= 0; --n) {
+        const c = el ("div", `acid-cell${black (n) ? " sharp" : ""}${s % 4 === 0 ? " beat" : ""}`);
+        c.style.gridColumn = s + 2; c.style.gridRow = 2 + 12 - n;
+        c.dataset.step = s; c.dataset.note = n; c.dataset.kind = "note";
+        grid.append (c); column[n] = c;
+      }
+      TOGGLES.forEach (([, key], i) => {
+        const c = el ("div", `acid-opt ${key}`);
+        c.style.gridColumn = s + 2; c.style.gridRow = 15 + i;
+        c.dataset.step = s; c.dataset.kind = key;
+        grid.append (c); column[key] = c;
+      });
+      cells.push (column);
+    }
+    a.hint = el ("p", "acid-hint");
+    const main = el ("div", "acid-main");
+    main.append (grid, a.hint);
+    box.append (side, main);
+
+    const pattern = () => a.patterns[a.current];
+    const refresh = () => {
+      const pat = pattern ();
+      patternButtons.forEach ((b, i) => {
+        b.classList.toggle ("on", i === a.current);
+        b.classList.toggle ("pending", a.playing && i === a.requested && i !== a.current);
+      });
+      patternName.textContent = `${pat.name} · ${pat.length} ${t ("pas", "steps")}`;
+      for (let s = 0; s < 16; ++s) {
+        const st = pat.steps[s], col = cells[s];
+        for (let n = 0; n <= 12; ++n) {
+          const on = st.gate && st.note === n;
+          col[n].classList.toggle ("on", on);
+          col[n].classList.toggle ("accent", on && st.accent);
+          col[n].textContent = on && st.octave ? (st.octave > 0 ? "▲" : "▼") : "";
+        }
+        col.up.classList.toggle ("on", st.octave > 0);
+        col.down.classList.toggle ("on", st.octave < 0);
+        col.accent.classList.toggle ("on", st.accent);
+        col.slide.classList.toggle ("on", st.slide);
+        const outside = s >= pat.length;
+        heads[s].classList.toggle ("out", outside);
+        Object.values (col).forEach (c => c.classList.toggle ("out", outside));
+      }
+    };
+    a.refresh = refresh;
+
+    // Édition : clic, puis glisser pour peindre la même valeur.
+    let drag = null;
+    const apply = (target, first) => {
+      const kind = target.dataset.kind, s = Number (target.dataset.step), st = pattern ().steps[s];
+      if (kind === "head") { if (first) pattern ().length = s + 1; }
+      else if (kind === "note") {
+        const n = Number (target.dataset.note);
+        if (first) drag.value = ! (st.gate && st.note === n);
+        st.gate = drag.value;
+        if (drag.value) st.note = n;
+        if (first && drag.value && ! a.playing) {
+          const note = LP303_BASE + n + 12 * st.octave;
+          this.noteOn (note, st.accent ? 1 : 0.7);
+          setTimeout (() => this.noteOff (note), 160);
+        }
+      } else {
+        const get = { up: () => st.octave > 0, down: () => st.octave < 0, accent: () => st.accent, slide: () => st.slide }[kind];
+        if (first) drag.value = ! get ();
+        if (kind === "up") st.octave = drag.value ? 1 : (st.octave > 0 ? 0 : st.octave);
+        else if (kind === "down") st.octave = drag.value ? -1 : (st.octave < 0 ? 0 : st.octave);
+        else st[kind] = drag.value;
+      }
+      drag.last = `${kind}${s}${target.dataset.note ?? ""}`;
+      refresh ();
+    };
+    grid.addEventListener ("pointerdown", e => {
+      const target = e.target.closest ("[data-kind]");
+      if (! target) return;
+      drag = { kind: target.dataset.kind, value: true, last: "" };
+      grid.setPointerCapture (e.pointerId);
+      apply (target, true);
+    });
+    grid.addEventListener ("pointermove", e => {
+      if (! drag || drag.kind === "head") return;
+      const target = document.elementFromPoint (e.clientX, e.clientY)?.closest ("[data-kind]");
+      if (! target || target.dataset.kind !== drag.kind) return;
+      if (`${target.dataset.kind}${target.dataset.step}${target.dataset.note ?? ""}` !== drag.last) apply (target, false);
+    });
+    const endDrag = () => (drag = null);
+    grid.addEventListener ("pointerup", endDrag);
+    grid.addEventListener ("pointercancel", endDrag);
+
+    a.random.addEventListener ("click", () => { const r = randomPattern (); Object.assign (pattern (), { steps: r.steps, length: 16 }); refresh (); });
+    a.clear.addEventListener ("click", () => {
+      Object.assign (pattern (), { length: 16, steps: Array.from ({ length: 16 }, () => ({ note: 0, octave: 0, accent: false, slide: false, gate: true })) });
+      refresh ();
+    });
+
+    // Lecture : comme le plugin. Une note dure une demi double croche ; un slide
+    // envoie la note suivante avant de relâcher la précédente (legato).
+    let timer = null, nextTime = 0, k = 0, position = 0, sounding = -1, tie = false;
+    const stepSeconds = () => 60 / a.tempo / 4;
+    const schedule = () => {
+      const ctx = this.ctx;
+      while (nextTime < ctx.currentTime + 0.12) {
+        const swingDelay = k % 2 ? a.swing * 0.5 * stepSeconds () : 0;
+        const at = nextTime + swingDelay;
+        if (position === 0 && a.requested !== a.current) { a.current = a.requested; setTimeout (refresh, Math.max (0, (at - ctx.currentTime) * 1000)); }
+        const pat = pattern ();
+        if (position >= pat.length) position = 0;
+        const st = pat.steps[position];
+        if (st.gate) {
+          const note = Math.max (0, Math.min (127, LP303_BASE + st.note + 12 * st.octave + a.transpose));
+          const velocity = st.accent ? 1 : 90 / 127;
+          if (tie && sounding >= 0) {
+            if (note !== sounding) { this.noteOn (note, velocity, at); this.noteOff (sounding, at); }
+          } else {
+            if (sounding >= 0) this.noteOff (sounding, at);
+            this.noteOn (note, velocity, at);
+          }
+          sounding = note;
+          tie = st.slide;
+          if (! st.slide) {
+            const nextStart = nextTime + stepSeconds () + ((k + 1) % 2 ? a.swing * 0.5 * stepSeconds () : 0);
+            this.noteOff (note, at + 0.5 * (nextStart - at));
+            sounding = -1;
+          }
+        } else {
+          if (sounding >= 0) this.noteOff (sounding, at);
+          sounding = -1; tie = false;
+        }
+        const shown = position;
+        setTimeout (() => {
+          heads.forEach ((h, i) => h.classList.toggle ("now", i === shown && a.playing));
+          cells.forEach ((col, i) => Object.values (col).forEach (c => c.classList.toggle ("now", i === shown && a.playing)));
+        }, Math.max (0, (at - ctx.currentTime) * 1000));
+        position = (position + 1) % pat.length;
+        k += 1;
+        nextTime += stepSeconds ();
+      }
+    };
+    const play = async () => {
+      await this.start ();
+      this.send ({ type: "allOff" });
+      a.playing = true;
+      k = 0; position = 0; sounding = -1; tie = false;
+      a.current = a.requested;
+      nextTime = this.ctx.currentTime + 0.05;
+      schedule ();
+      timer = setInterval (schedule, 25);
+      this.refreshTexts ();
+      refresh ();
+    };
+    const stop = () => {
+      a.playing = false;
+      clearInterval (timer);
+      this.send ({ type: "allOff" });
+      heads.forEach (h => h.classList.remove ("now"));
+      cells.forEach (col => Object.values (col).forEach (c => c.classList.remove ("now")));
+      this.refreshTexts ();
+      refresh ();
+    };
+    a.stop = stop;
+    a.play.addEventListener ("click", () => (a.playing ? stop () : play ()));
+    a.showTranspose ();
+    refresh ();
+    return box;
   }
 }
 

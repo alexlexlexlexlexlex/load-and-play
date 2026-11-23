@@ -4,6 +4,7 @@
 #include <juce_audio_utils/juce_audio_utils.h>
 
 #include "AcidEngine.h"
+#include "MidiFilePlayer.h"
 #include "Sequencer.h"
 
 class LP303Processor final : public juce::AudioProcessor,
@@ -51,6 +52,10 @@ public:
 
     juce::AudioProcessorValueTreeState apvts;
     juce::MidiKeyboardState keyboardState;
+    MidiFilePlayer midiPlayer;                   // fichier MIDI glissé sur la fenêtre
+
+    // Séquenceur affiché ou replié dans l'interface (sauvegardé avec le projet).
+    std::atomic<bool> sequencerShown { true };
 
 private:
     static juce::AudioProcessorValueTreeState::ParameterLayout createLayout();
