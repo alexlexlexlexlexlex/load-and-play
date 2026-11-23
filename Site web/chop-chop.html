@@ -49,7 +49,6 @@
     <ul class="toc">
       <li><a class="btn dark" href="#de-plus-pres"><span lang="fr">De plus près</span><span lang="en">A closer look</span></a></li>
       <li><a class="btn dark" href="#description">Description</a></li>
-      <li><a class="btn dark" href="#brancher"><span lang="fr">Dans votre logiciel</span><span lang="en">In your DAW</span></a></li>
       <li><a class="btn dark" href="#caracteristiques"><span lang="fr">Caractéristiques</span><span lang="en">Specifications</span></a></li>
       <li><a class="btn dark" href="#telechargements"><span lang="fr">Téléchargements</span><span lang="en">Downloads</span></a></li>
       <li><a class="btn dark" href="#code"><span lang="fr">Code source</span><span lang="en">Source code</span></a></li>
@@ -81,6 +80,17 @@
         <li>11 presets : bégaiement de fin de mesure, voix hachée sur les drums, chipmunk rave, téléphone sale, rembobinage…</li>
         <li>Aucune latence : utilisable en direct sur scène.</li>
       </ul>
+      <h3>Dans votre logiciel</h3>
+      <p>Insérez Chop Chop sur la piste de voix, choisissez un preset et lancez la lecture : en mode PATTERN, il suit le tempo du projet. Pour les modes à drums, envoyez la piste (ou le groupe) de batterie sur son entrée sidechain :</p>
+      <ul>
+        <li><b>Cubase / Nuendo</b> : dans la fenêtre du plugin, activez <i>Side-Chain</i>, puis sur la piste de drums ajoutez un envoi vers « Chop Chop – Side-Chain ».</li>
+        <li><b>Logic Pro</b> : en haut de la fenêtre du plugin, menu <i>Side Chain</i> → choisissez la piste de drums.</li>
+        <li><b>Ableton Live</b> : dépliez le plugin, ouvrez <i>Sidechain</i> et choisissez la piste de drums dans <i>Audio From</i>.</li>
+        <li><b>Studio One</b> : bouton <i>Side-Chain</i> en haut du plugin, puis un envoi des drums vers Chop Chop.</li>
+        <li><b>Reaper</b> : bouton des broches → entrées 3/4 pour le sidechain, puis un envoi des drums vers les canaux 3/4.</li>
+        <li><b>Bitwig</b> : choisissez la source du sidechain dans le plugin. <b>FL Studio</b> : reliez la piste de drums à celle de Chop Chop en « sidechain », puis choisissez-la dans l'onglet de traitement du plugin.</li>
+      </ul>
+      <p>Astuce : automatisez MIX pour ne hacher que certains mots, comme dans les morceaux du genre. En mode MIDI, envoyez une piste MIDI vers Chop Chop (do 3 = hauteur d'origine).</p>
     </div>
     <div lang="en">
       <p>Chop Chop keeps listening to the voice. Whenever a step asks for it, it replays the latest slice of voice, from 1/4 to 1/64 of a beat, aligned to the start of a syllable so it never cuts a word in half. Slices repeat, roll, flip, change octave, then go through dirt, filter and space.</p>
@@ -103,22 +113,7 @@
         <li>11 presets: end-of-bar stutter, vocal chopped by the drums, chipmunk rave, dirty telephone, rewind…</li>
         <li>Zero latency: playable live on stage.</li>
       </ul>
-    </div>
-
-    <h2 id="brancher"><span lang="fr">Dans votre logiciel</span><span lang="en">In your DAW</span></h2>
-    <div lang="fr">
-      <p>Insérez Chop Chop sur la piste de voix, choisissez un preset et lancez la lecture : en mode PATTERN, il suit le tempo du projet. Pour les modes à drums, envoyez la piste (ou le groupe) de batterie sur son entrée sidechain :</p>
-      <ul>
-        <li><b>Cubase / Nuendo</b> : dans la fenêtre du plugin, activez <i>Side-Chain</i>, puis sur la piste de drums ajoutez un envoi vers « Chop Chop – Side-Chain ».</li>
-        <li><b>Logic Pro</b> : en haut de la fenêtre du plugin, menu <i>Side Chain</i> → choisissez la piste de drums.</li>
-        <li><b>Ableton Live</b> : dépliez le plugin, ouvrez <i>Sidechain</i> et choisissez la piste de drums dans <i>Audio From</i>.</li>
-        <li><b>Studio One</b> : bouton <i>Side-Chain</i> en haut du plugin, puis un envoi des drums vers Chop Chop.</li>
-        <li><b>Reaper</b> : bouton des broches → entrées 3/4 pour le sidechain, puis un envoi des drums vers les canaux 3/4.</li>
-        <li><b>Bitwig</b> : choisissez la source du sidechain dans le plugin. <b>FL Studio</b> : reliez la piste de drums à celle de Chop Chop en « sidechain », puis choisissez-la dans l'onglet de traitement du plugin.</li>
-      </ul>
-      <p>Astuce : automatisez MIX pour ne hacher que certains mots, comme dans les morceaux du genre. En mode MIDI, envoyez une piste MIDI vers Chop Chop (do 3 = hauteur d'origine).</p>
-    </div>
-    <div lang="en">
+      <h3>In your DAW</h3>
       <p>Insert Chop Chop on the vocal track, pick a preset and press play: in PATTERN mode it follows the project tempo. For the drum-driven modes, send the drum track (or bus) to its sidechain input:</p>
       <ul>
         <li><b>Cubase / Nuendo</b>: in the plugin window, enable <i>Side-Chain</i>, then add a send from the drum track to "Chop Chop – Side-Chain".</li>
@@ -150,13 +145,6 @@
 
     <h2 id="telechargements"><span lang="fr">Téléchargements</span><span lang="en">Downloads</span></h2>
     <div class="downloads">
-      <div class="dl">
-        <h3><span lang="fr">Manuel</span><span lang="en">Manual</span></h3>
-        <p lang="fr">Tous les réglages, le branchement dans les logiciels et les presets. PDF, aussi inclus dans chaque zip.</p>
-        <p lang="en">Every control, hooking it up in your DAW and the presets. PDF, also included in every zip.</p>
-        <a class="btn dark" href="docs/Chop-Chop-manuel.pdf" lang="fr" target="_blank" rel="noopener">PDF</a>
-        <a class="btn dark" href="docs/Chop-Chop-manual.pdf" lang="en" target="_blank" rel="noopener">PDF</a>
-      </div>
       <div class="dl">
         <h3>macOS</h3>
         <p lang="fr">AU, VST3, CLAP et LV2. Apple Silicon + Intel.</p>

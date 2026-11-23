@@ -49,7 +49,6 @@
     <ul class="toc">
       <li><a class="btn dark" href="#de-plus-pres"><span lang="fr">De plus près</span><span lang="en">A closer look</span></a></li>
       <li><a class="btn dark" href="#description">Description</a></li>
-      <li><a class="btn dark" href="#brancher"><span lang="fr">Dans votre logiciel</span><span lang="en">In your DAW</span></a></li>
       <li><a class="btn dark" href="#caracteristiques"><span lang="fr">Caractéristiques</span><span lang="en">Specifications</span></a></li>
       <li><a class="btn dark" href="#telechargements"><span lang="fr">Téléchargements</span><span lang="en">Downloads</span></a></li>
       <li><a class="btn dark" href="#code"><span lang="fr">Code source</span><span lang="en">Source code</span></a></li>
@@ -81,6 +80,17 @@
         <li>Mode inversé (gate), mélange sec / traité, écoute de la référence filtrée.</li>
         <li>10 presets : basse sous le kick, graves seulement, place pour la voix, voix radio, pompes, House Rave, hachures MIDI, gate.</li>
       </ul>
+      <h3>Dans votre logiciel</h3>
+      <p>Insérez Duck Hunt sur la piste à faire baisser, puis envoyez la piste de référence sur son entrée sidechain :</p>
+      <ul>
+        <li><b>Cubase / Nuendo</b> : dans la fenêtre du plugin, activez <i>Side-Chain</i>, puis sur la piste de référence ajoutez un envoi vers « Duck Hunt – Side-Chain ».</li>
+        <li><b>Logic Pro</b> : en haut de la fenêtre du plugin, menu <i>Side Chain</i> → choisissez la piste de référence.</li>
+        <li><b>Ableton Live</b> : dépliez le plugin (triangle), ouvrez <i>Sidechain</i> et choisissez la piste de référence dans <i>Audio From</i>.</li>
+        <li><b>Studio One</b> : bouton <i>Side-Chain</i> en haut du plugin, puis un envoi de la piste de référence vers Duck Hunt.</li>
+        <li><b>Reaper</b> : bouton des broches (<i>2 in 2 out</i>) → entrées 3/4 pour le sidechain, puis un envoi de la piste de référence vers les canaux 3/4.</li>
+        <li><b>Bitwig</b> : dans le plugin, choisissez la source du sidechain. <b>FL Studio</b> : reliez la piste de référence à la piste de Duck Hunt en « sidechain », puis choisissez-la dans l'onglet de traitement du plugin.</li>
+      </ul>
+      <p>En mode MIDI, envoyez une piste MIDI vers Duck Hunt. En mode tempo, il n'y a rien à brancher.</p>
     </div>
     <div lang="en">
       <p>A sidechain compressor turns the track down according to its own level: the result changes with the track, colours the sound and sometimes pumps when you don't want it to. Duck Hunt draws the duck curve straight from the reference (or MIDI, or tempo) and applies it as is. What you see on the display is exactly what you hear.</p>
@@ -103,22 +113,7 @@
         <li>Inverted mode (gate), dry / wet mix, listen to the filtered reference.</li>
         <li>10 presets: bass under the kick, lows only, room for the vocal, radio voice, pumps, House Rave, MIDI chops, gate.</li>
       </ul>
-    </div>
-
-    <h2 id="brancher"><span lang="fr">Dans votre logiciel</span><span lang="en">In your DAW</span></h2>
-    <div lang="fr">
-      <p>Insérez Duck Hunt sur la piste à faire baisser, puis envoyez la piste de référence sur son entrée sidechain :</p>
-      <ul>
-        <li><b>Cubase / Nuendo</b> : dans la fenêtre du plugin, activez <i>Side-Chain</i>, puis sur la piste de référence ajoutez un envoi vers « Duck Hunt – Side-Chain ».</li>
-        <li><b>Logic Pro</b> : en haut de la fenêtre du plugin, menu <i>Side Chain</i> → choisissez la piste de référence.</li>
-        <li><b>Ableton Live</b> : dépliez le plugin (triangle), ouvrez <i>Sidechain</i> et choisissez la piste de référence dans <i>Audio From</i>.</li>
-        <li><b>Studio One</b> : bouton <i>Side-Chain</i> en haut du plugin, puis un envoi de la piste de référence vers Duck Hunt.</li>
-        <li><b>Reaper</b> : bouton des broches (<i>2 in 2 out</i>) → entrées 3/4 pour le sidechain, puis un envoi de la piste de référence vers les canaux 3/4.</li>
-        <li><b>Bitwig</b> : dans le plugin, choisissez la source du sidechain. <b>FL Studio</b> : reliez la piste de référence à la piste de Duck Hunt en « sidechain », puis choisissez-la dans l'onglet de traitement du plugin.</li>
-      </ul>
-      <p>En mode MIDI, envoyez une piste MIDI vers Duck Hunt. En mode tempo, il n'y a rien à brancher.</p>
-    </div>
-    <div lang="en">
+      <h3>In your DAW</h3>
       <p>Insert Duck Hunt on the track to duck, then send the reference track to its sidechain input:</p>
       <ul>
         <li><b>Cubase / Nuendo</b>: in the plugin window, enable <i>Side-Chain</i>, then add a send from the reference track to "Duck Hunt – Side-Chain".</li>
@@ -149,13 +144,6 @@
 
     <h2 id="telechargements"><span lang="fr">Téléchargements</span><span lang="en">Downloads</span></h2>
     <div class="downloads">
-      <div class="dl">
-        <h3><span lang="fr">Manuel</span><span lang="en">Manual</span></h3>
-        <p lang="fr">Tous les réglages, le branchement dans les logiciels et les presets. PDF, aussi inclus dans chaque zip.</p>
-        <p lang="en">Every control, hooking it up in your DAW and the presets. PDF, also included in every zip.</p>
-        <a class="btn dark" href="docs/Duck-Hunt-manuel.pdf" lang="fr" target="_blank" rel="noopener">PDF</a>
-        <a class="btn dark" href="docs/Duck-Hunt-manual.pdf" lang="en" target="_blank" rel="noopener">PDF</a>
-      </div>
       <div class="dl">
         <h3>macOS</h3>
         <p lang="fr">AU, VST3, CLAP et LV2. Apple Silicon + Intel.</p>
