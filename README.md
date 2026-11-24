@@ -3,7 +3,7 @@
 Trois synthés virtuels et deux effets, gratuits et open source (AU, VST3, CLAP, LV2,
 pour macOS, Windows et Linux), et le site qui les présente.
 
-**Site : https://alexlexlexlexlexlex.github.io/load-and-play/** — on peut y jouer les
+**Site : https://loadandplaymusic.com/** — on peut y jouer les
 deux instruments dans le navigateur et télécharger les plugins.
 
 | Dossier | Contenu |

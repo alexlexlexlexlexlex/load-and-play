@@ -4,7 +4,7 @@ Site statique (HTML, CSS, JavaScript, sans outil de construction) qui présente
 le LP-60, Model Play, LP-303, Duck Hunt et Chop Chop, avec les trois synthés jouables
 dans le navigateur et le manuel PDF de chaque plugin (`docs/`).
 
-En ligne : https://alexlexlexlexlexlex.github.io/load-and-play/
+En ligne : https://loadandplaymusic.com/
 
 ## Voir le site en local
 
@@ -44,8 +44,14 @@ cd /tmp/site && python3 -m http.server 8765
 - **Cache** : après un changement de `style.css`, `site.js`, `products.js` ou
   `closer.js`, changer `?v=…` dans les pages (GitHub Pages garde les fichiers
   10 minutes en cache).
-- `robots.txt` n'est lu par les moteurs qu'à la racine d'un domaine : il ne servira
-  qu'avec un nom de domaine personnalisé.
+- **Nom de domaine** : loadandplaymusic.com (DNS chez Amen : 4 enregistrements A vers
+  GitHub, `www` en CNAME vers `alexlexlexlexlexlex.github.io`, TXT de vérification
+  GitHub). Réglé dans *Settings → Pages → Custom domain* du dépôt ; les anciennes
+  adresses `…github.io/load-and-play/…` y sont redirigées. Si le domaine change,
+  remplacer l'adresse dans les pages, `sitemap.xml`, `robots.txt`,
+  `tools/seo/make_en.py` et `tools/manual/build.py`.
+- `google70864082f773f970.html` : fichier de validation de Google Search Console,
+  à garder.
 
 ## Réglages : `assets/js/config.js`
 

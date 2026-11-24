@@ -119,7 +119,7 @@ T = {
     "steps16": {"fr": "Step 1 … Step 16", "en": "Step 1 … Step 16"},
 }
 
-SITE_URL = "https://alexlexlexlexlexlex.github.io/load-and-play/"
+SITE_URL = "https://loadandplaymusic.com/"
 REPO_URL = "https://github.com/alexlexlexlexlexlex/load-and-play"
 
 

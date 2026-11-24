@@ -29,7 +29,7 @@ import re
 import sys
 from pathlib import Path
 
-BASE = "https://alexlexlexlexlexlex.github.io/load-and-play/"
+BASE = "https://loadandplaymusic.com/"
 PAGE_LINK = re.compile (r'(href=")([a-z0-9-]+?)\.html(#[^"]*)?"')
 
 
@@ -120,7 +120,10 @@ def check_sitemap (site, pages):
 
 def main ():
     site = Path (sys.argv[1])
-    pages = sorted (p.name for p in site.glob ("*.html") if not p.name.endswith ("-en.html"))
+    # Seulement les vraies pages (pas le fichier de validation de Google, par exemple).
+    pages = sorted (p.name for p in site.glob ("*.html")
+                    if not p.name.endswith ("-en.html")
+                    and '<html lang="fr"' in p.read_text (encoding="utf-8", errors="ignore"))
     for p in pages:
         print ("→", make_en (site / p, pages).name)
     check_sitemap (site, pages)
