@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Toutes les pages, en français et en anglais (les pages -en.html sont fabriquées
+     à la mise en ligne par tools/seo/make_en.py). Ajouter ici toute nouvelle page. -->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">
+  <url>
+    <loc>https://alexlexlexlexlexlex.github.io/load-and-play/</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://alexlexlexlexlexlex.github.io/load-and-play/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://alexlexlexlexlexlex.github.io/load-and-play/index-en.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://alexlexlexlexlexlex.github.io/load-and-play/index-en.html"/>
+  </url>
+  <url>
+    <loc>https://alexlexlexlexlexlex.github.io/load-and-play/index-en.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://alexlexlexlexlexlex.github.io/load-and-play/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://alexlexlexlexlexlex.github.io/load-and-play/index-en.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://alexlexlexlexlexlex.github.io/load-and-play/index-en.html"/>
+  </url>
+  <url>
+    <loc>https://alexlexlexlexlexlex.github.io/load-and-play/lp-60.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://alexlexlexlexlexlex.github.io/load-and-play/lp-60.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://alexlexlexlexlexlex.github.io/load-and-play/lp-60-en.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://alexlexlexlexlexlex.github.io/load-and-play/lp-60-en.html"/>
+  </url>
+  <url>
+    <loc>https://alexlexlexlexlexlex.github.io/load-and-play/lp-60-en.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://alexlexlexlexlexlex.github.io/load-and-play/lp-60.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://alexlexlexlexlexlex.github.io/load-and-play/lp-60-en.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://alexlexlexlexlexlex.github.io/load-and-play/lp-60-en.html"/>
+  </url>
+  <url>
+    <loc>https://alexlexlexlexlexlex.github.io/load-and-play/model-play.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://alexlexlexlexlexlex.github.io/load-and-play/model-play.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://alexlexlexlexlexlex.github.io/load-and-play/model-play-en.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://alexlexlexlexlexlex.github.io/load-and-play/model-play-en.html"/>
+  </url>
+  <url>
+    <loc>https://alexlexlexlexlexlex.github.io/load-and-play/model-play-en.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://alexlexlexlexlexlex.github.io/load-and-play/model-play.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://alexlexlexlexlexlex.github.io/load-and-play/model-play-en.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://alexlexlexlexlexlex.github.io/load-and-play/model-play-en.html"/>
+  </url>
+  <url>
+    <loc>https://alexlexlexlexlexlex.github.io/load-and-play/lp-303.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://alexlexlexlexlexlex.github.io/load-and-play/lp-303.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://alexlexlexlexlexlex.github.io/load-and-play/lp-303-en.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://alexlexlexlexlexlex.github.io/load-and-play/lp-303-en.html"/>
+  </url>
+  <url>
+    <loc>https://alexlexlexlexlexlex.github.io/load-and-play/lp-303-en.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://alexlexlexlexlexlex.github.io/load-and-play/lp-303.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://alexlexlexlexlexlex.github.io/load-and-play/lp-303-en.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://alexlexlexlexlexlex.github.io/load-and-play/lp-303-en.html"/>
+  </url>
+  <url>
+    <loc>https://alexlexlexlexlexlex.github.io/load-and-play/duck-hunt.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://alexlexlexlexlexlex.github.io/load-and-play/duck-hunt.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://alexlexlexlexlexlex.github.io/load-and-play/duck-hunt-en.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://alexlexlexlexlexlex.github.io/load-and-play/duck-hunt-en.html"/>
+  </url>
+  <url>
+    <loc>https://alexlexlexlexlexlex.github.io/load-and-play/duck-hunt-en.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://alexlexlexlexlexlex.github.io/load-and-play/duck-hunt.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://alexlexlexlexlexlex.github.io/load-and-play/duck-hunt-en.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://alexlexlexlexlexlex.github.io/load-and-play/duck-hunt-en.html"/>
+  </url>
+  <url>
+    <loc>https://alexlexlexlexlexlex.github.io/load-and-play/chop-chop.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://alexlexlexlexlexlex.github.io/load-and-play/chop-chop.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://alexlexlexlexlexlex.github.io/load-and-play/chop-chop-en.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://alexlexlexlexlexlex.github.io/load-and-play/chop-chop-en.html"/>
+  </url>
+  <url>
+    <loc>https://alexlexlexlexlexlex.github.io/load-and-play/chop-chop-en.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://alexlexlexlexlexlex.github.io/load-and-play/chop-chop.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://alexlexlexlexlexlex.github.io/load-and-play/chop-chop-en.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://alexlexlexlexlexlex.github.io/load-and-play/chop-chop-en.html"/>
+  </url>
+  <url>
+    <loc>https://alexlexlexlexlexlex.github.io/load-and-play/what-about-the-law.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://alexlexlexlexlexlex.github.io/load-and-play/what-about-the-law.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://alexlexlexlexlexlex.github.io/load-and-play/what-about-the-law-en.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://alexlexlexlexlexlex.github.io/load-and-play/what-about-the-law-en.html"/>
+  </url>
+  <url>
+    <loc>https://alexlexlexlexlexlex.github.io/load-and-play/what-about-the-law-en.html</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://alexlexlexlexlexlex.github.io/load-and-play/what-about-the-law.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://alexlexlexlexlexlex.github.io/load-and-play/what-about-the-law-en.html"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://alexlexlexlexlexlex.github.io/load-and-play/what-about-the-law-en.html"/>
+  </url>
+</urlset>

@@ -29,6 +29,8 @@ jobs:
         run: |
           mkdir _site
           rsync -a --exclude tools --exclude README.md "Site web/" _site/
+      - name: Pages anglaises (lp-60-en.html…, pour Google)
+        run: python3 "Site web/tools/seo/make_en.py" _site
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:

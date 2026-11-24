@@ -27,7 +27,13 @@
     stage.style.setProperty ("--ratio", data.ratio);
     const img = el ("img");
     img.src = data.image;
-    img.alt = data.alt;
+    // Texte alternatif dans la langue affichée.
+    const setAlt = () => {
+      img.alt = typeof data.alt === "string" ? data.alt
+        : data.alt[document.documentElement.dataset.uiLang === "en" ? "en" : "fr"];
+    };
+    setAlt ();
+    document.addEventListener ("languagechange", setAlt);
     img.width = data.width;
     img.height = data.height;
     img.draggable = false;

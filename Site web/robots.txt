@@ -1,0 +1,9 @@
+# Tout le site peut être exploré.
+# Attention : sur alexlexlexlexlexlex.github.io/load-and-play/, ce fichier n'est pas lu
+# par les moteurs (ils ne lisent que celui à la racine du domaine). Il servira tel quel
+# avec un nom de domaine personnalisé. En attendant, le sitemap est déclaré dans
+# Google Search Console.
+User-agent: *
+Allow: /
+
+Sitemap: https://alexlexlexlexlexlex.github.io/load-and-play/sitemap.xml

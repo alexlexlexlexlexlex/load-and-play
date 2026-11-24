@@ -17,6 +17,36 @@ cd "Site web" && python3 -m http.server 8765
 
 puis ouvrir http://localhost:8765.
 
+Les pages anglaises (`lp-60-en.html`…) n'existent qu'en ligne. Pour les voir en
+local, travailler sur une copie :
+
+```bash
+rsync -a --exclude tools "Site web/" /tmp/site/ && python3 "Site web/tools/seo/make_en.py" /tmp/site
+cd /tmp/site && python3 -m http.server 8765
+```
+
+## Référencement (SEO)
+
+- **Deux adresses par page** : `lp-60.html` en français (la source), `lp-60-en.html`
+  en anglais, fabriquée à la mise en ligne par `tools/seo/make_en.py` à partir du
+  texte `lang="en"` déjà présent. Le bouton FR / EN bascule sur place et change
+  l'adresse ; sans choix mémorisé, la langue est celle de l'adresse (jamais celle
+  du navigateur, pour que Google voie chaque page dans sa langue).
+- **En-tête de chaque page** : titre et description en français, avec leur version
+  anglaise dans `data-en-text` / `data-en-content` (idem `alt` → `data-en-alt`),
+  `canonical`, `hreflang` (fr, en, x-default = anglais), Open Graph / Twitter
+  (images 1200 × 630 dans `assets/img/og/`), icônes, données structurées JSON-LD
+  (`SoftwareApplication` pour chaque plugin).
+- **Nouvelle page** : copier l'en-tête d'une page existante, l'ajouter à
+  `sitemap.xml` (le script prévient s'il en manque une).
+- **Accueil** : images réduites à 1400 px (`*-1400.jpg`) ; les originales servent au
+  zoom de « De plus près ».
+- **Cache** : après un changement de `style.css`, `site.js`, `products.js` ou
+  `closer.js`, changer `?v=…` dans les pages (GitHub Pages garde les fichiers
+  10 minutes en cache).
+- `robots.txt` n'est lu par les moteurs qu'à la racine d'un domaine : il ne servira
+  qu'avec un nom de domaine personnalisé.
+
 ## Réglages : `assets/js/config.js`
 
 | Réglage | Rôle |

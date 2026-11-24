@@ -5,7 +5,7 @@
 window.LP_CLOSER = {
   lp60: {
     image: "assets/img/lp-60.jpg", width: 2972, height: 800, ratio: 2.4,
-    alt: "Interface du LP-60",
+    alt: { fr: "Interface du LP-60, synthé polyphonique inspiré du Juno-60", en: "LP-60 interface, a polysynth inspired by the Juno-60" },
     overview: {
       fr: ["Vue d'ensemble", "Toute la façade du Juno-60, de gauche à droite : arpège, LFO, oscillateur, filtres, VCA, enveloppe et chorus. Douze sons d'usine se choisissent en haut, au centre."],
       en: ["Overview", "The whole Juno-60 front panel, left to right: arpeggiator, LFO, oscillator, filters, VCA, envelope and chorus. Twelve factory sounds are picked at the top centre."],
@@ -37,7 +37,7 @@ window.LP_CLOSER = {
 
   modelplay: {
     image: "assets/img/model-play.jpg", width: 2772, height: 1404, ratio: 2772 / 1404,
-    alt: "Interface du Model Play",
+    alt: { fr: "Interface de Model Play, synthé analogique virtuel inspiré du Minimoog", en: "Model Play interface, a virtual analog synth inspired by the Minimoog" },
     overview: {
       fr: ["Vue d'ensemble", "En haut, le Minimoog tel quel : contrôleurs, oscillateurs, mixer, filtre et contours. En dessous, les ajouts : LFO, effets, MIDI learn et arpégiateur. Tous neutres par défaut."],
       en: ["Overview", "At the top, the Minimoog as it was: controllers, oscillators, mixer, filter and contours. Below, the additions: LFO, effects, MIDI learn and arpeggiator. All neutral by default."],
@@ -71,7 +71,7 @@ window.LP_CLOSER = {
   },
   lp303: {
     image: "assets/img/lp-303.jpg", width: 2360, height: 1296, ratio: 2360 / 1296,
-    alt: "Interface de LP-303",
+    alt: { fr: "Interface de LP-303, basse acide avec séquenceur 16 pas", en: "LP-303 interface, an acid bass with a 16-step sequencer" },
     overview: {
       fr: ["Vue d'ensemble", "En haut, sur l'alu, le son : oscillateur, filtre, accent, slide, saturation et volume. En dessous, le séquenceur de 16 pas et sa grille de notes. HIDE SEQ replie le séquenceur quand LP-303 est joué en MIDI depuis votre logiciel."],
       en: ["Overview", "At the top, on the brushed metal, the sound: oscillator, filter, accent, slide, drive and volume. Below, the 16-step sequencer and its note grid. HIDE SEQ folds the sequencer away when LP-303 is played over MIDI from your host."],
@@ -105,7 +105,7 @@ window.LP_CLOSER = {
   },
   duckhunt: {
     image: "assets/img/duck-hunt.jpg", width: 1840, height: 1232, ratio: 1840 / 1232,
-    alt: "Interface de Duck Hunt",
+    alt: { fr: "Interface de Duck Hunt, effet de ducking par sidechain, MIDI ou tempo", en: "Duck Hunt interface, a ducking effect driven by sidechain, MIDI or tempo" },
     overview: {
       fr: ["Vue d'ensemble", "En haut, ce qui déclenche la baisse et la façon de baisser. Au milieu, l'écran qui montre tout en direct. En bas, les réglages de la courbe, des bandes et de la sortie. Ici, le preset House Rave : trois bandes, une baisse par temps."],
       en: ["Overview", "At the top, what triggers the duck and how it ducks. In the middle, a live display of everything. Below, the controls for the curve, the bands and the output. Shown here: the House Rave preset, three bands, one duck per beat."],
@@ -140,7 +140,7 @@ window.LP_CLOSER = {
 
   chopchop: {
     image: "assets/img/chop-chop.jpg", width: 2080, height: 1140, ratio: 2080 / 1140,
-    alt: "Interface de Chop Chop",
+    alt: { fr: "Interface de Chop Chop, repeater de voix à 16 pas", en: "Chop Chop interface, a 16-step vocal repeater" },
     overview: {
       fr: ["Vue d'ensemble", "En haut, ce qui fait avancer le hachage : le séquenceur, les drums ou le clavier. Au milieu, l'écran et les 16 pas. En bas, les réglages des répétitions, de la saleté, du filtre et de l'espace. Ici, le preset « Voix hachée sur les drums »."],
       en: ["Overview", "At the top, what drives the chopping: the sequencer, the drums or the keyboard. In the middle, the display and the 16 steps. Below, the controls for repeats, dirt, filter and space. Shown here: the “Voix hachée sur les drums” preset."],
