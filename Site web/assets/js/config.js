@@ -1,7 +1,7 @@
 // Réglages du site : à remplir avant la mise en ligne.
 window.SITE = {
   // Adresse affichée par le bouton « Contact » (vide = bouton masqué).
-  email: "sebastienroche20@gmail.com",
+  email: "contact@loadandplaymusic.com",
 
   // Dépôt GitHub qui héberge le code et les fichiers à télécharger (Releases).
   // Exemple : user "mon-pseudo", repo "load-and-play".
