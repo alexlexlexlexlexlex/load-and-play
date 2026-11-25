@@ -10,7 +10,7 @@ on:
   push:
     branches: [main]
     tags: ["v*"]
-    paths: ["LP60/**", "MiniMoog/**", "LP303/**", "DuckHunt/**", "ChopChop/**", "Site web/docs/**", ".github/workflows/plugins.yml"]
+    paths: ["LP60/**", "MiniMoog/**", "LP303/**", "DuckHunt/**", "ChopChop/**", "Site web/docs/**", ".github/workflows/plugins.yml", ".github/macos/**"]
   workflow_dispatch:
     inputs:
       release:
@@ -97,7 +97,27 @@ jobs:
           cp LICENSE README.md "$folder/"
           # Le manuel PDF (français et anglais), le même que sur le site.
           cp "../Site web/docs/${{ matrix.synth.name }}-manuel.pdf" "../Site web/docs/${{ matrix.synth.name }}-manual.pdf" "$folder/"
-          cmake -E tar cf "$folder.zip" --format=zip "$folder"
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            # Sans l'étape d'installation, JUCE ajoute moduleinfo.json après la signature (VST3 cassé)
+            # et ne signe ni l'AU ni l'appli : sur un Mac Apple Silicon, rien ne se chargerait.
+            # Signature « ad hoc » de chaque bundle, vérifiée, puis l'installeur qui retire la quarantaine.
+            for bundle in "$folder"/*/*.vst3 "$folder"/*/*.component "$folder"/*/*.clap "$folder"/*/*.app; do
+              [ -e "$bundle" ] || continue
+              codesign --force --deep --sign - "$bundle"
+              codesign --verify --deep --strict "$bundle"
+            done
+            # LV2 : un simple dossier, on signe la bibliothèque qu'il contient.
+            for library in "$folder"/LV2/*.lv2/*.so "$folder"/LV2/*.lv2/*.dylib; do
+              [ -e "$library" ] || continue
+              codesign --force --sign - "$library"
+              codesign --verify --strict "$library"
+            done
+            cp ../.github/macos/Installer.command "../.github/macos/Lisez-moi (Mac).txt" "$folder/"
+            chmod +x "$folder/Installer.command"
+            ditto -c -k --keepParent "$folder" "$folder.zip"
+          else
+            cmake -E tar cf "$folder.zip" --format=zip "$folder"
+          fi
           echo "ZIP=${{ matrix.synth.dir }}/$folder.zip" >> "$GITHUB_ENV"
           echo "FOLDER=$folder" >> "$GITHUB_ENV"
 

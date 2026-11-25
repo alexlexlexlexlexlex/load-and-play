@@ -61,7 +61,19 @@ jobs:
           cp -R build/GridPlay_artefacts/Release/* "$folder/"
           rm -rf "$folder/JuceLibraryCode" "$folder"/*.a "$folder"/*.lib
           cp LICENSE README.md "$folder/"
-          cmake -E tar cf "$folder.zip" --format=zip "$folder"
+          if [ "$RUNNER_OS" = "macOS" ]; then
+            # Signature « ad hoc » (obligatoire sur Apple Silicon) et installeur qui retire la quarantaine.
+            for app in "$folder"/*.app; do
+              [ -e "$app" ] || continue
+              codesign --force --deep --sign - "$app"
+              codesign --verify --deep --strict "$app"
+            done
+            cp ../.github/macos/Installer.command "../.github/macos/Lisez-moi (Mac).txt" "$folder/"
+            chmod +x "$folder/Installer.command"
+            ditto -c -k --keepParent "$folder" "$folder.zip"
+          else
+            cmake -E tar cf "$folder.zip" --format=zip "$folder"
+          fi
           echo "ZIP=GridPlay/$folder.zip" >> "$GITHUB_ENV"
           echo "FOLDER=$folder" >> "$GITHUB_ENV"
 

@@ -1,0 +1,28 @@
+INSTALLER SUR MAC
+=================
+
+1. Clic droit sur « Installer.command » > Ouvrir, puis cliquez « Ouvrir ».
+   (Un double-clic simple est refusé par macOS : les plugins Load & Play sont gratuits
+   et ne passent pas par la signature payante d'Apple.)
+2. Relancez votre logiciel de musique.
+
+Le script copie les plugins dans ~/Library/Audio/Plug-Ins, retire le blocage que macOS
+met sur les fichiers téléchargés ou reçus par AirDrop, et les signe pour ce Mac.
+
+À LA MAIN (si le script est refusé)
+----------------------------------
+1. Copiez le .vst3 dans ~/Library/Audio/Plug-Ins/VST3
+   (Finder > Aller > Aller au dossier..., collez le chemin), le .component dans
+   ~/Library/Audio/Plug-Ins/Components.
+2. Dans le Terminal, pour chaque plugin copié, par exemple :
+     xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/VST3/*.vst3
+     codesign --force --deep --sign - ~/Library/Audio/Plug-Ins/VST3/*.vst3
+
+CUBASE NE VOIT PAS LE PLUGIN
+----------------------------
+Studio > VST Plug-in Manager : cliquez « Rechercher à nouveau ». Si le plugin est dans la
+liste des plugins bloqués (en bas), sélectionnez-le et réactivez-le.
+
+INSTALLING ON A MAC (English)
+-----------------------------
+Right-click "Installer.command" > Open, then click "Open". Restart your music software.
